@@ -1,0 +1,4 @@
+repository "Ford@rufik956@cloud"
+  path "/"
+    br "/main"
+    co "/main"
