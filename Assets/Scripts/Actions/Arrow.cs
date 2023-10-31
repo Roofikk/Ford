@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 [RequireComponent(typeof(BoxCollider))]
 public class Arrow : ActionBone
@@ -8,7 +7,7 @@ public class Arrow : ActionBone
     private float _powerMovement = 0;
     private BoxCollider _boxCollider;
 
-    public Action<Vector3, float> OnTranslated;
+    public event Action<Vector3> OnTranslated;
 
     public override void Awake()
     {
@@ -21,26 +20,7 @@ public class Arrow : ActionBone
     {
         base.Start();
 
-        NormalState = new NormalState();
-        HighlightedState = new HighlightedState();
-        SelectedState = new SelectedState();
-        DisabledState = new DisabledState();
-
         OnTranslated += ActionManager.ActivateAction;
-
-        SetState(NormalState);
-    }
-
-    private void OnMouseEnter()
-    {
-        if (CurrentState != SelectedState)
-            SetState(HighlightedState);
-    }
-
-    private void OnMouseExit()
-    {
-        if (CurrentState != SelectedState)
-            SetState(NormalState);
     }
 
     private void OnMouseDown()
@@ -56,18 +36,11 @@ public class Arrow : ActionBone
         DragArrow();
     }
 
-    private void OnMouseUp()
-    {
-        SetState(NormalState);
-
-        OnEndDrag?.Invoke();
-    }
-
     private void DragArrow()
     {
         float vx = Input.GetAxis("Mouse X");
         float vy = Input.GetAxis("Mouse Y");
-        Vector2 directMouse = new Vector2(vx, vy);
+        Vector2 directMouse = new(vx, vy);
 
         Vector3 vEnd = Camera.main.WorldToScreenPoint(transform.position + Direction);
         Vector3 vStart = Camera.main.WorldToScreenPoint(transform.position);
@@ -79,7 +52,7 @@ public class Arrow : ActionBone
         {
             Vector3 direction = (_powerMovement > 0 ? Direction : -Direction);
 
-            OnTranslated?.Invoke(direction, SpeedShift);
+            OnTranslated?.Invoke(direction);
             _powerMovement = 0f;
         }
     }

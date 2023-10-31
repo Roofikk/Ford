@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: polySurface1982Left
   m_EditorClassIdentifier: 
   Id: polySurface1982Left
+  GroupId: Arm_Bones
   Name: polySurface1982Left
   Position: {x: -9.134911, y: 32.605156, z: 41.02981}
   Rotation: {x: -0, y: 0, z: 0}

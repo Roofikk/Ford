@@ -1,22 +1,17 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class RotationBoneState : StateActionBone
 {
-    public override void Init(ActionBoneManager stateMachine)
+    public override void ActivateAction(Vector3 v)
     {
-        base.Init(stateMachine);
-    }
-    public override void ActivateAction(Vector3 v, float power)
-    {
-        Rotate(v, power);
+        Rotate(v);
     }
 
-    private void Rotate(Vector3 eulerAngle, float angle)
+    private void Rotate(Vector3 eulerAngle)
     {
         foreach (BoneObject bone in ActionManager.Ford.SelectingBones)
         {
-            bone.Rotate(eulerAngle, angle);
+            bone.Rotate(eulerAngle, SpeedShift);
         }
     }
 }

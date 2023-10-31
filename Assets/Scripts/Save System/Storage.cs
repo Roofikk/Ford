@@ -7,27 +7,65 @@ using Newtonsoft.Json;
 public class Storage
 {
     private string _pathSave;
-    public string PathHorse => _pathSave + "Horses/";
-    public string PathHorseSaves => _pathSave + "HorseSaves/";
 
-    public Storage()
+    public string PathSave => _pathSave;
+    public string PathHorse => _pathSave + "/Horses/";
+    public string PathHorseSaves => _pathSave + "/HorseSaves/";
+    private string DevPathSave => _pathSave + "/DevSaves/";
+
+    private DirectoryInfo _horseDirectory;
+    private DirectoryInfo _horseSavesDirectory;
+
+    public Storage(string path)
     {
-        _pathSave = Application.persistentDataPath + "Saves/";
+        _pathSave = path;
+
+        if (!CheckHorseDirectory())
+            CreateHorseDirectory();
+
+        if (!CheckHorseSaveDirectory())
+            CreateHorseSaveDirectory();
+    }
+
+    private bool CheckHorseDirectory()
+    {
+        DirectoryInfo directoryInfo = new(PathHorse);
+
+        if (directoryInfo.Exists)
+            _horseDirectory = directoryInfo;
+
+        return directoryInfo.Exists;
+    }
+
+    private void CreateHorseDirectory()
+    {
+        DirectoryInfo directoryInfo = new(PathHorse);
+        directoryInfo.Create();
+        _horseDirectory = directoryInfo;
+    }
+
+    private bool CheckHorseSaveDirectory()
+    {
+        DirectoryInfo directoryInfo = new(PathHorseSaves);
+
+        if (directoryInfo.Exists)
+            _horseSavesDirectory = directoryInfo;
+
+        return directoryInfo.Exists;
+    }
+
+    private void CreateHorseSaveDirectory()
+    {
+        DirectoryInfo directoryInfo = new(PathHorseSaves);
+        directoryInfo.Create();
+        _horseSavesDirectory = directoryInfo;
     }
 
     #region Horse
 
     public List<HorseData> GetHorses()
     {
-        DirectoryInfo directoryInfo = new DirectoryInfo(PathHorse);
-
-        if (!directoryInfo.Exists)
-        {
-            directoryInfo.Create();
-            return new List<HorseData>();
-        }
-
-        FileInfo[] files = directoryInfo.GetFiles("*.json");
+        System.IO.FileInfo[] files = _horseDirectory.GetFiles("*.json");
         List<HorseData> horses = new List<HorseData>();
 
         foreach (var file in files)
@@ -45,6 +83,21 @@ public class Storage
         return GetHorses().Find(h => h.Id == id);
     }
 
+    public HorseData FindHorseBySave(HorseSaveData saveData)
+    {
+        var horses = GetHorses();
+        
+        foreach (var horse in horses)
+        {
+            var findSave = horse.SavesId.Find(x => x == saveData.Id);
+
+            if (findSave != null)
+                return horse;
+        }
+
+        return null;
+    }
+
     public HorseData AddHorse(HorseData horse)
     {
         if (horse == null)
@@ -56,7 +109,8 @@ public class Storage
             throw new Exception("Current horse exitsts");
 
         string data = JsonConvert.SerializeObject(horse);
-        StreamWriter sw = new StreamWriter(PathHorse + horse.Id + ".json");
+
+        StreamWriter sw = new(PathHorse + horse.Id + ".json");
         sw.Write(data);
         sw.Close();
 
@@ -92,27 +146,28 @@ public class Storage
         if (horse == null)
             throw new Exception("Horse not found");
 
-        string fullPath = PathHorse + horse.PathSave;
-        File.Delete(fullPath);
-
         List<HorseSaveData> saves = GetHorseSaves(horse);
 
         foreach (var save in saves)
         {
-            fullPath = PathHorseSaves + save.PathSave;
-            File.Delete(fullPath);
+            DeleteHorseSave(save);
         }
+
+        string fullPath = PathHorse + horse.PathSave;
+        File.Delete(fullPath);
     }
 
     #endregion
 
+    #region HorseSave
+
     public List<HorseSaveData> GetHorseSaves(HorseData horse)
     {
-        List<HorseSaveData> horseHistories = new List<HorseSaveData>();
+        List<HorseSaveData> horseHistories = new();
 
         foreach (var path in horse.SavesId)
         {
-            string pathSave = PathHorseSaves + path;
+            string pathSave = PathHorseSaves + path + ".json";
 
             if (!File.Exists(pathSave))
             {
@@ -140,16 +195,24 @@ public class Storage
 
         if (File.Exists(pathSave))
         {
-            Debug.LogError("File is exists. Change the path save");
+            Debug.LogError("File is exists. Change the save path");
             return null;
         }
 
-        string stringData = JsonConvert.SerializeObject(save);
+        string stringData = JsonConvert.SerializeObject(save, new JsonSerializerSettings
+        {
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+        });
+
         StreamWriter sw = new StreamWriter(pathSave);
         sw.Write(stringData);
         sw.Close();
 
-        horse.SavesId.Add(save.Id);
+        var findSave = horse.SavesId.Find((saveId) => saveId == save.Id);
+        
+        if (findSave == null)
+            horse.SavesId.Add(save.Id);
+
         UpdateHorse(horse);
 
         return save;
@@ -168,8 +231,12 @@ public class Storage
         if (!File.Exists(fullPathSave))
             throw new Exception("Save file not found");
 
-        string stringData = JsonConvert.SerializeObject(save);
-        StreamWriter sw = new StreamWriter(fullPathSave);
+        string stringData = JsonConvert.SerializeObject(save, new JsonSerializerSettings
+        {
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+        });
+
+        StreamWriter sw = new(fullPathSave);
         sw.Write(stringData);
         sw.Close();
 
@@ -179,9 +246,65 @@ public class Storage
     public void DeleteHorseSave(HorseSaveData save)
     {
         string fullPath = PathHorseSaves + save.PathSave;
+
         if (!File.Exists(fullPath))
             throw new Exception("Save not found");
 
         File.Delete(fullPath);
+
+        HorseData horseData = FindHorseBySave(save);
+        
+        if (horseData == null)
+            return;
+
+        horseData.SavesId.Remove(save.Id);
+        UpdateHorse(horseData);
     }
+    #endregion
+
+    #region Dev
+
+    public void DevSaveStateHorse(DevHorseSaveData saveData)
+    {
+        DirectoryInfo dirInfo = new(DevPathSave);
+        if (!dirInfo.Exists)
+        {
+            dirInfo.Create();
+        }
+
+        string pathSave = DevPathSave + "developer_save.json";
+
+        string stringData = JsonConvert.SerializeObject(saveData, new JsonSerializerSettings
+        {
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+        });
+
+        StreamWriter sw = new StreamWriter(pathSave);
+        sw.Write(stringData);
+        sw.Close();
+    }
+
+    public DevHorseSaveData DevGetHorseState(string id)
+    {
+        DirectoryInfo dirInfo = new(DevPathSave);
+
+        if (!dirInfo.Exists)
+        {
+            dirInfo.Create();
+        }
+
+        string pathSave = DevPathSave + "developer_save.json";
+
+        if (!File.Exists(pathSave))
+        {
+            Debug.LogWarning("File not exists. Need first save to create file");
+            return null;
+        }
+
+        string fileString = File.ReadAllText(pathSave);
+        DevHorseSaveData data = JsonConvert.DeserializeObject<DevHorseSaveData>(fileString);
+
+        return data;
+    }
+    #endregion
 }

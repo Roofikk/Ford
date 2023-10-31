@@ -13,7 +13,7 @@ public class Arc : ActionBone
     private float _powerMovement;
     private Vector2 _directionOnScreen;
 
-    public Action<Vector3, float> OnRotated;
+    public Action<Vector3> OnRotated;
 
     public override void Awake()
     {
@@ -26,14 +26,7 @@ public class Arc : ActionBone
     {
         base.Start();
 
-        NormalState = new NormalState();
-        HighlightedState = new HighlightedState();
-        SelectedState = new SelectedState();
-        DisabledState = new DisabledState();
-
         OnRotated += ActionManager.ActivateAction;
-
-        SetState(NormalState);
     }
 
     private void LateUpdate()
@@ -48,18 +41,6 @@ public class Arc : ActionBone
         lookAt = Vector3.Scale(lookAt, _plane);
         lookAt += Vector3.Scale(transform.position, _normal);
         transform.LookAt(lookAt, _normal);
-    }
-
-    private void OnMouseEnter()
-    {
-        if (CurrentState != SelectedState)
-            SetState(HighlightedState);
-    }
-
-    private void OnMouseExit()
-    {
-        if (CurrentState != SelectedState)
-            SetState(NormalState);
     }
 
     private void OnMouseDown()
@@ -84,12 +65,6 @@ public class Arc : ActionBone
         OnStartDrag?.Invoke();
     }
 
-    private void OnMouseUp()
-    {
-        SetState(NormalState);
-        OnEndDrag?.Invoke();
-    }
-
     private void OnMouseDrag()
     {
         DragTorus();
@@ -106,7 +81,7 @@ public class Arc : ActionBone
         {
             transform.rotation *= Quaternion.Euler(_powerMovement > 0 ? Vector3.up : -Vector3.up);
 
-            OnRotated?.Invoke(_powerMovement > 0 ? _normal : - _normal, SpeedShift);
+            OnRotated?.Invoke(_powerMovement > 0 ? _normal : - _normal);
             _powerMovement = 0f;
         }
     }

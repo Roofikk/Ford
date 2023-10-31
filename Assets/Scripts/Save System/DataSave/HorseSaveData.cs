@@ -9,13 +9,13 @@ public class HorseSaveData
     public string Name { get; set; }
     public string Description { get; set; }
     public DateTime Date { get; set; }
-    public List<BoneData> Bones { get; set; }
+    public List<BoneDataSave> Bones { get; set; }
 
     public string HorseId { get; set; }
 
     [JsonIgnore] public string PathSave => Id + ".json";
 
-    public HorseSaveData(string name, string description, DateTime date, List<BoneData> bones, string horseId)
+    public HorseSaveData(string name, string description, DateTime date, List<BoneDataSave> bones, string horseId)
     {
         Name = name;
         Description = description;
@@ -32,7 +32,7 @@ public class HorseSaveData
     }
 
     [JsonConstructor]
-    public HorseSaveData(string id, string name, string description, DateTime date, List<BoneData> bones, string horseId)
+    public HorseSaveData(string id, string name, string description, DateTime date, List<BoneDataSave> bones, string horseId)
     {
         Id = id;
         Name = name;

@@ -1,16 +1,21 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class LoadHorsePage : Page
 {
     [SerializeField] private ScrollRect _horsesScrollRect;
     [SerializeField] private Button _backButton;
+    [SerializeField] private LoadSavesPage _savesPage;
+
     [SerializeField] private HorseLoadUI _horseUiPrefab;
+    [SerializeField] private ToggleGroup _toggleGroup;
 
     private void Start()
     {
         _backButton.onClick.AddListener(Close);
+        _backButton.onClick.AddListener(() => { PageManager.Instance.OpenPage(PageManager.Instance.StartPage); });
     }
 
     private void OnDestroy()
@@ -18,18 +23,22 @@ public class LoadHorsePage : Page
         _backButton.onClick.RemoveListener(Close);
     }
 
-    public override void Open()
+    public override void Open(int popUpLevel = 0)
     {
-        base.Open();
+        base.Open(popUpLevel);
 
-        Storage storage = new Storage();
+        Storage storage = new(GameManager.Instance.Settings.PathSave);
         List<HorseData> horses = storage.GetHorses();
         horses.Sort((x, y) => x.DateCreation.CompareTo(y.DateCreation));
 
         foreach(var horse in horses)
         {
             var horseUi = Instantiate(_horseUiPrefab.gameObject, _horsesScrollRect.content).GetComponent<HorseLoadUI>();
-            horseUi.Initiate(horse);
+
+            UnityAction<HorseData> onHorseClicked = new(_savesPage.Open);
+            horseUi.Initiate(horse, onHorseClicked, _toggleGroup);
+            horseUi.OnDestroyed += OnHorseRemoved;
+            _savesPage.HorseInfoPanel.HorseUpdated += horseUi.UpdateHorseInfo;
         }
     }
 
@@ -41,5 +50,12 @@ public class LoadHorsePage : Page
         {
             Destroy(t.gameObject);
         }
+
+        _savesPage.Close();
+    }
+
+    private void OnHorseRemoved()
+    {
+        _savesPage.Close();
     }
 }

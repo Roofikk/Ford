@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: polySurface1535
   m_EditorClassIdentifier: 
   Id: polySurface1535
+  GroupId: Skull_Bones
   Name: polySurface1535
   Position: {x: 0.8649521, y: 134.43793, z: 95.64699}
   Rotation: {x: -0, y: 0, z: 0}

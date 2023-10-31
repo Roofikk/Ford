@@ -1,8 +1,5 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class ActionBoneManager : MonoBehaviour
 {
@@ -12,16 +9,14 @@ public class ActionBoneManager : MonoBehaviour
     public StateActionBone CurrentState { get; private set; }
     public StateActionBone PreviousState { get; private set; }
 
-    private Vector3 _startScale = new Vector3();
-    private Vector3 _distancePlayer = new Vector3();
+    private Vector3 _startScale = new();
+    private Vector3 _distancePlayer = new();
 
     public StateActionBone StartState;
     public StateActionBone MovementState;
     public StateActionBone RotateState;
 
-    public Action OnStartAction;
-    public Action OnEndAction;
-    public Action OnActionComplited;
+    public event Action OnActionComplited;
 
     private void Start()
     {
@@ -74,17 +69,19 @@ public class ActionBoneManager : MonoBehaviour
     public void StartAction()
     {
         Ford.DeactivateSelection();
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
-    public void ActivateAction(Vector3 direct, float power)
+    public void ActivateAction(Vector3 direct)
     {
-        CurrentState.ActivateAction(direct, power);
+        CurrentState.ActivateAction(direct);
         OnActionComplited?.Invoke();
     }
 
     public void EndAction()
     {
         Ford.ActivateSelection();
+        Cursor.lockState = CursorLockMode.None;
     }
 
     public void Move(Vector3 moveTo)
@@ -102,5 +99,10 @@ public class ActionBoneManager : MonoBehaviour
         var newScale = Camera.main.transform.position - transform.position;
         float normal = newScale.magnitude / _distancePlayer.magnitude;
         transform.localScale = new Vector3(_startScale.x, _startScale.y, _startScale.z) * normal;
+    }
+
+    public void SetPowerSpeedShift(float powerValue)
+    {
+        CurrentState.SetPowerSpeedShift(powerValue);
     }
 }

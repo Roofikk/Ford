@@ -1,7 +1,5 @@
 using System;
-using System.Runtime.CompilerServices;
 using UnityEngine;
-using UnityEngine.UI;
 
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(Outline))]
@@ -14,12 +12,8 @@ public abstract class ActionBone : MonoBehaviour, IMouseTouchLocker
     public Vector3 Direction { get { return _direction; } }
 
     [Header("Settings drag")]
-
     [SerializeField] private float _sensetivityDrag = 2f;
     public float SensetivityDrag { get { return _sensetivityDrag; } }
-
-    [SerializeField] private float _speedShift;
-    public float SpeedShift { get { return _speedShift; } }
 
     [Header("Colors")]
     [SerializeField] private ColorAction _colors;
@@ -50,6 +44,31 @@ public abstract class ActionBone : MonoBehaviour, IMouseTouchLocker
     {
         OnStartDrag += UIHandler.LockMouseUI;
         OnEndDrag += UIHandler.UnlockMouseUI;
+
+        NormalState = new NormalState();
+        HighlightedState = new HighlightedState();
+        SelectedState = new SelectedState();
+        DisabledState = new DisabledState();
+
+        SetState(NormalState);
+    }
+
+    private void OnMouseEnter()
+    {
+        if (CurrentState != SelectedState)
+            SetState(HighlightedState);
+    }
+
+    private void OnMouseExit()
+    {
+        if (CurrentState != SelectedState && CurrentState != DisabledState)
+            SetState(NormalState);
+    }
+
+    private void OnMouseUp()
+    {
+        SetState(NormalState);
+        OnEndDrag?.Invoke();
     }
 
     public virtual void OnDestroy()
@@ -60,6 +79,9 @@ public abstract class ActionBone : MonoBehaviour, IMouseTouchLocker
 
     public void SetState(ActionStateBase state)
     {
+        if (state == null)
+            return;
+
         if (CurrentState != null)
             CurrentState.Exit(this);
 

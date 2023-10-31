@@ -1,18 +1,18 @@
-using System;
 using UnityEngine;
 
-[Serializable]
 [CreateAssetMenu(fileName = "New Bone", menuName = "Bone/Create new Bone")]
 public class BoneData : ScriptableObject
 {
     public string Id;
+    public string GroupId;
     public string Name;
     public Vector3 Position;
     public Vector3 Rotation;
 
-    public BoneData(string id, string name, Vector3 position, Vector3 rotation)
+    public BoneData(string id, string groupId, string name, Vector3 position, Vector3 rotation)
     {
         Id = id;
+        GroupId = groupId;
         Name = name;
         Position = position;
         Rotation = rotation;

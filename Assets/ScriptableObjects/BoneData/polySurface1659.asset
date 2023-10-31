@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: polySurface1659
   m_EditorClassIdentifier: 
   Id: polySurface1659
+  GroupId: Spine_Bones
   Name: polySurface1659
   Position: {x: 0.8649261, y: 147.4187, z: 68.28208}
   Rotation: {x: -0, y: 0, z: 0}

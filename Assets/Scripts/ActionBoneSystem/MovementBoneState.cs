@@ -1,28 +1,19 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UIElements;
+﻿using UnityEngine;
 
 public class MovementBoneState : StateActionBone
 {
-    public override void LateTic()
+    public override void ActivateAction(Vector3 v)
     {
-        base.LateTic();
+        Move(v);
     }
 
-    public override void ActivateAction(Vector3 v, float power)
-    {
-        Move(v, power);
-    }
-
-    private void Move(Vector3 direct, float power)
+    private void Move(Vector3 direct)
     {
         foreach (BoneObject bone in ActionManager.Ford.SelectingBones)
         {
-            bone.Translate(direct, power);
+            bone.Translate(direct, SpeedShift);
         }
 
-        ActionManager.Move(direct * power);
+        ActionManager.Move(direct * SpeedShift);
     }
 }

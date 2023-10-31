@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc8df2f7b40dd3a4db662ca727c21d8f, type: 3}
   m_Name: ColorBoneUI
   m_EditorClassIdentifier: 
-  _defaultColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.5019608}
-  _selectionColor: {r: 1, g: 1, b: 0.5019608, a: 0.5019608}
-  _highlightColor: {r: 1, g: 0.75294125, b: 0.5019608, a: 0.5019608}
+  _defaultColor: {r: 0, g: 0, b: 0, a: 0.5019608}
+  _selectionColor: {r: 0.5, g: 0.5, b: 0, a: 0.5019608}
+  _highlightedColor: {r: 0.5019608, g: 0.5019608, b: 0.5019608, a: 0.7529412}
+  _highlightedAfterSelectColor: {r: 1, g: 0.6472527, b: 0, a: 0.7529412}

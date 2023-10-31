@@ -1,58 +1,57 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PageManager : MonoBehaviour
 {
     [SerializeField] private Page _startPage;
-    [SerializeField] private Page _mainMenu;
-    [SerializeField] private Page _newProjectHorsePage;
-    [SerializeField] private Page _loadHorsePage;
+    [SerializeField] private WarningPage _warningPage;
 
+    public Page StartPage { get { return _startPage; } }
+    public static PageManager Instance { get; private set; }
     public Page CurrentPage { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance == null)
+            Instance = this;
+    }
 
     private void Start()
     {
-        (CurrentPage = _startPage).Open();
-
-        //Test();
+        if (_startPage != null)
+            (CurrentPage = _startPage).Open();
     }
 
-    private void Test()
+    public void OpenStartPage()
     {
-        Storage storage = new Storage();
-        for (int i = 0; i < 50; i++)
-        {
-            HorseData horse = new HorseData($"Ford - {i}", "Жеребец", new DateTime(1970 + i, 1, 1), "Same data", $"Owner Ford - {i}", $"City - {i}", new List<string>());
-            storage.AddHorse(horse);
-
-            for (int j = 0; j < 50; j++)
-            {
-                HorseSaveData save = new HorseSaveData($"Name - {j}", "Same data", new DateTime(2022, 11, 22, 11, 00 + j, 0), null, horse.Id);
-                storage.AddHorseSave(save);
-            }
-        }
+        OpenPage(StartPage);
     }
 
-    public void OpenPage(Page page)
-    {
-        CurrentPage.Close();
+    public void OpenPage(Page page, int popUpLevel = 0)
+    { 
+        if (popUpLevel == 0)
+            CurrentPage?.Close();
 
-        page.Open();
-        CurrentPage = page;
-    }
-
-    public void OpenPage(Page page, bool isPopUp)
-    {
-        if (!isPopUp)
-            ClosePage(CurrentPage);
-
-        page.Open();
+        page.Open(popUpLevel);
         CurrentPage = page;
     }
 
     public void ClosePage(Page page)
     {
         page.Close();
+    }
+
+    public void OpenPage<T>(Page page, T param, int popUpLevel = 0)
+    {
+        page.Open(param, popUpLevel);
+    }
+
+    public void OpenWarningPage(WarningData data, int popUpLevel = 1)
+    {
+        _warningPage.Open(data, popUpLevel);
+    }
+
+    public void CloseWarningPage()
+    {
+        _warningPage.Close();
     }
 }

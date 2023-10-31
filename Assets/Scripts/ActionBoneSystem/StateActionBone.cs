@@ -1,14 +1,21 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public abstract class StateActionBone : MonoBehaviour
 {
     public ActionBoneManager ActionManager { get; private set; }
 
     [SerializeField] private List<ActionBone> _actionList = new List<ActionBone>();
+
+    [Header("Settings drag")]
+    [SerializeField] private float _minSpeedShift = 0.1f;
+    [SerializeField] private float _maxSpeedShift = 1f;
+    [SerializeField] private float _speedShift;
+
+    public float MinSpeedShift { get { return _minSpeedShift; } }
+    public float MaxSpeedShift { get { return _maxSpeedShift; } }
+    public float SpeedShift { get { return _speedShift; } }
+
     public IReadOnlyCollection<ActionBone> ActionList => _actionList.AsReadOnly();
 
     public virtual void Init(ActionBoneManager stateMachine)
@@ -68,7 +75,7 @@ public abstract class StateActionBone : MonoBehaviour
         ActionManager.StartAction();
     }
 
-    public abstract void ActivateAction(Vector3 v, float power);
+    public abstract void ActivateAction(Vector3 v);
 
     public virtual void OnEndAction()
     {
@@ -87,5 +94,10 @@ public abstract class StateActionBone : MonoBehaviour
             else
                 action.SetState(action.NormalState);
         }
+    }
+
+    public void SetPowerSpeedShift(float value)
+    {
+        _speedShift = value;
     }
 }

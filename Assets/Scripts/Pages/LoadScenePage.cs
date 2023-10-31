@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,11 +6,11 @@ public class LoadScenePage : Page
     [SerializeField] private Slider _sliderLoadProgress;
     public AsyncOperation LoadingOperation { get; set; }
 
-    public void Open(AsyncOperation loadingOperation)
+    public void Open(AsyncOperation loadingOperation, int popUpLevel = 1)
     {
         LoadingOperation = loadingOperation;
 
-        Open();
+        Open(popUpLevel);
     }
 
     public override void Close()

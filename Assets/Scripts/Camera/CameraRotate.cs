@@ -1,24 +1,31 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraRotate : MonoBehaviour
 {
     [SerializeField] private Player _player;
-    [SerializeField] private bool _inverse;
+    [SerializeField] private Settings _settings;
 
-    [Range(1f, 4f)]
-    [SerializeField] private float _sensetivity = 200f;
-    [SerializeField] private float _smoothing = 2f;
-    private Vector2 _currentLook;
-    private Vector2 smoothedVelocity;
+    [Range(50f, 90f)][SerializeField] private float _yMinLimit = 88f;
+    [Range(50f, 90f)][SerializeField] private float _yMaxLimit = 88f;
+
+    private Vector2 _rotation = Vector2.zero;
 
     private void Start()
     {
-        _currentLook = new(_player.transform.localRotation.eulerAngles.x, _player.transform.localRotation.eulerAngles.y);
+        if (!_settings.InverseRotationCamera)
+            _rotation = new(-_player.transform.eulerAngles.y, -_player.transform.eulerAngles.x);
+        else
+            _rotation = new(_player.transform.eulerAngles.y, _player.transform.eulerAngles.x);
+
+        _settings.OnInverseRotationToggleChanged += InverseRotation;
     }
 
-    private void FixedUpdate()
+    private void OnDestroy()
+    {
+        _settings.OnInverseRotationToggleChanged -= InverseRotation;
+    }
+
+    private void Update()
     {
         if (Input.GetKey(KeyCode.Mouse2) && !UIHandler.IsMouseOnUI)
         {
@@ -28,18 +35,18 @@ public class CameraRotate : MonoBehaviour
 
     private void Look()
     {
-        Vector2 inputVector = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y"));
+        _rotation += new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y")) * _settings.SensetivityRotationCamera;
 
-        inputVector = Vector2.Scale(inputVector, new Vector2(_sensetivity * _smoothing, _sensetivity * _smoothing));
+        _rotation.y = Mathf.Clamp(_rotation.y, -_yMinLimit, _yMaxLimit);
 
-        smoothedVelocity.x = Mathf.Lerp(smoothedVelocity.x, inputVector.x, 1f / _smoothing);
-        smoothedVelocity.y = Mathf.Lerp(smoothedVelocity.y, inputVector.y, 1f / _smoothing);
+        var xQuat = Quaternion.AngleAxis(_rotation.x, _settings.InverseRotationCamera ? -Vector3.up : Vector3.up);
+        var yQuat = Quaternion.AngleAxis(_rotation.y, _settings.InverseRotationCamera ? -Vector3.left : Vector3.left);
 
-        _currentLook.x += _inverse ? smoothedVelocity.y : -smoothedVelocity.y;
-        _currentLook.y += _inverse ? -smoothedVelocity.x : smoothedVelocity.x;
+        _player.transform.localRotation = xQuat * yQuat;
+    }
 
-        _currentLook.x = Mathf.Clamp(_currentLook.x, -90f, 90f);
-
-        _player.transform.localRotation = Quaternion.Euler(_currentLook.x, _currentLook.y, 0f);
+    public void InverseRotation(bool value)
+    {
+        _rotation *= -1;
     }
 }

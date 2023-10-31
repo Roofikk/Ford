@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: polySurface2090Left
   m_EditorClassIdentifier: 
   Id: polySurface2090Left
+  GroupId: Leg_Bones
   Name: polySurface2090Left
   Position: {x: -12.224889, y: 59.485317, z: -67.69674}
   Rotation: {x: -0, y: 0, z: 0}

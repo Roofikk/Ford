@@ -1,55 +1,15 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    [SerializeField] private Skeleton _ford;
-    [SerializeField] private bool _inverseMovement = true;
-
-    [Range(100f, 400f)]
-    [SerializeField] private float _sensetivityMovement = 200f;
-
-    [Range(1000f, 4000f)]
-    [SerializeField] private float _sensetivityScroll = 2000f;
-
-    private string _name;
-    private string _city;
-    private DateTime _dateBegin;
-    private DateTime _dateNow;
+    [SerializeField] private Settings _settings;
 
     public static Player Instance { get; private set; }
-    public string Name { get { return _name; } }
-    public string City { get { return _city; } }
-    public DateTime DateBegin { get { return _dateBegin; } }
-    public DateTime DateNow { get { return _dateNow; } }
-
-    public Player(string name, string city, DateTime dateBegin)
-    {
-        _name = name;
-        _city = city;
-        _dateBegin = dateBegin;
-    }
 
     private void Awake()
     {
         if (Instance == null)
             Instance = this;
-    }
-
-    void Start()
-    {
-        //Player player = SceneManagerWithParams.GetParam<Player>();
-
-        //if (player != null)
-        //{
-        //    _name = player.Name;
-        //    _city = player.City;
-        //    _dateBegin = DateBegin;
-
-        //    Debug.Log(player.Name);
-        //    Debug.Log(player.City);
-        //    Debug.Log(player.DateBegin);
-        //}
     }
 
     private void Update()
@@ -70,10 +30,7 @@ public class Player : MonoBehaviour
         {
             MoveForward(Input.GetAxis("Mouse ScrollWheel"));
         }
-    }
 
-    private void FixedUpdate()
-    {
         if (Input.GetKey(KeyCode.Mouse1) && !UIHandler.IsMouseOnUI)
         {
             MoveOnPlane();
@@ -86,14 +43,30 @@ public class Player : MonoBehaviour
         float mouseVy = Input.GetAxis("Mouse Y");
         Vector3 direction = new(mouseVx, mouseVy);
 
-        if (_inverseMovement)
+        if (_settings.InverseMovementPlayer)
             direction = -direction;
 
-        transform.Translate(direction * _sensetivityMovement * Time.deltaTime);
+        //To check wall
+        Vector3 v = (transform.right * mouseVx + transform.up * mouseVy) * _settings.SensetivityMovementPlayer;
+
+        //To movement
+        Vector3 dt = _settings.SensetivityMovementPlayer * direction;
+        if (!CheckWall(v, v.magnitude * 3f))
+            transform.Translate(dt);
     }
 
-    private void MoveForward(float power)
+    private void MoveForward(float direction)
     {
-        transform.Translate(transform.forward * power * _sensetivityScroll * Time.deltaTime, Space.World);
+        Vector3 ds = _settings.SensetivityScrollPlayer * direction * transform.forward;
+        if (!CheckWall(ds, ds.magnitude * 3f))
+            transform.Translate(ds, Space.World);
+    }
+
+    private bool CheckWall(Vector3 direction, float maxDistanceRaycast)
+    {        
+        Ray ray = new (transform.position, direction);
+        int mask = 1 << LayerMask.NameToLayer("Wall");
+
+        return Physics.Raycast(ray, out RaycastHit hit, maxDistanceRaycast, mask);
     }
 }

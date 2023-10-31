@@ -21,7 +21,7 @@ public class GroupBonesUI : GroupBones
         foreach (var bone in group.Bones)
         {
             BoneUI boneUi = UiManager.Instance.CreateBoneUI(_contentBonesUI);
-            boneUi.Initiate((BoneObject)bone);
+            boneUi.Initiate((BoneObject)bone, group);
 
             _bones.Add(boneUi);
         }

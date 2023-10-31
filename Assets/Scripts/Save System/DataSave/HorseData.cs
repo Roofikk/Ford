@@ -5,14 +5,15 @@ using UnityEngine;
 
 public class HorseData
 {
-    public string Id { get; private set; }
+    public string Id { get; protected set; }
     public string Name { get; set; }
-    public DateTime Birthday { get; set; }
+    public string Birthday { get; set; }
     public string Sex { get; set; }
     public string Description { get; set; }
 
     public string OwnerName { get; set; }
     public string Locality { get; set; }
+    public string PhoneNumber { get; set; }
 
     public DateTime DateCreation { get; set; }
     public List<string> SavesId { get; set; }
@@ -20,7 +21,7 @@ public class HorseData
     [JsonIgnore] public int Age { get; private set; }
     [JsonIgnore] public string PathSave => Id + ".json";
 
-    public HorseData(string name, string sex, DateTime birthday, string description, string ownerName, string locality, List<string> savesId)
+    public HorseData(string name, string sex, string birthday, string description, string ownerName, string locality, string phoneNumber, List<string> savesId)
     {
         Name = name;
         Sex = sex;
@@ -29,9 +30,12 @@ public class HorseData
 
         OwnerName = ownerName;
         Locality = locality;
+        PhoneNumber = phoneNumber;
 
         DateCreation = DateTime.Now;
-        Age = CalculateAge(Birthday);
+
+        if (!string.IsNullOrEmpty(Birthday))
+            Age = CalculateAge(DateTime.Parse(Birthday));
 
         if (savesId == null)
             SavesId = new List<string>();
@@ -48,7 +52,7 @@ public class HorseData
     }
 
     [JsonConstructor]
-    public HorseData(string id, string name, string sex, DateTime birthday, string description, string ownerName, string locality, List<string> savesId)
+    public HorseData(string id, string name, string sex, string birthday, string description, string ownerName, string locality, string phoneNumber, List<string> savesId)
     {
         Id = id;
         Name = name;
@@ -58,9 +62,12 @@ public class HorseData
 
         OwnerName = ownerName;
         Locality = locality;
+        PhoneNumber = phoneNumber;
 
         DateCreation = DateTime.Now;
-        Age = CalculateAge(Birthday);
+
+        if (!string.IsNullOrEmpty(Birthday))
+            Age = CalculateAge(DateTime.Parse(Birthday));
 
         if (savesId == null)
             SavesId = new List<string>();
@@ -68,7 +75,7 @@ public class HorseData
             SavesId = savesId;
     }
 
-    private int CalculateAge(DateTime birthday)
+    public static int CalculateAge(DateTime birthday)
     {
         var subTicks = DateTime.Today.Ticks - birthday.Ticks;
         DateTime subDate = new DateTime(subTicks);

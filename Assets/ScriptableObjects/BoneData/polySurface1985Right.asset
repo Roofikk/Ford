@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: polySurface1985Right
   m_EditorClassIdentifier: 
   Id: polySurface1985Right
+  GroupId: Arm_Bones
   Name: polySurface1985Right
   Position: {x: 8.754242, y: 35.297646, z: 41.448345}
   Rotation: {x: -0, y: 0, z: 0}

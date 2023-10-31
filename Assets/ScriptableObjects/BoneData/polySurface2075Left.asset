@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: polySurface2075Left
   m_EditorClassIdentifier: 
   Id: polySurface2075Left
+  GroupId: Rib_Cage_Bones
   Name: polySurface2075Left
   Position: {x: -12.302117, y: 100.04709, z: -15.901998}
   Rotation: {x: -0, y: 0, z: 0}

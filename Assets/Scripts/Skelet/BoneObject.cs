@@ -1,32 +1,44 @@
 ﻿using System;
-using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
-[System.Serializable]
-
 [RequireComponent(typeof(Outline))]
 [RequireComponent(typeof(MeshCollider))]
-
 public class BoneObject : Bone, IMouseTouchLocker
 {
-    public BoneData BoneData;
     private MeshCollider _meshCollider;
     private Outline _outline;
     private bool _isMouseOverBone;
 
-    public Vector3 DefaultPosition { get; private set; }
-    public Vector3 DefaultRotation { get; private set; }
-    public Vector3 ShiftPosition { get; private set; }
-    public Vector3 ShiftRotation { get; private set; }
+    [SerializeField] private BoneData _boneData;
+    [SerializeField] string _groupId;
+
+    public event Action<string> OnBoneNameChanged;
+    public BoneData BoneData { get { return _boneData; } }
+    public Vector3 DefaultPosition { get { return BoneData.Position; } }
+    public Vector3 DefaultRotation { get { return BoneData.Rotation; } }
+
+    public Vector3 ShiftPosition
+    {
+        get
+        {
+            return transform.position - DefaultPosition;
+        }
+    }
+    
+    public Vector3 ShiftRotation
+    {
+        get
+        {
+            return transform.rotation.eulerAngles - DefaultRotation;
+        }
+    }
 
     public Action<Vector3> OnMoved;
     public Action<Vector3> OnRotated;
 
     private void Awake()
     {
-        DefaultPosition = transform.position;
-        DefaultRotation = transform.rotation.eulerAngles;
         _meshCollider = GetComponent<MeshCollider>();
     }
 
@@ -34,6 +46,8 @@ public class BoneObject : Bone, IMouseTouchLocker
     {
         if (_outline == null)
             _outline = GetComponent<Outline>();
+
+        _isMouseOverBone = false;
     }
 
     private void Update()
@@ -44,9 +58,11 @@ public class BoneObject : Bone, IMouseTouchLocker
         }
     }
 
-    public override void Initiate(string name = "Default")
+    public override void Initiate(GroupBones group)
     {
-        base.Initiate(name);
+        base.Initiate(group);
+
+        _groupId = group.Id;
 
         if (_outline == null)
             _outline = GetComponent<Outline>();
@@ -54,37 +70,36 @@ public class BoneObject : Bone, IMouseTouchLocker
         SetColor(colorSelectionBone.DefaultColor);
 
         _outline.enabled = IsSelected;
-        _outline.OutlineWidth = 8f;
     }
 
-    public void ReturnToDefault()
+    public void SetPosition(Vector3 position)
     {
-        transform.position = DefaultPosition;
-        transform.rotation = Quaternion.identity;
+        transform.position = position;
+    }
+
+    public void SetRotation(Vector3 rotation)
+    {
+        transform.rotation = Quaternion.Euler(rotation);
     }
 
     private void OnMouseOver()
     {
-        if (!UIHandler.IsMouseOnUI)
-            if (!IsSelected)
-            {
-                _isMouseOverBone = true;
-                EnterBone();
-            }
+        if (!IsSelected)
+        {
+            _isMouseOverBone = true;
+            EnterBone();
+        }
     }
 
     private void OnMouseDown()
     {
-        if (!UIHandler.IsMouseOnUI)
-        {
-            OnClicked?.Invoke();
-            SetSelection(!IsSelected);
-        }
+        OnClicked?.Invoke();
+        SetSelection(!IsSelected);
     }
 
     private void OnMouseExit()
     {
-        _isMouseOverBone = true;
+        _isMouseOverBone = false;
         ExitBone();
     }
 
@@ -126,19 +141,21 @@ public class BoneObject : Bone, IMouseTouchLocker
     public void Translate(Vector3 direction, float speedShift)
     {
         transform.Translate(direction * speedShift, Space.World);
-        ShiftPosition += direction * speedShift;
     }
 
     public void Rotate(Vector3 eulerAngle, float angle)
     {
         transform.Rotate(eulerAngle, angle, Space.World);
-        ShiftRotation = transform.rotation.eulerAngles;
+    }
+
+    public void UpdateName(string name)
+    {
+        BoneData.Name = name;
     }
 
     public void LockTouch()
     {
         _meshCollider.enabled = false;
-        
     }
 
     public void UnlockTouch()
@@ -146,15 +163,23 @@ public class BoneObject : Bone, IMouseTouchLocker
         _meshCollider.enabled = true;
     }
 
+    public void EditBoneName(string name)
+    {
+        _boneData.Name = name;
+        OnBoneNameChanged?.Invoke(name);
+    }
+
+#if UNITY_EDITOR
     [ContextMenu("Create File")]
     public void CreateFile()
     {
-        BoneData = ScriptableObject.CreateInstance<BoneData>();
+        _boneData = ScriptableObject.CreateInstance<BoneData>();
 
-        BoneData = new BoneData(name, name, transform.position, Quaternion.identity.eulerAngles);
+        _boneData = new BoneData(name, _groupId, name, transform.position, Quaternion.identity.eulerAngles);
         string path = $"Assets/ScriptableObjects/BoneData/{name}.asset";
-        AssetDatabase.CreateAsset(BoneData, path);
+        AssetDatabase.CreateAsset(_boneData, path);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
     }
+#endif
 }
