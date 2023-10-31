@@ -30,11 +30,6 @@ public class SavePanel : Page
     private void Start()
     {
         _inputMaskValidateList = GetComponentsInChildren<FieldMaskValidate>().ToList();
-        
-        if (_skeleton == null)
-        {
-            Debug.LogError("Отсутствует ссылка на скелет");
-        }
     }
 
     public override void Open<T>(T param, int popUpLevel = 0)
