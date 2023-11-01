@@ -164,21 +164,21 @@ public class SettingsPage : Page
     private void OpenSelectFolderWithExplorer()
     {
 #if UNITY_EDITOR
-        string targetPath = EditorUtility.OpenFolderPanel("Выберите папку...", _settings.PathSave, "");
+        //string targetPath = EditorUtility.OpenFolderPanel("Выберите папку...", _settings.PathSave, "");
 
-        if (!string.IsNullOrEmpty(targetPath))
-        {
-            PageManager.Instance.OpenPage(_warningPage, new WarningData(
-                    "Внимание",
-                    "Перенести сохранения с предыдущей папки?\r\nЕсли отмените, то сохранения с предыдущей папки удалятся",
-                    () => { TransferSaves(_settings.PathSave, targetPath); },
-                    () => { CancelTransferSave(_settings.PathSave, targetPath); },
-                    CancelChangePathSave), 1);
-        }
-        else
-        {
-            Instantiate(_toastPrefab.gameObject, transform.parent).GetComponent<ToastMessage>().Show("Не удалось изменить путь сохранения");
-        }
+        //if (!string.IsNullOrEmpty(targetPath))
+        //{
+        //    PageManager.Instance.OpenPage(_warningPage, new WarningData(
+        //            "Внимание",
+        //            "Перенести сохранения с предыдущей папки?\r\nЕсли отмените, то сохранения с предыдущей папки удалятся",
+        //            () => { TransferSaves(_settings.PathSave, targetPath); },
+        //            () => { CancelTransferSave(_settings.PathSave, targetPath); },
+        //            CancelChangePathSave), 1);
+        //}
+        //else
+        //{
+        //    Instantiate(_toastPrefab.gameObject, transform.parent).GetComponent<ToastMessage>().Show("Не удалось изменить путь сохранения");
+        //}
 #endif
 
 #if PLATFORM_STANDALONE_WIN
@@ -189,7 +189,19 @@ public class SettingsPage : Page
         FileBrowser fileBrowser = new FileBrowser();
         fileBrowser.OpenFolderBrowser(bp, path =>
         {
-            Debug.Log($"Selecting path: {path}");
+            if (path is not null)
+            {
+                PageManager.Instance.OpenPage(_warningPage, new WarningData(
+                    "Внимание",
+                    "Перенести сохранения с предыдущей папки?\r\nЕсли отмените, то сохранения с предыдущей папки удалятся",
+                    () => { TransferSaves(_settings.PathSave, path); },
+                    () => { CancelTransferSave(_settings.PathSave, path); },
+                    CancelChangePathSave), 1);
+            }
+            else
+            {
+                Debug.Log("Path has not choosen");
+            }
         });
 #endif
     }
@@ -204,9 +216,7 @@ public class SettingsPage : Page
                 DirectoryInfo targetDir = new(pathTarget);
 
                 CopyFilesRecursively(sourceDir, targetDir);
-
                 DeleteSaves(sourceDir);
-
                 SetSavePath(pathTarget);
             }
             else
@@ -222,7 +232,6 @@ public class SettingsPage : Page
     {
         DirectoryInfo directoryInfo = new DirectoryInfo(sourcePath);
         DeleteSaves(directoryInfo);
-
         SetSavePath(targetPath);
     }
 
