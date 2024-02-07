@@ -2,13 +2,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using YandexDiskSDK;
 
 public class MainMenuPage : Page
 {
-    [Header("Yandex disk client")]
-    [SerializeField] private YandexDiskClient _yaDiskClient;
-
     [Space(10)]
     [Header("Buttons")]
     [SerializeField] private Button _newProjectButton;
@@ -49,18 +45,6 @@ public class MainMenuPage : Page
         _yandexDiskButton.onClick.AddListener(() => { PageManager.Instance.OpenPage(_yandexAuthorizePage, 1); });
 
         YandexDiskToken yandexDiskToken = new();
-        
-        _yaDiskClient.Authorize(yandexDiskToken.Token).RunAsyncOnMainThread((personData) =>
-        {
-            if (personData != null)
-            {
-                Debug.Log("Authorization success");
-            }
-            else
-            {
-                Debug.LogError("Authorization failed");
-            }
-        });
     }
 
     private void OnDestroy()

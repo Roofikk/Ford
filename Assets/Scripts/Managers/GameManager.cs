@@ -2,14 +2,12 @@
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using YandexDiskSDK;
 
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private Settings _settings;
 
     private readonly string TOKEN_KEY = "TOKEN_KEY";
-    [SerializeField] private YandexDiskClient _diskClient;
 
     private bool _devMode = false;
 
@@ -17,7 +15,6 @@ public class GameManager : MonoBehaviour
 
     public static GameManager Instance { get; private set; }
     public Settings Settings { get { return _settings; } }
-    public YandexDiskClient YandexDiskClient { get { return _diskClient; } }
     public bool DevMode { get { return _devMode; } }
 
     private void Awake()

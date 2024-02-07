@@ -1,13 +1,5 @@
 {
   "dependencies": {
-    "com.manevras.yandex-disk-sdk": {
-      "version": "file:YandexDiskSDK",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {
-        "com.unity.nuget.newtonsoft-json": "3.0.0"
-      }
-    },
     "com.srejonkhan.another-file-browser": {
       "version": "https://github.com/SrejonKhan/AnotherFileBrowser.git",
       "depth": 0,
