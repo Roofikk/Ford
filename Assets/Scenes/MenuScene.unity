@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.12731713, g: 0.13414736, b: 0.12107852, a: 1}
+  m_IndirectSpecularColor: {r: 0.12731749, g: 0.13414757, b: 0.1210787, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -17321,7 +17321,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _settings: {fileID: 11400000, guid: 9a012334a8cbd824e8c40e862b08bece, type: 2}
-  _diskClient: {fileID: 1923505644}
 --- !u!1 &1517864069
 GameObject:
   m_ObjectHideFlags: 0
@@ -18295,7 +18294,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffdd46a8148a1c24e8bbb4dc46884732, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _yaDiskClient: {fileID: 1923505644}
   _newProjectButton: {fileID: 1471630423}
   _loadProjectButton: {fileID: 1375241090}
   _settingsButton: {fileID: 532640933}
@@ -20999,7 +20997,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1b3ceb23a595c444ab6ef309a85e48b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _clientId: 34c26434a12e401b81836b9fabdf9519
 --- !u!4 &1923505645
 Transform:
   m_ObjectHideFlags: 0
@@ -22427,11 +22424,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 034f1ed3da52cb744bdfbd3d99b94f1c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _diskClient: {fileID: 1923505644}
-  _tokenInput: {fileID: 1540276121}
-  _getInfoDiksButton: {fileID: 936765029}
-  _applyButton: {fileID: 987176713}
-  _cancelButton: {fileID: 1348587609}
 --- !u!1 &2062797803
 GameObject:
   m_ObjectHideFlags: 0

@@ -65,7 +65,7 @@ public class Storage
 
     public List<HorseData> GetHorses()
     {
-        System.IO.FileInfo[] files = _horseDirectory.GetFiles("*.json");
+        FileInfo[] files = _horseDirectory.GetFiles("*.json");
         List<HorseData> horses = new List<HorseData>();
 
         foreach (var file in files)
