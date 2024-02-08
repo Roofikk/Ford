@@ -5,18 +5,62 @@ using UnityEngine;
 using Newtonsoft.Json;
 using System.IO;
 using System.Linq;
+using UnityEngine.UI;
+using TMPro;
 
-public class HorseLocalSaveFab : MonoBehaviour
+public class ForTestScene : MonoBehaviour
 {
+    [SerializeField] private TextMeshProUGUI _resultText;
+
+    [Header("Buttons")]
+    [SerializeField] private Button _getHorseButton;
+    [SerializeField] private Button _getHorsesButton;
+    [SerializeField] private Button _createHorseButton;
+
     private string _pathToSave;
+    Ford.SaveSystem.Ver2.Storage _storage;
 
     private void Start()
     {
         _pathToSave = Application.persistentDataPath;
+        _storage = new();
 
-        //CreateTestHorses();
-        CreateTestHorses();
-        List<HorseLocalSaveData> horses = DeserializeFile();
+        _getHorsesButton.onClick.AddListener(GetHorses);
+        _createHorseButton.onClick.AddListener(CreateHorse);
+    }
+
+    private void GetHorses()
+    {
+        ClearText();
+        var horses = _storage.GetHorses();
+        _resultText.text = JsonConvert.SerializeObject(horses, Formatting.Indented);
+    }
+
+    private void CreateHorse()
+    {
+        ClearText();
+        var id = Guid.NewGuid().ToString();
+        HorseLocalSaveData horseLocalSaveData = new HorseLocalSaveData()
+        {
+            Id = id,
+            Name = id,
+            Description = id,
+            Sex = "Male",
+            BirthDate = DateTime.Now,
+            City = "There",
+            Region = "There there",
+            Country = "Russia",
+            DateCreation = DateTime.Now,
+            Saves = Array.Empty<LocalSaveData>()
+        };
+
+        var createdHorse = _storage.CreateHorse(horseLocalSaveData);
+        _resultText.text = JsonConvert.SerializeObject(createdHorse, Formatting.Indented);
+    }
+
+    private void ClearText()
+    {
+        _resultText.text = string.Empty;
     }
 
     private void CreateTestHorses()

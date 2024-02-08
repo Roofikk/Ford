@@ -31,7 +31,7 @@ namespace Ford.SaveSystem.Ver2
 
             if (!FileIsExists(pathHorses))
             {
-                throw new Exception("Path to horses is incorrect");
+                return null;
             }
 
             StreamReader sr = new(pathHorses);
@@ -65,7 +65,7 @@ namespace Ford.SaveSystem.Ver2
 
             if (!FileIsExists(pathHorses))
             {
-                throw new Exception("Path to horses is incorrect");
+                return null;
             }
 
             string json = "";
@@ -87,34 +87,23 @@ namespace Ford.SaveSystem.Ver2
             {
                 horseData.Id = Guid.NewGuid().ToString();
             }
-            else
+
+            var horses = GetHorses();
+            List<HorseLocalSaveData> horseList = new();
+
+            if (horses is not null)
             {
-                if (GetHorse(horseData.Id) is not null)
-                {
-                    throw new Exception("Horse is already exists");
-                }
+                horseList = horses.ToList();
             }
+
+            horseList.Add(horseData);
 
             string pathHorses = Path.Combine(_pathSave, horsesFileName);
 
-            if (!FileIsExists(pathHorses))
-            {
-                throw new Exception("Path to horses is incorrect");
-            }
+            using StreamWriter sw = new(pathHorses);
+            using JsonWriter jsonWriter = new JsonTextWriter(sw);
+            JsonSerializer.CreateDefault().Serialize(jsonWriter, new ArraySerializable<HorseLocalSaveData>(horseList));
 
-            //StreamWriter sw = new(pathHorses, true);
-            //sw.Re
-            //using (JsonTextWriter jtw = new(sw))
-            //{
-            //    jtw.WriteStartObject();
-
-            //    jtw.Se
-            //    jtw.Formatting = Formatting.None;
-            //    jtw.WriteStartObject();
-
-            //}
-            
-            //sw.Dispose();
             return horseData;
         }
         #endregion
