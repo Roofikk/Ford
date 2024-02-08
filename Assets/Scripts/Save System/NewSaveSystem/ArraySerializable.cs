@@ -1,11 +1,14 @@
 using System.Collections.Generic;
 
-public class ArraySerializable<T>
+namespace Ford.SaveSystem.Ver2
 {
-    public ICollection<T> Items { get; set; }
-
-    public ArraySerializable(ICollection<T> items)
+    public class ArraySerializable<T>
     {
-        Items = items;
+        public ICollection<T> Items { get; set; }
+
+        public ArraySerializable(ICollection<T> items)
+        {
+            Items = items;
+        }
     }
 }

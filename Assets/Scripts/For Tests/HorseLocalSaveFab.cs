@@ -4,19 +4,19 @@ using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
 using System.IO;
-using System.Threading.Tasks;
+using System.Linq;
 
 public class HorseLocalSaveFab : MonoBehaviour
 {
-    private string _pathToSave = Application.persistentDataPath;
+    private string _pathToSave;
 
     private void Start()
     {
-        //CreateTestHorses();
-        List<HorseLocalSaveData> horses = DeserializeFile();
+        _pathToSave = Application.persistentDataPath;
 
-        Task check = new Task(() => { CheckUniqueIdInHorsesData(horses); });
-        check.RunSynchronously();
+        //CreateTestHorses();
+        CreateTestHorses();
+        List<HorseLocalSaveData> horses = DeserializeFile();
     }
 
     private void CreateTestHorses()
@@ -68,8 +68,11 @@ public class HorseLocalSaveFab : MonoBehaviour
 
     private List<HorseLocalSaveData> DeserializeFile()
     {
-        StreamReader sr = new StreamReader(_pathToSave);
+        StreamReader sr = new StreamReader(_pathToSave + "\\save.json");
         string json = sr.ReadToEnd();
+        sr.Close();
+        sr.Dispose();
+
         var horses = JsonConvert.DeserializeObject<ArraySerializable<HorseLocalSaveData>>(json);
         return new List<HorseLocalSaveData>(horses.Items);
     }
@@ -88,6 +91,8 @@ public class HorseLocalSaveFab : MonoBehaviour
             }
         }
 
-        return true;
+        var uniqueIds = IDs.Distinct();
+
+        return uniqueIds.Count() == IDs.Count;
     }
 }
