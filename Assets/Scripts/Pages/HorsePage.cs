@@ -4,8 +4,13 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Ford.SaveSystem.Ver2.Data;
+using Ford.SaveSystem.Ver2;
+using Ford.SaveSystem.Ver2.Dto;
+using Unity.VisualScripting;
+using System.Globalization;
 
-public class NewHorseProjectPage : Page
+public class HorsePage : Page
 {
     [Header("Header")]
     [SerializeField] private TextMeshProUGUI _headerText;
@@ -15,9 +20,11 @@ public class NewHorseProjectPage : Page
     [SerializeField] private TextMeshProUGUI _sexText;
     [SerializeField] private TMP_InputField _birthdayInputFiled;
     [SerializeField] private TMP_InputField _descriptionInputField;
+    [SerializeField] private TMP_InputField _countryInputFiled;
+    [SerializeField] private TMP_InputField _cityInputFiled;
+    [SerializeField] private TMP_InputField _regionInputFiled;
     [SerializeField] private TMP_InputField _ownerNameInputFiled;
     [SerializeField] private TMP_InputField _phoneNumberInputField;
-    [SerializeField] private TMP_InputField _localityInputFiled;
 
     [Space(10)]
     [Header("Buttons")]
@@ -33,8 +40,6 @@ public class NewHorseProjectPage : Page
     [SerializeField] private ToastMessage _toastMessagePrefab;
 
     private List<TMP_InputField> _inputFields;
-    private HorseData _horseData;
-
     public event Action<HorseData> OnApply;
 
     /// <summary>
@@ -52,21 +57,23 @@ public class NewHorseProjectPage : Page
             return;
         }
 
-        _horseData = data;
-
         //Field inputs
-        _headerText.text = $"Изменение данных о {_horseData.Name}";
-        _horseNameInputField.text = _horseData.Name;
-        _sexText.text = _horseData.Sex;
-        _birthdayInputFiled.text = _horseData.Birthday;
-        _descriptionInputField.text = _horseData.Description;
-        _ownerNameInputFiled.text = _horseData.OwnerName;
-        _phoneNumberInputField.text = _horseData.PhoneNumber;
-        _localityInputFiled.text = _horseData.Locality;
+        _headerText.text = $"Изменение данных о {data.Name}";
+        _horseNameInputField.text = data.Name;
+        _sexText.text = data.Sex;
+        _birthdayInputFiled.text = data.BirthDate?.ToString("dd:MM:yyyy");
+        _descriptionInputField.text = data.Description;
+        _ownerNameInputFiled.text = data.Owner.Name;
+        _phoneNumberInputField.text = data.Owner.PhoneNumber;
+        _countryInputFiled.text = data.Country;
+        _cityInputFiled.text = data.City;
+        _regionInputFiled.text = data.Region;
 
         _applyButtonText.text = "Применить";
         _applyButton.onClick.AddListener(EditHorse);
         _cancelButton.onClick.AddListener(Close);
+
+        InitiatePhoneInput();
     }
 
     public override void Open(int popUpLevel = 0)
@@ -79,6 +86,8 @@ public class NewHorseProjectPage : Page
         _applyButton.onClick.AddListener(StartProject);
         _cancelButton.onClick.AddListener(Close);
         _cancelButton.onClick.AddListener(() => { PageManager.Instance.OpenPage(PageManager.Instance.StartPage); });
+
+        InitiatePhoneInput();
     }
 
     public override void Close()
@@ -90,7 +99,7 @@ public class NewHorseProjectPage : Page
             input.text = string.Empty;
             
             if (input.TryGetComponent<FieldMaskValidate>(out var validator))
-                validator.DisplayDescription(false);
+                validator.DisplayException(false);
 
             if (input.TryGetComponent<InputFieldValidateStroke>(out var stroke))
                 stroke.DisplayStroke(false);
@@ -109,13 +118,37 @@ public class NewHorseProjectPage : Page
             _descriptionInputField,
             _ownerNameInputFiled,
             _phoneNumberInputField,
-            _localityInputFiled
+            _countryInputFiled,
+            _cityInputFiled,
+            _regionInputFiled
         };
     }
 
     private void OnDestroy()
     {
+        _phoneNumberInputField.onEndEdit.RemoveAllListeners();
         _applyButton.onClick.RemoveAllListeners();
+    }
+
+    private void InitiatePhoneInput()
+    {
+        _ownerNameInputFiled.GetComponent<FieldMaskValidate>().enabled = false;
+
+        _phoneNumberInputField.onEndEdit.AddListener((text) =>
+        {
+            var validator = _ownerNameInputFiled.GetComponent<FieldMaskValidate>();
+
+            if (string.IsNullOrEmpty(text))
+            {
+                validator.enabled = false;
+            }
+            else
+            {
+                validator.enabled = true;
+            }
+
+            validator.DisplayException(false);
+        });
     }
 
     private void EditHorse()
@@ -123,19 +156,23 @@ public class NewHorseProjectPage : Page
         if (!CheckValidData())
             return;
 
-        _horseData.Name = _horseNameInputField.text;
-        _horseData.Sex = _sexText.text;
-        _horseData.Birthday = _birthdayInputFiled.text;
-        _horseData.Description = _descriptionInputField.text;
-        _horseData.OwnerName = _ownerNameInputFiled.text;
-        _horseData.PhoneNumber = _phoneNumberInputField.text;
-        _horseData.Locality = _localityInputFiled.text;
+        CreationHorseData horse = new()
+        {
+            Name = _horseNameInputField.text,
+            Description = _descriptionInputField.text,
+            BirthDate = DateTime.ParseExact(_birthdayInputFiled.text, "dd:MM:yyyy", CultureInfo.CurrentCulture),
+            Sex = _sexText.text,
+            Country = _countryInputFiled.text,
+            City = _cityInputFiled.text,
+            Region = _regionInputFiled.text,
+            OwnerName = _ownerNameInputFiled.text,
+            PhoneNumber = _phoneNumberInputField.text,
+        };
 
         Storage storage = new(GameManager.Instance.Settings.PathSave);
-        storage.UpdateHorse(_horseData);
+        var horseData = storage.UpdateHorse(horse);
 
-        OnApply?.Invoke(_horseData);
-
+        OnApply?.Invoke(horseData);
         Close();
 
         ToastMessage toast = Instantiate(_toastMessagePrefab.gameObject, transform.parent).GetComponent<ToastMessage>();
@@ -153,22 +190,36 @@ public class NewHorseProjectPage : Page
             dateStr = _birthdayInputFiled.GetComponent<InputFieldDateValidate>().Date.ToString();
         }
 
-        HorseData horse = new HorseData(
-            _horseNameInputField.text,
-            _sexText.text,
-            dateStr,
-            _descriptionInputField.text,
-            _ownerNameInputFiled.text,
-            _localityInputFiled.text,
-            _phoneNumberInputField.text,
-            new List<string>()
-        );
-        
-        HorseSaveData save = new("Новый проект", "Стартовое сохранение без каких либо изменений", DateTime.Now, null, horse.Id);
+        Storage storage = new(GameManager.Instance.Settings.PathSave);
 
-        Storage storage = new Storage(GameManager.Instance.Settings.PathSave);
-        storage.AddHorse(horse);
-        storage.AddHorseSave(save);
+        CreateSaveDto save = new()
+        {
+            Header = "Новый проект",
+            Description = "Стартовое сохранение без каких либо изменений",
+            Date = DateTime.Now,
+            Bones = null
+        };
+
+        CreationHorseData horse = new()
+        {
+            Name = _horseNameInputField.text,
+            Sex = _sexText.text,
+            BirthDate = string.IsNullOrEmpty(dateStr) ? null : DateTime.ParseExact(dateStr, "dd:MM:yyyy", CultureInfo.CurrentCulture),
+            Description = _descriptionInputField.text,
+            Country = _countryInputFiled.text,
+            City = _cityInputFiled.text,
+            Region = _regionInputFiled.text,
+            OwnerName = _ownerNameInputFiled.text,
+            PhoneNumber = _phoneNumberInputField.text
+        };
+
+        //HorseSaveData save = new("Новый проект", "Стартовое сохранение без каких либо изменений", DateTime.Now, null, horse.Id);
+
+        //Storage storage = new Storage(GameManager.Instance.Settings.PathSave);
+        //storage.AddHorse(horse);
+        //storage.AddHorseSave(save);
+        var creatingHorse = storage.CreateHorse(horse);
+        storage.CreateSave(creatingHorse.Id, save);
 
         SceneParameters.AddParam(horse);
         AsyncOperation loadingOperation = SceneManager.LoadSceneAsync(1);
@@ -182,7 +233,14 @@ public class NewHorseProjectPage : Page
         {
             var validator = input.GetComponent<FieldMaskValidate>();
             if (validator == null)
+            {
                 continue;
+            }
+
+            if (!validator.enabled)
+            {
+                continue;
+            }
 
             if (!validator.ValidateInput(input.text))
                 countInvalid++;

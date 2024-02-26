@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 
-namespace Ford.SaveSystem.Ver2
+namespace Ford.SaveSystem
 {
-    public class ArraySerializable<T>
+    internal class ArraySerializable<T>
     {
         public ICollection<T> Items { get; set; }
 

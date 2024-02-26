@@ -1,3 +1,4 @@
+using Ford.SaveSystem.Ver1.Data;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -189,9 +190,9 @@ public class Skeleton : MonoBehaviour
         }
     }
 
-    public List<BoneDataSave> GetBonesForSave()
+    public List<Ford.SaveSystem.Ver2.Data.BoneData> GetBonesForSave()
     {
-        List<BoneDataSave> bones = new();
+        List<Ford.SaveSystem.Ver2.Data.BoneData> bones = new();
 
         foreach (var group in _groupBones)
         {
@@ -199,7 +200,12 @@ public class Skeleton : MonoBehaviour
             {
                 if (bone.ShiftPosition != Vector3.zero || (bone.ShiftRotation - bone.DefaultRotation).magnitude > 0.1)
                 {
-                    bones.Add(new(bone.BoneData.Id, bone.BoneData.GroupId, bone.transform.position, bone.transform.rotation.eulerAngles));
+                    bones.Add(new()
+                    {
+                        Id = bone.BoneData.Id,
+                        Position = new(bone.transform.position.x, bone.transform.position.y, bone.transform.position.z),
+                        Rotation = new(bone.transform.rotation.eulerAngles.x, bone.transform.rotation.eulerAngles.y, bone.transform.rotation.eulerAngles.z)
+                    });
                 }
             }
         }
@@ -207,33 +213,33 @@ public class Skeleton : MonoBehaviour
         return bones;
     }
 
-    public List<BoneDataSave> GetAllBonesForSave()
-    {
-        List<BoneDataSave> bones = new();
+    //public List<BoneDataSave> GetAllBonesForSave()
+    //{
+    //    List<BoneDataSave> bones = new();
 
-        foreach (var group in _groupBones)
-        {
-            foreach (BoneObject bone in group.Bones.Cast<BoneObject>())
-            {
-                bones.Add(new(bone.BoneData));
-            }
-        }
+    //    foreach (var group in _groupBones)
+    //    {
+    //        foreach (BoneObject bone in group.Bones.Cast<BoneObject>())
+    //        {
+    //            bones.Add(new(bone.BoneData));
+    //        }
+    //    }
 
-        return bones;
-    }
+    //    return bones;
+    //}
 
-    public List<DevBoneDataSave> GetDevBonesData()
-    {
-        List<DevBoneDataSave> bones = new();
+    //public List<DevBoneDataSave> GetDevBonesData()
+    //{
+    //    List<DevBoneDataSave> bones = new();
 
-        foreach (var group in _groupBones)
-        {
-            foreach (BoneObject bone in group.Bones.Cast<BoneObject>())
-            {
-                bones.Add(new(bone.BoneData));
-            }
-        }
+    //    foreach (var group in _groupBones)
+    //    {
+    //        foreach (BoneObject bone in group.Bones.Cast<BoneObject>())
+    //        {
+    //            bones.Add(new(bone.BoneData));
+    //        }
+    //    }
 
-        return bones;
-    }
+    //    return bones;
+    //}
 }

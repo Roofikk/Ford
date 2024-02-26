@@ -1,3 +1,5 @@
+using Ford.SaveSystem.Ver2.Data;
+using Ford.SaveSystem.Ver2.Dto;
 using System;
 using TMPro;
 using UnityEngine;
@@ -17,7 +19,7 @@ public class HorseInfoPanel : MonoBehaviour
     [SerializeField] private Button _editButton;
 
     [Space(15)]
-    [SerializeField] private NewHorseProjectPage _horsePage;
+    [SerializeField] private HorsePage _horsePage;
 
     private HorseData _horseData;
 
@@ -41,12 +43,22 @@ public class HorseInfoPanel : MonoBehaviour
 
         _horseNameText.text = horseData.Name;
         _sexText.text = horseData.Sex;
-        _birthdateText.text = horseData.Birthday;
-        _ageText.text = horseData.Age.ToString();
+        _birthdateText.text = horseData.BirthDate?.ToString("dd:MM:yyyy");
+
+        TimeSpan? timeSpan = DateTime.Now - horseData.BirthDate;
+        if (timeSpan == null)
+        {
+            _ageText.text = "-";
+        }
+        else
+        {
+            _ageText.text = new DateTime(timeSpan.Value.Ticks).Year.ToString();
+        }
+
         _descriptionText.text = horseData.Description;
-        _ownerNameText.text = horseData.OwnerName;
-        _localityText.text = horseData.Locality;
-        _phoneNumberText.text = horseData.PhoneNumber;
+        _ownerNameText.text = horseData.Owner.Name;
+        _localityText.text = horseData.City;
+        _phoneNumberText.text = horseData.Owner.PhoneNumber;
     }
 
     private void UpdateHorseInfo(HorseData horseData)

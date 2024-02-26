@@ -1,3 +1,4 @@
+using Ford.SaveSystem.Ver1.Data;
 using System.Collections.Generic;
 
 public class DevHorseData : HorseData

@@ -1,3 +1,4 @@
+using Ford.SaveSystem.Ver2;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -8,6 +9,7 @@ public class MainMenuPage : Page
     [Space(10)]
     [Header("Buttons")]
     [SerializeField] private Button _newProjectButton;
+    [SerializeField] private Button _newProjectByNewSaveSystem;
     [SerializeField] private Button _loadProjectButton;
     [SerializeField] private Button _settingsButton;
     [SerializeField] private Button _guideButton;
@@ -32,11 +34,13 @@ public class MainMenuPage : Page
         _startDevProjectButton.onClick.AddListener(StartDevProject);
 
         _newProjectButton.onClick.AddListener(() => { PageManager.Instance.OpenPage(_newProjectPage); });
+        _newProjectByNewSaveSystem.onClick.AddListener(() => { PageManager.Instance.OpenPage(_newProjectPage); });
         _loadProjectButton.onClick.AddListener(() => { PageManager.Instance.OpenPage(_loadProjectPage); });
         _settingsButton.onClick.AddListener(() => { PageManager.Instance.OpenPage(_settingsPage); });
         _guideButton.onClick.AddListener(() => { PageManager.Instance.OpenPage(_guidePage); });
 
         _newProjectButton.onClick.AddListener(() => { PageManager.Instance.ClosePage(this); });
+        _newProjectByNewSaveSystem.onClick.AddListener(() => { PageManager.Instance.ClosePage(this); });
         _loadProjectButton.onClick.AddListener(() => { PageManager.Instance.ClosePage(this); });
         _settingsButton.onClick.AddListener(() => { PageManager.Instance.ClosePage(this); });
         _guideButton.onClick.AddListener(() => { PageManager.Instance.ClosePage(this); });
@@ -70,7 +74,7 @@ public class MainMenuPage : Page
         );
 
         Storage storage = new(GameManager.Instance.Settings.PathSave);
-        DevHorseSaveData devHorseSaveData = storage.DevGetHorseState(devHorse.Id);
+        DevHorseSaveData devHorseSaveData = null;//storage.DevGetHorseState(devHorse.Id);
 
         if (devHorseSaveData != null)
         {

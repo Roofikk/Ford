@@ -4,6 +4,10 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Ford.SaveSystem.Ver2;
+using Ford.SaveSystem.Ver2.Dto;
+using Ford.SaveSystem.Ver2.Data;
+using System.Globalization;
 
 public class SavePanel : Page
 {
@@ -36,14 +40,20 @@ public class SavePanel : Page
     {
         base.Open(param, popUpLevel);
 
-        if (param is not HorseSaveData saveData)
+        if (param is not SaveData saveData)
             return;
 
         _cancelButton.onClick.AddListener(Close);
-        _applyButton.onClick.AddListener(() => { EditSave(saveData); });
+        _applyButton.onClick.AddListener(() => { EditSave(new()
+        {
+            Header = saveData.Header,
+            Date = saveData.Date,
+            Description = saveData.Description,
+            Id = saveData.Id
+        }); });
         _applyButtonText.text = "Изменить";
 
-        _headerInputField.text = saveData.Name;
+        _headerInputField.text = saveData.Header;
         _descriptionInputField.text = saveData.Description;
         _dateInputField.text = saveData.Date.ToString("dd.MM.yyyy");
     }
@@ -71,14 +81,14 @@ public class SavePanel : Page
 
         foreach (var inputMask in _inputMaskValidateList)
         {
-            inputMask.DisplayDescription(false);
+            inputMask.DisplayException(false);
 
             if (inputMask.TryGetComponent(out InputFieldValidateStroke stroke))
                 stroke.DisplayStroke(false);
         }
     }
 
-    private void EditSave(HorseSaveData saveData)
+    private void EditSave(UpdateSaveDto saveData)
     {
         foreach (var inputMask in _inputMaskValidateList)
         {
@@ -88,12 +98,12 @@ public class SavePanel : Page
             }
         }
 
-        saveData.Name = _headerInputField.text;
+        saveData.Header = _headerInputField.text;
         saveData.Description = _descriptionInputField.text;
         saveData.Date = DateTime.Parse(_dateInputField.text);
 
         Storage storage = new(GameManager.Instance.Settings.PathSave);
-        storage.UpdateHorseSave(saveData);
+        storage.UpdateSave(saveData);
 
         ToastMessage toast =  Instantiate(_toastMessage.gameObject, transform.parent).GetComponent<ToastMessage>();
         toast.Show("Изменения применены");
@@ -114,11 +124,11 @@ public class SavePanel : Page
                 DateTime.Parse(_dateInputField.text),
                 null,
                 _skeleton.Data.Id,
-                _skeleton.GetDevBonesData()
+                null//_skeleton.GetDevBonesData()
             );
 
             Storage devStorage = new(GameManager.Instance.Settings.PathSave);
-            devStorage.DevSaveStateHorse(devSave);
+            //devStorage.DevSaveStateHorse(devSave);
 
             toast = Instantiate(_toastMessage.gameObject, transform.parent).GetComponent<ToastMessage>();
             toast.Show("Сохранение завершено");
@@ -136,16 +146,16 @@ public class SavePanel : Page
             }
         }
 
-        HorseSaveData save = new(
-            _headerInputField.text,
-            _descriptionInputField.text,
-            DateTime.Parse(_dateInputField.text),
-            _skeleton.GetBonesForSave(),
-            _skeleton.Data.Id
-        );
+        CreateSaveDto save = new()
+        {
+            Header = _headerInputField.text,
+            Description = _descriptionInputField.text,
+            Date = DateTime.ParseExact(_dateInputField.text, "dd:MM:yyyy", CultureInfo.CurrentCulture),
+            Bones = _skeleton.GetBonesForSave()
+        };
 
         Storage storage = new(GameManager.Instance.Settings.PathSave);
-        storage.AddHorseSave(save);
+        storage.CreateSave(_skeleton.Data.Id, save);
 
         toast = Instantiate(_toastMessage.gameObject, transform.parent).GetComponent<ToastMessage>();
         toast.Show("Сохранение завершено");
@@ -161,11 +171,11 @@ public class SavePanel : Page
             DateTime.Parse(_dateInputField.text),
             null,
             _skeleton.Data.Id,
-            _skeleton.GetDevBonesData()
+            null//_skeleton.GetDevBonesData()
         );
 
         Storage storage = new(GameManager.Instance.Settings.PathSave);
-        storage.AddHorseSave(save);
+        //storage.CreateSave(save);
 
         ToastMessage toast = Instantiate(_toastMessage.gameObject, transform.parent).GetComponent<ToastMessage>();
         toast.Show("Сохранение завершено");

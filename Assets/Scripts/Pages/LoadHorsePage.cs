@@ -1,4 +1,8 @@
+using Ford.SaveSystem.Ver2;
+using Ford.SaveSystem.Ver2.Data;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -28,7 +32,7 @@ public class LoadHorsePage : Page
         base.Open(popUpLevel);
 
         Storage storage = new(GameManager.Instance.Settings.PathSave);
-        List<HorseData> horses = storage.GetHorses();
+        List<HorseData> horses = storage.GetHorses().ToList();
         horses.Sort((x, y) => x.DateCreation.CompareTo(y.DateCreation));
 
         foreach(var horse in horses)

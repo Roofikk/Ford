@@ -1,3 +1,6 @@
+using Ford.SaveSystem.Ver2;
+using Ford.SaveSystem.Ver2.Data;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -29,9 +32,8 @@ public class LoadSavesPage : Page
         _horseInfoPanel.FillData(_horseData);
 
         Storage storage = new(GameManager.Instance.Settings.PathSave);
-        var saves = storage.GetHorseSaves(_horseData);
 
-        _savesPanel.FillSaves(saves.ToArray());
+        _savesPanel.FillSaves(_horseData.Saves.ToArray());
     }
 
     public override void Close()

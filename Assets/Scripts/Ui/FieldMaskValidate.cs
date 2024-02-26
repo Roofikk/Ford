@@ -9,8 +9,9 @@ public abstract class FieldMaskValidate : MonoBehaviour
     [SerializeField] private bool _showStroke = true;
 
     private TMP_InputField _inputField;
+    private InputFieldValidateStroke _stroke;
 
-    public bool ShowStroke { get { return _showStroke; } private set { _showStroke = value; } }
+    public bool ShowStroke { get { return _showStroke; } set { _showStroke = value; } }
     public string Text { get { return _inputField.text; } }
     public Action<bool> OnValidate { get; set; }
 
@@ -24,22 +25,44 @@ public abstract class FieldMaskValidate : MonoBehaviour
             return;
         }
 
-        _inputField.onDeselect.AddListener((string str) => { ValidateInput(str); });
-
         _invalidDescriptionText.gameObject.SetActive(false);
+        OnValidate += (bool value) => { if (!value) DisplayException(true); };
 
-        OnValidate += (bool value) => { if (!value) DisplayDescription(true); };
-        _inputField.onSelect.AddListener((string str) => { DisplayDescription(false); });
-
-        var stroke = _inputField.GetComponent<InputFieldValidateStroke>();
+        _stroke = _inputField.GetComponent<InputFieldValidateStroke>();
         
-        if (stroke == null)
+        if (_stroke == null)
         {
             Debug.LogError("Компонента \"InputFieldValidateStroke\" не была найдена");
             return;
         }
 
-        stroke.Initiate(this);
+        //_stroke.Initiate(this);
+    }
+
+    private void OnEnable()
+    {
+        _inputField.onDeselect.AddListener((string str) => { ValidateInput(str); });
+        _inputField.onSelect.AddListener((string str) => { DisplayException(false); });
+
+        _stroke?.DisplayStroke(false);
+
+        if (_stroke != null)
+        {
+            _stroke.enabled = true;
+        }
+    }
+
+    private void OnDisable()
+    {
+        _inputField.onSelect.RemoveAllListeners();
+        _inputField.onDeselect.RemoveAllListeners();
+
+        _stroke?.DisplayStroke(false);
+
+        if (_stroke != null)
+        {
+            _stroke.enabled = false;
+        }
     }
 
     public abstract bool ValidateInput(string str);
@@ -49,10 +72,15 @@ public abstract class FieldMaskValidate : MonoBehaviour
         return ValidateInput(_inputField.text);
     }
 
-    public void DisplayDescription(bool value)
+    public void DisplayException(bool value)
     {
         _invalidDescriptionText.text = _descriptionString;
         _invalidDescriptionText.gameObject.SetActive(value);
+
+        if (ShowStroke)
+        {
+            _stroke?.DisplayStroke(value);
+        }
     }
 
     public virtual bool IsTextEmpty()

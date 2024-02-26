@@ -1,3 +1,4 @@
+using Ford.SaveSystem.Ver2.Data;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,7 +11,7 @@ public class SavesPanel : MonoBehaviour
     [SerializeField] private SavePanel _editSavePage;
 
     private ToggleGroup _toggleGroup;
-    public HorseSaveData SelectedHorseSave { get; private set; }
+    public SaveData SelectedHorseSave { get; private set; }
 
     private void Awake()
     {
@@ -18,7 +19,7 @@ public class SavesPanel : MonoBehaviour
             _toggleGroup = GetComponent<ToggleGroup>();
     }
 
-    public void FillSaves(HorseSaveData[] saves)
+    public void FillSaves(SaveData[] saves)
     {
         if (_toggleGroup == null)
             _toggleGroup = GetComponent<ToggleGroup>();
@@ -36,7 +37,7 @@ public class SavesPanel : MonoBehaviour
         }
     }
 
-    private void OpenEditSavePage(HorseSaveData saveData)
+    private void OpenEditSavePage(SaveData saveData)
     {
         PageManager.Instance.OpenPage(_editSavePage, saveData, 1);
 

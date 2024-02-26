@@ -1,3 +1,5 @@
+using Ford.SaveSystem.Ver2;
+using Ford.SaveSystem.Ver2.Data;
 using System;
 using TMPro;
 using UnityEngine;
@@ -18,7 +20,7 @@ public class SaveElementUI : MonoBehaviour
     private Toggle _toggle;
     private Image _image;
 
-    private HorseSaveData _horseSaveData;
+    private SaveData _saveData;
 
     public Button RemoveButton { get { return _removeButton; } }
     public Button EditButton { get { return _editButton; } }
@@ -26,11 +28,11 @@ public class SaveElementUI : MonoBehaviour
     public event Action OnClicked;
     public event Action OnRemoved;
 
-    public void Initiate(HorseSaveData saveData, ToggleGroup toggleGroup)
+    public void Initiate(SaveData saveData, ToggleGroup toggleGroup)
     {
-        _horseSaveData = saveData;
+        _saveData = saveData;
 
-        _nameText.text = saveData.Name;
+        _nameText.text = saveData.Header;
         _dateText.text = saveData.Date.ToString("d");
         _descriptionText.text = saveData.Description;
 
@@ -56,9 +58,9 @@ public class SaveElementUI : MonoBehaviour
 
     public void UpdateInfo()
     {
-        _nameText.text = _horseSaveData.Name;
-        _dateText.text = _horseSaveData.Date.ToString("d");
-        _descriptionText.text = _horseSaveData.Description;
+        _nameText.text = _saveData.Header;
+        _dateText.text = _saveData.Date.ToString("d");
+        _descriptionText.text = _saveData.Description;
     }
 
     private void SelectSave(bool value)
@@ -77,20 +79,18 @@ public class SaveElementUI : MonoBehaviour
     public void RemoveSave()
     {
         Storage storage = new(GameManager.Instance.Settings.PathSave);
-        storage.DeleteHorseSave(_horseSaveData);
+        storage.DeleteSave(_saveData.Id);
 
         Destroy(gameObject);
-
         PageManager.Instance.CloseWarningPage();
-
         OnRemoved?.Invoke();
     }
 
-    public void EditSave(HorseSaveData saveData)
+    public void EditSave(SaveData saveData)
     {
-        _horseSaveData = saveData;
+        _saveData = saveData;
 
-        _nameText.text = saveData.Name;
+        _nameText.text = saveData.Header;
         _descriptionText.text = saveData.Description;
         _dateText.text = saveData.Date.ToString("d");
     }

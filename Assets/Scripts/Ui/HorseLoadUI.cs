@@ -1,3 +1,5 @@
+using Ford.SaveSystem.Ver2;
+using Ford.SaveSystem.Ver2.Data;
 using System;
 using TMPro;
 using UnityEngine;
@@ -9,7 +11,7 @@ public class HorseLoadUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _horseNameText;
     [SerializeField] private TextMeshProUGUI _ownerNameText;
-    [SerializeField] private TextMeshProUGUI _localityText;
+    [SerializeField] private TextMeshProUGUI _cityText;
     [SerializeField] private Button _removeButton;
 
     [Space(10)]
@@ -28,8 +30,8 @@ public class HorseLoadUI : MonoBehaviour
         _horseData = horse;
 
         _horseNameText.text = horse.Name;
-        _ownerNameText.text = horse.OwnerName;
-        _localityText.text = horse.Locality;
+        _ownerNameText.text = horse.Owner.Name;
+        _cityText.text = horse.City;
 
         if (_image == null)
         {
@@ -61,8 +63,8 @@ public class HorseLoadUI : MonoBehaviour
     public void UpdateHorseInfo()
     {
         _horseNameText.text = _horseData.Name;
-        _ownerNameText.text = _horseData.OwnerName;
-        _localityText.text = _horseData.Locality;
+        _ownerNameText.text = _horseData.Owner.Name;
+        _cityText.text = _horseData.City;
     }
 
     private void OpenWarningDeletePage()
@@ -73,7 +75,7 @@ public class HorseLoadUI : MonoBehaviour
     private void RemoveHorse()
     {
         Storage storage = new(GameManager.Instance.Settings.PathSave);
-        storage.DeleteHorse(_horseData);
+        storage.DeleteHorse(_horseData.Id);
 
         Destroy(gameObject);
 
