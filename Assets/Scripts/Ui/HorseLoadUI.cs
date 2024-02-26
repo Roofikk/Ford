@@ -28,9 +28,17 @@ public class HorseLoadUI : MonoBehaviour
     public void Initiate(HorseData horse, UnityAction<HorseData> onClick, ToggleGroup group)
     {
         _horseData = horse;
-
         _horseNameText.text = horse.Name;
-        _ownerNameText.text = horse.Owner.Name;
+
+        if (horse.Owner != null)
+        {
+            _ownerNameText.text = horse.Owner.Name;
+        }
+        else
+        {
+            _ownerNameText.text = "Безхозный";
+        }
+
         _cityText.text = horse.City;
 
         if (_image == null)

@@ -2,15 +2,18 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
-[Serializable]
-public class DevHorseSaveData : HorseSaveData
+namespace Ford.SaveSystem.Ver1.Data
 {
-    public List<DevBoneDataSave> DevBones {  get; set; }
-
-    [JsonConstructor]
-    public DevHorseSaveData(string name, string description, DateTime date, List<BoneDataSave> bones, string horseId, List<DevBoneDataSave> devBones) 
-        : base(name, description, date, bones, horseId)
+    [Serializable]
+    public class DevHorseSaveData : HorseSaveData
     {
-        DevBones = devBones;
+        public List<DevBoneDataSave> DevBones { get; set; }
+
+        [JsonConstructor]
+        public DevHorseSaveData(string name, string description, DateTime date, List<BoneDataSave> bones, string horseId, List<DevBoneDataSave> devBones)
+            : base(name, description, date, bones, horseId)
+        {
+            DevBones = devBones;
+        }
     }
 }

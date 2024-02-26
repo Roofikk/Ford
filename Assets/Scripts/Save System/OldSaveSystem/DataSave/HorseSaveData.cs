@@ -3,42 +3,45 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HorseSaveData
+namespace Ford.SaveSystem.Ver1.Data
 {
-    public string Id { get; private set; }
-    public string Name { get; set; }
-    public string Description { get; set; }
-    public DateTime Date { get; set; }
-    public List<BoneDataSave> Bones { get; set; }
-
-    public string HorseId { get; set; }
-
-    [JsonIgnore] public string PathSave => Id + ".json";
-
-    public HorseSaveData(string name, string description, DateTime date, List<BoneDataSave> bones, string horseId)
+    public class HorseSaveData
     {
-        Name = name;
-        Description = description;
-        Date = date;
-        Bones = bones;
-        HorseId = horseId;
+        public string Id { get; private set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public DateTime Date { get; set; }
+        public List<BoneDataSave> Bones { get; set; }
 
-        var hash = new Hash128();
-        hash.Append(Name);
-        hash.Append(Date.ToString());
-        hash.Append(HorseId);
-        hash.Append(DateTime.Now.ToString());
-        Id = hash.ToString();
-    }
+        public string HorseId { get; set; }
 
-    [JsonConstructor]
-    public HorseSaveData(string id, string name, string description, DateTime date, List<BoneDataSave> bones, string horseId)
-    {
-        Id = id;
-        Name = name;
-        Description = description;
-        Date = date;
-        Bones = bones;
-        HorseId = horseId;
+        [JsonIgnore] public string PathSave => Id + ".json";
+
+        public HorseSaveData(string name, string description, DateTime date, List<BoneDataSave> bones, string horseId)
+        {
+            Name = name;
+            Description = description;
+            Date = date;
+            Bones = bones;
+            HorseId = horseId;
+
+            var hash = new Hash128();
+            hash.Append(Name);
+            hash.Append(Date.ToString());
+            hash.Append(HorseId);
+            hash.Append(DateTime.Now.ToString());
+            Id = hash.ToString();
+        }
+
+        [JsonConstructor]
+        public HorseSaveData(string id, string name, string description, DateTime date, List<BoneDataSave> bones, string horseId)
+        {
+            Id = id;
+            Name = name;
+            Description = description;
+            Date = date;
+            Bones = bones;
+            HorseId = horseId;
+        }
     }
 }

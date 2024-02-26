@@ -1,7 +1,4 @@
-using Ford.SaveSystem.Ver2;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MainMenuPage : Page
@@ -9,7 +6,6 @@ public class MainMenuPage : Page
     [Space(10)]
     [Header("Buttons")]
     [SerializeField] private Button _newProjectButton;
-    [SerializeField] private Button _newProjectByNewSaveSystem;
     [SerializeField] private Button _loadProjectButton;
     [SerializeField] private Button _settingsButton;
     [SerializeField] private Button _guideButton;
@@ -31,16 +27,14 @@ public class MainMenuPage : Page
 
     private void Start()
     {
-        _startDevProjectButton.onClick.AddListener(StartDevProject);
+        //_startDevProjectButton.onClick.AddListener(StartDevProject);
 
         _newProjectButton.onClick.AddListener(() => { PageManager.Instance.OpenPage(_newProjectPage); });
-        _newProjectByNewSaveSystem.onClick.AddListener(() => { PageManager.Instance.OpenPage(_newProjectPage); });
         _loadProjectButton.onClick.AddListener(() => { PageManager.Instance.OpenPage(_loadProjectPage); });
         _settingsButton.onClick.AddListener(() => { PageManager.Instance.OpenPage(_settingsPage); });
         _guideButton.onClick.AddListener(() => { PageManager.Instance.OpenPage(_guidePage); });
 
         _newProjectButton.onClick.AddListener(() => { PageManager.Instance.ClosePage(this); });
-        _newProjectByNewSaveSystem.onClick.AddListener(() => { PageManager.Instance.ClosePage(this); });
         _loadProjectButton.onClick.AddListener(() => { PageManager.Instance.ClosePage(this); });
         _settingsButton.onClick.AddListener(() => { PageManager.Instance.ClosePage(this); });
         _guideButton.onClick.AddListener(() => { PageManager.Instance.ClosePage(this); });
@@ -60,30 +54,30 @@ public class MainMenuPage : Page
         _guideButton.onClick.RemoveAllListeners();
     }
 
-    private void StartDevProject()
-    {
-        DevHorseData devHorse = new(
-            "Dev Horse",
-            "Unsex",
-            "01.01.1970",
-            "This project start by developer",
-            "Developer",
-            "Dev City",
-            "+7 (123) 456 78 90",
-            new List<string>()
-        );
+    //private void StartDevProject()
+    //{
+    //    DevHorseData devHorse = new(
+    //        "Dev Horse",
+    //        "Unsex",
+    //        "01.01.1970",
+    //        "This project start by developer",
+    //        "Developer",
+    //        "Dev City",
+    //        "+7 (123) 456 78 90",
+    //        new List<string>()
+    //    );
 
-        Storage storage = new(GameManager.Instance.Settings.PathSave);
-        DevHorseSaveData devHorseSaveData = null;//storage.DevGetHorseState(devHorse.Id);
+    //    Storage storage = new(GameManager.Instance.Settings.PathSave);
+    //    DevHorseSaveData devHorseSaveData = null;//storage.DevGetHorseState(devHorse.Id);
 
-        if (devHorseSaveData != null)
-        {
-            SceneParameters.AddParam(devHorseSaveData);
-        }
+    //    if (devHorseSaveData != null)
+    //    {
+    //        SceneParameters.AddParam(devHorseSaveData);
+    //    }
 
-        SceneParameters.AddParam(devHorse);
+    //    SceneParameters.AddParam(devHorse);
 
-        AsyncOperation loadingOperation = SceneManager.LoadSceneAsync(1);
-        _loadScenePage.Open(loadingOperation);
-    }
+    //    AsyncOperation loadingOperation = SceneManager.LoadSceneAsync(1);
+    //    _loadScenePage.Open(loadingOperation);
+    //}
 }

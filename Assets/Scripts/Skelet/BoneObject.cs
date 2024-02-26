@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEditor;
 using UnityEngine;
+using CustomVector3 = Ford.SaveSystem.Ver2.Data.Vector3;
 
 [RequireComponent(typeof(Outline))]
 [RequireComponent(typeof(MeshCollider))]
@@ -72,14 +73,36 @@ public class BoneObject : Bone, IMouseTouchLocker
         _outline.enabled = IsSelected;
     }
 
+    public void SetPosition(CustomVector3 position)
+    {
+        transform.position = new Vector3(
+            position.x,
+            position.y,
+            position.z);
+    }
+
     public void SetPosition(Vector3 position)
     {
-        transform.position = position;
+        transform.position = new Vector3(
+            position.x,
+            position.y,
+            position.z);
+    }
+
+    public void SetRotation(CustomVector3 rotation)
+    {
+        transform.rotation = Quaternion.Euler(
+            rotation.x,
+            rotation.y,
+            rotation.z);
     }
 
     public void SetRotation(Vector3 rotation)
     {
-        transform.rotation = Quaternion.Euler(rotation);
+        transform.rotation = Quaternion.Euler(
+            rotation.x,
+            rotation.y,
+            rotation.z);
     }
 
     private void OnMouseOver()

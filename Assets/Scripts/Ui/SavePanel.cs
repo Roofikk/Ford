@@ -116,27 +116,27 @@ public class SavePanel : Page
     {
         ToastMessage toast;
 
-        if (GameManager.Instance.DevMode)
-        {
-            DevHorseSaveData devSave = new(
-                _headerInputField.text,
-                _descriptionInputField.text,
-                DateTime.Parse(_dateInputField.text),
-                null,
-                _skeleton.Data.Id,
-                null//_skeleton.GetDevBonesData()
-            );
+        //if (GameManager.Instance.DevMode)
+        //{
+        //    DevHorseSaveData devSave = new(
+        //        _headerInputField.text,
+        //        _descriptionInputField.text,
+        //        DateTime.Parse(_dateInputField.text),
+        //        null,
+        //        _skeleton.Data.Id,
+        //        null//_skeleton.GetDevBonesData()
+        //    );
 
-            Storage devStorage = new(GameManager.Instance.Settings.PathSave);
-            //devStorage.DevSaveStateHorse(devSave);
+        //    Storage devStorage = new(GameManager.Instance.Settings.PathSave);
+        //    //devStorage.DevSaveStateHorse(devSave);
 
-            toast = Instantiate(_toastMessage.gameObject, transform.parent).GetComponent<ToastMessage>();
-            toast.Show("Сохранение завершено");
+        //    toast = Instantiate(_toastMessage.gameObject, transform.parent).GetComponent<ToastMessage>();
+        //    toast.Show("Сохранение завершено");
 
-            PageManager.Instance.ClosePage(this);
+        //    PageManager.Instance.ClosePage(this);
 
-            return;
-        }
+        //    return;
+        //}
 
         foreach (var inputMask in _inputMaskValidateList)
         {
@@ -163,23 +163,23 @@ public class SavePanel : Page
         PageManager.Instance.ClosePage(this);
     }
 
-    public void DevSave()
-    {
-        DevHorseSaveData save = new(
-            _headerInputField.text + " -- DevSave",
-            _descriptionInputField.text,
-            DateTime.Parse(_dateInputField.text),
-            null,
-            _skeleton.Data.Id,
-            null//_skeleton.GetDevBonesData()
-        );
+    //public void DevSave()
+    //{
+    //    DevHorseSaveData save = new(
+    //        _headerInputField.text + " -- DevSave",
+    //        _descriptionInputField.text,
+    //        DateTime.Parse(_dateInputField.text),
+    //        null,
+    //        _skeleton.Data.Id,
+    //        null//_skeleton.GetDevBonesData()
+    //    );
 
-        Storage storage = new(GameManager.Instance.Settings.PathSave);
-        //storage.CreateSave(save);
+    //    Storage storage = new(GameManager.Instance.Settings.PathSave);
+    //    //storage.CreateSave(save);
 
-        ToastMessage toast = Instantiate(_toastMessage.gameObject, transform.parent).GetComponent<ToastMessage>();
-        toast.Show("Сохранение завершено");
+    //    ToastMessage toast = Instantiate(_toastMessage.gameObject, transform.parent).GetComponent<ToastMessage>();
+    //    toast.Show("Сохранение завершено");
 
-        PageManager.Instance.ClosePage(this);
-    }
+    //    PageManager.Instance.ClosePage(this);
+    //}
 }

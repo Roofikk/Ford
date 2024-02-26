@@ -1,12 +1,13 @@
 using System;
+using System.Globalization;
 using UnityEngine;
 
 public class InputFieldDateValidate : FieldMaskValidate
 {
     [SerializeField] private bool _validateEmpty = false;
-    private DateTime _date;
+    private DateTime? _date;
 
-    public DateTime Date { get { return _date; } }
+    public DateTime? Date { get { return _date; } }
 
     public override bool ValidateInput(string str)
     {
@@ -14,12 +15,15 @@ public class InputFieldDateValidate : FieldMaskValidate
             if (string.IsNullOrEmpty(str))
                 return true;
 
-        int count = str.Split(new char[] { '.', '/', ',' }).Length;
-        bool value = DateTime.TryParse(str, out _date);
-
-        bool result = value && count == 3;
-        if (result)
-            _date = default;
+        bool result;
+        if (result = DateTime.TryParseExact(str, "d.M.yyyy", CultureInfo.CurrentCulture, DateTimeStyles.None, out var date))
+        {
+            _date = date;
+        }
+        else
+        {
+            _date = null;
+        }
         
         OnValidate?.Invoke(result);
         return result;

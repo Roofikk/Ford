@@ -126,6 +126,15 @@ namespace Ford.SaveSystem.Ver2
                 Saves = new List<SaveData>(),
             };
 
+            if (!string.IsNullOrEmpty(horseData.OwnerName))
+            {
+                addHorse.Owner = new HorseOwnerData()
+                {
+                    Name = horseData.OwnerName,
+                    PhoneNumber = horseData.PhoneNumber,
+                };
+            }
+
             horses.Add(addHorse);
             RewriteHorseFile(horses);
             return addHorse;
@@ -156,6 +165,15 @@ namespace Ford.SaveSystem.Ver2
             existHorse.Region = horseData.Region;
             existHorse.Country = horseData.Country;
             existHorse.LastUpdate = DateTime.Now;
+
+            if (!string.IsNullOrEmpty(horseData.OwnerName))
+            {
+                existHorse.Owner = new HorseOwnerData()
+                {
+                    Name = horseData.OwnerName,
+                    PhoneNumber = horseData.PhoneNumber,
+                };
+            }
             //
 
             RewriteHorseFile(horses);

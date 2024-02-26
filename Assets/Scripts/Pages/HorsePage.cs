@@ -7,7 +7,6 @@ using UnityEngine.UI;
 using Ford.SaveSystem.Ver2.Data;
 using Ford.SaveSystem.Ver2;
 using Ford.SaveSystem.Ver2.Dto;
-using Unity.VisualScripting;
 using System.Globalization;
 
 public class HorsePage : Page
@@ -61,7 +60,7 @@ public class HorsePage : Page
         _headerText.text = $"Изменение данных о {data.Name}";
         _horseNameInputField.text = data.Name;
         _sexText.text = data.Sex;
-        _birthdayInputFiled.text = data.BirthDate?.ToString("dd:MM:yyyy");
+        _birthdayInputFiled.text = data.BirthDate?.ToString("dd.MM.yyyy");
         _descriptionInputField.text = data.Description;
         _ownerNameInputFiled.text = data.Owner.Name;
         _phoneNumberInputField.text = data.Owner.PhoneNumber;
@@ -160,7 +159,7 @@ public class HorsePage : Page
         {
             Name = _horseNameInputField.text,
             Description = _descriptionInputField.text,
-            BirthDate = DateTime.ParseExact(_birthdayInputFiled.text, "dd:MM:yyyy", CultureInfo.CurrentCulture),
+            BirthDate = _birthdayInputFiled.GetComponent<InputFieldDateValidate>().Date,
             Sex = _sexText.text,
             Country = _countryInputFiled.text,
             City = _cityInputFiled.text,
@@ -184,12 +183,6 @@ public class HorsePage : Page
         if (!CheckValidData())
             return;
 
-        string dateStr = string.Empty;
-        if (!_birthdayInputFiled.GetComponent<InputFieldDateValidate>().IsTextEmpty())
-        {
-            dateStr = _birthdayInputFiled.GetComponent<InputFieldDateValidate>().Date.ToString();
-        }
-
         Storage storage = new(GameManager.Instance.Settings.PathSave);
 
         CreateSaveDto save = new()
@@ -204,7 +197,7 @@ public class HorsePage : Page
         {
             Name = _horseNameInputField.text,
             Sex = _sexText.text,
-            BirthDate = string.IsNullOrEmpty(dateStr) ? null : DateTime.ParseExact(dateStr, "dd:MM:yyyy", CultureInfo.CurrentCulture),
+            BirthDate = _birthdayInputFiled.GetComponent<InputFieldDateValidate>().Date,
             Description = _descriptionInputField.text,
             Country = _countryInputFiled.text,
             City = _cityInputFiled.text,
@@ -213,15 +206,10 @@ public class HorsePage : Page
             PhoneNumber = _phoneNumberInputField.text
         };
 
-        //HorseSaveData save = new("Новый проект", "Стартовое сохранение без каких либо изменений", DateTime.Now, null, horse.Id);
-
-        //Storage storage = new Storage(GameManager.Instance.Settings.PathSave);
-        //storage.AddHorse(horse);
-        //storage.AddHorseSave(save);
         var creatingHorse = storage.CreateHorse(horse);
         storage.CreateSave(creatingHorse.Id, save);
 
-        SceneParameters.AddParam(horse);
+        SceneParameters.AddParam(creatingHorse);
         AsyncOperation loadingOperation = SceneManager.LoadSceneAsync(1);
         _loadScenePage.Open(loadingOperation);
     }

@@ -1,5 +1,4 @@
 using Ford.SaveSystem.Ver2.Data;
-using Ford.SaveSystem.Ver2.Dto;
 using System;
 using TMPro;
 using UnityEngine;
@@ -43,7 +42,7 @@ public class HorseInfoPanel : MonoBehaviour
 
         _horseNameText.text = horseData.Name;
         _sexText.text = horseData.Sex;
-        _birthdateText.text = horseData.BirthDate?.ToString("dd:MM:yyyy");
+        _birthdateText.text = horseData.BirthDate?.ToString("dd.MM.yyyy");
 
         TimeSpan? timeSpan = DateTime.Now - horseData.BirthDate;
         if (timeSpan == null)
@@ -56,9 +55,18 @@ public class HorseInfoPanel : MonoBehaviour
         }
 
         _descriptionText.text = horseData.Description;
-        _ownerNameText.text = horseData.Owner.Name;
         _localityText.text = horseData.City;
-        _phoneNumberText.text = horseData.Owner.PhoneNumber;
+
+        if (horseData.Owner != null)
+        {
+            _ownerNameText.text = horseData.Owner.Name;
+            _phoneNumberText.text = horseData.Owner.PhoneNumber;
+        }
+        else
+        {
+            _ownerNameText.text = "Безхозный";
+            _phoneNumberText.text = "Отсутствует";
+        }
     }
 
     private void UpdateHorseInfo(HorseData horseData)
