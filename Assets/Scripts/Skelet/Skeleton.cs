@@ -185,7 +185,7 @@ public class Skeleton : MonoBehaviour
         {
             foreach (var bone in group.Bones)
             {
-                ((BoneObject)bone).LockTouch();
+                (bone as BoneObject).LockTouch();
             }
         }
     }
