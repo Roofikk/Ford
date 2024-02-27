@@ -7,7 +7,6 @@ using System.Linq;
 using Ford.SaveSystem.Ver2;
 using Ford.SaveSystem.Ver2.Dto;
 using Ford.SaveSystem.Ver2.Data;
-using System.Globalization;
 
 public class SavePanel : Page
 {
@@ -150,7 +149,7 @@ public class SavePanel : Page
         {
             Header = _headerInputField.text,
             Description = _descriptionInputField.text,
-            Date = DateTime.ParseExact(_dateInputField.text, "dd:MM:yyyy", CultureInfo.CurrentCulture),
+            Date = _dateInputField.GetComponent<InputFieldDateValidate>().Date.Value,
             Bones = _skeleton.GetBonesForSave()
         };
 
