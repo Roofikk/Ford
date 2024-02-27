@@ -7,7 +7,6 @@ using UnityEngine.UI;
 using Ford.SaveSystem.Ver2.Data;
 using Ford.SaveSystem.Ver2;
 using Ford.SaveSystem.Ver2.Dto;
-using System.Globalization;
 
 public class HorsePage : Page
 {
