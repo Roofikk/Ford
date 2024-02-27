@@ -5,27 +5,33 @@ using UnityEngine;
 
 public class TestFordApi : MonoBehaviour
 {
+    [SerializeField] private string _accessToken = "";
+
     private void Start()
     {
-
-        //SignUp();
+        SignIn();
     }
 
-    private void SingIn()
+    private void SignIn()
     {
         Debug.Log("Логин");
 
-        FordApiClient fordApi = new();
-        fordApi.SignInAsync(new LoginRequestDto()
+        FordApiClient apiClient = new();
+        apiClient.SignInAsync(new LoginRequestDto()
         {
             Login = "user",
-            Password = "user3211"
+            Password = "user321"
         }).RunOnMainThread((result) =>
         {
             var content = result.Content;
             if (content != null)
             {
-                Debug.Log(content.Token);
+                if (string.IsNullOrEmpty(_accessToken))
+                {
+                    _accessToken = content.Token;
+                }
+
+                GetUserInfo(_accessToken);
             }
             else
             {
@@ -39,8 +45,8 @@ public class TestFordApi : MonoBehaviour
 
     private void SignUp()
     {
-        FordApiClient fordApi = new();
-        fordApi.SignUpAsync(new()
+        FordApiClient apiClient = new();
+        apiClient.SignUpAsync(new()
         {
             Login = "Reg_From_App",
             Password = "fromApp123",
@@ -63,5 +69,26 @@ public class TestFordApi : MonoBehaviour
                 }
             }
         });
+    }
+
+    private void GetUserInfo(string accessToken)
+    {
+        FordApiClient apiClient = new();
+        apiClient.GetUserInfoAsync(accessToken)
+            .RunOnMainThread((result) =>
+            {
+                var content = result.Content;
+                if (content != null)
+                {
+                    Debug.Log("Получили инфу о пользователе");
+                }
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        Debug.LogError($"Title: {error.Title}. Message: {error.Message}");
+                    }
+                }
+            });
     }
 }
