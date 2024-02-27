@@ -43,8 +43,12 @@ public class LoadSavesPage : Page
 
     private void Load()
     {
+        Storage storage = new Storage(GameManager.Instance.Settings.PathSave);
+        SaveData saveData = _savesPanel.SelectedHorseSave;
+        var saveBonesData = storage.GetSave(saveData.SaveFileName, saveData.Id);
+
         SceneParameters.AddParam(_horseData);
-        SceneParameters.AddParam(_savesPanel.SelectedHorseSave);
+        SceneParameters.AddParam(saveBonesData);
 
         AsyncOperation loadingOperation = SceneManager.LoadSceneAsync(1);
         _loadScenePage.Open(loadingOperation);
