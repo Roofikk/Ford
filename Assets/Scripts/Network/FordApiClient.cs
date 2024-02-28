@@ -171,7 +171,6 @@ namespace Ford.WebApi
         #endregion
 
         #region Horse
-        // не проверено
         /// <summary>
         /// Get horse<br/>
         /// GET request
@@ -198,7 +197,6 @@ namespace Ford.WebApi
             return ReturnBadResponse<HorseRetrieveDto>(responseText, response.StatusCode);
         }
 
-        // не проверено
         /// <summary>
         /// Get horses<br/>
         /// GET request
@@ -224,7 +222,6 @@ namespace Ford.WebApi
             return ReturnBadResponse<IEnumerable<HorseRetrieveDto>>(responseText, response.StatusCode);
         }
 
-        // не проверено
         /// <summary>
         /// Create horse<br/>
         /// POST request
@@ -290,7 +287,8 @@ namespace Ford.WebApi
 
             return ReturnBadResponse<HorseRetrieveDto>(responseText, response.StatusCode);
         }
-
+        
+        // не проверил
         /// <summary>
         /// Delete horse<br/>
         /// DELETE request
@@ -307,6 +305,69 @@ namespace Ford.WebApi
 
             var response = await client.SendAsync(request);
 
+            if (response.IsSuccessStatusCode)
+            {
+                return new ResponseResult(response.StatusCode);
+            }
+
+            string responseText = await response.Content.ReadAsStringAsync();
+            return ReturnBadResponse(responseText, response.StatusCode);
+        }
+        #endregion
+
+        #region HorseOwner
+        // не проверил
+        /// <summary>
+        /// Update horse owners<br/>
+        /// POST request
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <param name="horseOwners"></param>
+        /// <returns></returns>
+        public async Task<ResponseResult<HorseRetrieveDto>> UpdateHorseOwners(string accessToken, UpdatingHorseOwnersDto horseOwners)
+        {
+            string json = JsonConvert.SerializeObject(horseOwners);
+
+            Uri uri = new(_hostUri, _updateHorseOwnersUri);
+            StringContent content = new(json, Encoding.UTF8, "application/json");
+            HttpClient client = new();
+
+            HttpRequestMessage request = new(HttpMethod.Post, uri)
+            {
+                Content = content
+            };
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var response = await client.SendAsync(request);
+            string responseText = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var retrieveHorse = JsonConvert.DeserializeObject<HorseRetrieveDto>(responseText);
+                return new ResponseResult<HorseRetrieveDto>(retrieveHorse);
+            }
+
+            return ReturnBadResponse<HorseRetrieveDto>(responseText, response.StatusCode);
+        }
+
+        // не проверил
+        /// <summary>
+        /// Delete horse owner<br/>
+        /// DELETE request
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <param name="horseId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<ResponseResult> DeleteHorseOwner(string accessToken, long horseId, long userId)
+        {
+            HttpClient client = new();
+            Uri uri = new(_hostUri, $"{_horsesUri}?userId={userId}&horseId={horseId}");
+            HttpRequestMessage request = new(HttpMethod.Delete, uri);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var response = await client.SendAsync(request);
+            
             if (response.IsSuccessStatusCode)
             {
                 return new ResponseResult(response.StatusCode);
