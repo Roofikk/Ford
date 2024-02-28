@@ -102,7 +102,6 @@ namespace Ford.WebApi
             return ReturnBadResponse<AccountDto>(responseText, response.StatusCode);
         }
 
-        //Не проверил
         /// <summary>
         /// Update user info<br/>
         /// POST request
@@ -136,7 +135,6 @@ namespace Ford.WebApi
             return ReturnBadResponse<AccountDto>(responseText, response.StatusCode);
         }
 
-        //Еще не проверил
         /// <summary>
         /// Change password<br/>
         /// POST request

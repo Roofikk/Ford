@@ -13,16 +13,11 @@ public class MainMenuPage : Page
     [SerializeField] private Button _startDevProjectButton;
 
     [Space(10)]
-    [Header("Yandex disk button")]
-    [SerializeField] private Button _yandexDiskButton;
-
-    [Space(10)]
     [Header("Pages")]
     [SerializeField] private Page _newProjectPage;
     [SerializeField] private Page _loadProjectPage;
     [SerializeField] private Page _settingsPage;
     [SerializeField] private Page _guidePage;
-    [SerializeField] private Page _yandexAuthorizePage;
     [SerializeField] private LoadScenePage _loadScenePage;
 
     private void Start()
@@ -38,11 +33,6 @@ public class MainMenuPage : Page
         _loadProjectButton.onClick.AddListener(() => { PageManager.Instance.ClosePage(this); });
         _settingsButton.onClick.AddListener(() => { PageManager.Instance.ClosePage(this); });
         _guideButton.onClick.AddListener(() => { PageManager.Instance.ClosePage(this); });
-
-        //Yandex disk settings
-        _yandexDiskButton.onClick.AddListener(() => { PageManager.Instance.OpenPage(_yandexAuthorizePage, 1); });
-
-        YandexDiskToken yandexDiskToken = new();
     }
 
     private void OnDestroy()

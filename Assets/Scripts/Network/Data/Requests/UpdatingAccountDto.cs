@@ -1,4 +1,6 @@
 
+using System;
+
 namespace Ford.WebApi.Data
 {
     public class UpdatingAccountDto
@@ -8,6 +10,6 @@ namespace Ford.WebApi.Data
         public string City { get; set; }
         public string Region { get; set; }
         public string Country { get; set; }
-        public string BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
     }
 }

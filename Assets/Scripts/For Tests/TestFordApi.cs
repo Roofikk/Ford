@@ -9,10 +9,10 @@ public class TestFordApi : MonoBehaviour
 
     private void Start()
     {
-        SignIn();
+
     }
 
-    private void SignIn()
+    private void SignIn(Action callback)
     {
         Debug.Log("Логин");
 
@@ -30,8 +30,7 @@ public class TestFordApi : MonoBehaviour
                 {
                     _accessToken = content.Token;
                 }
-
-                GetUserInfo(_accessToken);
+                callback?.Invoke();
             }
             else
             {
@@ -90,5 +89,57 @@ public class TestFordApi : MonoBehaviour
                     }
                 }
             });
+    }
+
+    private void UpdateAccout()
+    {
+        FordApiClient client = new();
+        client.UpdateUserInfo(_accessToken, new()
+        {
+            FirstName = "Check",
+            LastName = "Update",
+            BirthDate = new DateTime(1999, 8, 6),
+            Country = "Russia",
+            Region = "Karelia",
+            City = "Petrozavodsk"
+        }).RunOnMainThread((result) =>
+        {
+            var content = result.Content;
+            if (content != null)
+            {
+                Debug.Log("User has been updated");
+            }
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    Debug.LogError($"Title: {error.Title}. Message: {error.Message}");
+                }
+            }
+        });
+    }
+
+    private void ChangePassword()
+    {
+        FordApiClient client = new();
+        client.ChangePassword(_accessToken, new UpdatingPasswordDto()
+        {
+            CurrentPassword = "user321",
+            NewPassword = "user321"
+        }).RunOnMainThread((result) =>
+        {
+            var content = result.Content;
+            if (content != null)
+            {
+                Debug.Log("Password has been changed");
+            }
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    Debug.LogError($"Title: {error.Title}. Message: {error.Message}");
+                }
+            }
+        });
     }
 }
