@@ -94,7 +94,7 @@ public class TestFordApi : MonoBehaviour
     private void UpdateAccout()
     {
         FordApiClient client = new();
-        client.UpdateUserInfo(_accessToken, new()
+        client.UpdateUserInfoAsync(_accessToken, new()
         {
             FirstName = "Check",
             LastName = "Update",
@@ -122,7 +122,7 @@ public class TestFordApi : MonoBehaviour
     private void ChangePassword()
     {
         FordApiClient client = new();
-        client.ChangePassword(_accessToken, new UpdatingPasswordDto()
+        client.ChangePasswordAsync(_accessToken, new UpdatingPasswordDto()
         {
             CurrentPassword = "user321",
             NewPassword = "user321"
