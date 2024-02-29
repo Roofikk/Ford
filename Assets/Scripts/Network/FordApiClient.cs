@@ -1,12 +1,15 @@
+using Ford.SaveSystem.Ver2.Data;
 using Ford.WebApi.Data;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEditor.Experimental.GraphView;
 
 namespace Ford.WebApi
 {
@@ -40,19 +43,9 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult<AccountDto>> SignUpAsync(RegisterUserDto registerUser)
         {
-            string json = JsonConvert.SerializeObject(registerUser);
-            StringContent content = new(json, Encoding.UTF8, "application/json");
-            HttpClient client = new();
-            var response = await client.PostAsync(new Uri(_hostUri, _signUpUri), content);
-            string responseText = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                var account = JsonConvert.DeserializeObject<AccountDto>(responseText);
-                return new ResponseResult<AccountDto>(account);
-            }
-
-            return ReturnBadResponse<AccountDto>(responseText, response.StatusCode);
+            Uri uri = new Uri(_hostUri, _signUpUri);
+            var result = await PostRequest<AccountDto>(uri, registerUser);
+            return result;
         }
 
         /// <summary>
@@ -63,19 +56,9 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult<LoginResponseDto>> SignInAsync(LoginRequestDto loginRequestData)
         {
-            string json = JsonConvert.SerializeObject(loginRequestData);
-            StringContent content = new(json, Encoding.UTF8, "application/json");
-            HttpClient client = new();
-            var response = await client.PostAsync(new Uri(_hostUri, _signInUri), content);
-            string responseText = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                var token = JsonConvert.DeserializeObject<LoginResponseDto>(responseText);
-                return new ResponseResult<LoginResponseDto>(token);
-            }
-
-            return ReturnBadResponse<LoginResponseDto>(responseText, response.StatusCode);
+            Uri uri = new Uri(_hostUri, _signInUri);
+            var result = await PostRequest<LoginResponseDto>(uri, loginRequestData);
+            return result;
         }
 
         /// <summary>
@@ -86,21 +69,9 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult<AccountDto>> GetUserInfoAsync(string accessToken)
         {
-            HttpClient client = new();
             Uri uri = new(_hostUri, _accountUri);
-            HttpRequestMessage request = new(HttpMethod.Get, uri);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            var response = await client.SendAsync(request);
-            string responseText = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                var account = JsonConvert.DeserializeObject<AccountDto>(responseText);
-                return new ResponseResult<AccountDto>(account);
-            }
-
-            return ReturnBadResponse<AccountDto>(responseText, response.StatusCode);
+            var account = await GetRequest<AccountDto>(uri, accessToken);
+            return account;
         }
 
         /// <summary>
@@ -112,28 +83,9 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult<AccountDto>> UpdateUserInfoAsync(string accessToken, UpdatingAccountDto requestAccount)
         {
-            string json = JsonConvert.SerializeObject(requestAccount);
-
             Uri uri = new(_hostUri, _accountUri);
-            StringContent content = new(json, Encoding.UTF8, "application/json");
-            HttpClient client = new();
-
-            HttpRequestMessage request = new(HttpMethod.Post, uri)
-            {
-                Content = content
-            };
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            var response = await client.SendAsync(request);
-            string responseText = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                var newAccount = JsonConvert.DeserializeObject<AccountDto>(responseText);
-                return new ResponseResult<AccountDto>(newAccount);
-            }
-
-            return ReturnBadResponse<AccountDto>(responseText, response.StatusCode);
+            var result = await PostRequest<AccountDto>(uri, requestAccount, accessToken);
+            return result;
         }
 
         /// <summary>
@@ -145,28 +97,9 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult<LoginResponseDto>> ChangePasswordAsync(string accessToken, UpdatingPasswordDto passwordRequest)
         {
-            string json = JsonConvert.SerializeObject(passwordRequest);
-
             Uri uri = new(_hostUri, _passwordChangeUri);
-            StringContent content = new(json, Encoding.UTF8, "application/json");
-            HttpClient client = new();
-
-            HttpRequestMessage request = new(HttpMethod.Post, uri)
-            {
-                Content = content
-            };
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            var response = await client.SendAsync(request);
-            string responseText = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                var token = JsonConvert.DeserializeObject<LoginResponseDto>(responseText);
-                return new ResponseResult<LoginResponseDto>(token);
-            }
-
-            return ReturnBadResponse<LoginResponseDto>(responseText, response.StatusCode);
+            var result = await PostRequest<LoginResponseDto>(uri, passwordRequest, accessToken);
+            return result;
         }
         #endregion
 
@@ -180,21 +113,9 @@ namespace Ford.WebApi
         /// <returns>Horse object</returns>
         public async Task<ResponseResult<HorseRetrieveDto>> GetHorseAsync(string accessToken, long horseId)
         {
-            HttpClient client = new();
             Uri uri = new(_hostUri, $"{_horsesUri}?horseId={horseId}");
-            HttpRequestMessage request = new(HttpMethod.Get, uri);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            var response = await client.SendAsync(request);
-            string responseText = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                var horse = JsonConvert.DeserializeObject<HorseRetrieveDto>(responseText);
-                return new ResponseResult<HorseRetrieveDto>(horse);
-            }
-
-            return ReturnBadResponse<HorseRetrieveDto>(responseText, response.StatusCode);
+            var horse = await GetRequest<HorseRetrieveDto>(uri, accessToken);
+            return horse;
         }
 
         /// <summary>
@@ -205,21 +126,9 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult<IEnumerable<HorseRetrieveDto>>> GetHorsesAsync(string accessToken)
         {
-            HttpClient client = new();
             Uri uri = new(_hostUri, _horsesUri);
-            HttpRequestMessage request = new(HttpMethod.Get, uri);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            var response = await client.SendAsync(request);
-            string responseText = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                var horse = JsonConvert.DeserializeObject<RetrieveArray<HorseRetrieveDto>>(responseText);
-                return new ResponseResult<IEnumerable<HorseRetrieveDto>>(horse.Items);
-            }
-
-            return ReturnBadResponse<IEnumerable<HorseRetrieveDto>>(responseText, response.StatusCode);
+            var horses = await GetRequest<IEnumerable<HorseRetrieveDto>>(uri, accessToken);
+            return horses;
         }
 
         /// <summary>
@@ -229,30 +138,12 @@ namespace Ford.WebApi
         /// <param name="accessToken">Access token</param>
         /// <param name="horse">Horse object for creation</param>
         /// <returns></returns>
-        public async Task<ResponseResult<HorseRetrieveDto>> CreateHorseAsync(string accessToken, CreationHorseDto horse)
+        public async Task<ResponseResult<HorseRetrieveDto>> CreateHorseAsync(string accessToken, CreationHorse horse)
         {
-            string json = JsonConvert.SerializeObject(horse);
-
             Uri uri = new(_hostUri, _horsesUri);
-            StringContent content = new(json, Encoding.UTF8, "application/json");
-            HttpClient client = new();
-
-            HttpRequestMessage request = new(HttpMethod.Post, uri)
-            {
-                Content = content
-            };
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            var response = await client.SendAsync(request);
-            string responseText = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                var retrieveHorse = JsonConvert.DeserializeObject<HorseRetrieveDto>(responseText);
-                return new ResponseResult<HorseRetrieveDto>(retrieveHorse);
-            }
-
-            return ReturnBadResponse<HorseRetrieveDto>(responseText, response.StatusCode);
+            var horseDto = Crea
+            var result = await PostRequest<HorseRetrieveDto>(uri, horse, accessToken);
+            return result;
         }
 
         /// <summary>
@@ -264,28 +155,9 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult<HorseRetrieveDto>> UpdateHorseAsync(string accessToken, UpdatingHorseDto horse)
         {
-            string json = JsonConvert.SerializeObject(horse);
-
             Uri uri = new(_hostUri, _horsesUri);
-            StringContent content = new(json, Encoding.UTF8, "application/json");
-            HttpClient client = new();
-
-            HttpRequestMessage request = new(HttpMethod.Put, uri)
-            {
-                Content = content
-            };
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            var response = await client.SendAsync(request);
-            string responseText = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                var retrieveHorse = JsonConvert.DeserializeObject<HorseRetrieveDto>(responseText);
-                return new ResponseResult<HorseRetrieveDto>(retrieveHorse);
-            }
-
-            return ReturnBadResponse<HorseRetrieveDto>(responseText, response.StatusCode);
+            var result = await PutRequest<HorseRetrieveDto>(uri, horse, accessToken);
+            return result;
         }
         
         // не проверил
@@ -298,20 +170,9 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult> DeleteHorseAsync(string accessToken, long horseId)
         {
-            HttpClient client = new();
             Uri uri = new(_hostUri, $"{_horsesUri}?horseId={horseId}");
-            HttpRequestMessage request = new(HttpMethod.Delete, uri);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            var response = await client.SendAsync(request);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return new ResponseResult(response.StatusCode);
-            }
-
-            string responseText = await response.Content.ReadAsStringAsync();
-            return ReturnBadResponse(responseText, response.StatusCode);
+            var result = await DeleteRequest(uri, accessToken);
+            return result;
         }
         #endregion
 
@@ -326,7 +187,30 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult<HorseRetrieveDto>> UpdateHorseOwners(string accessToken, UpdatingHorseOwnersDto horseOwners)
         {
-            string json = JsonConvert.SerializeObject(horseOwners);
+            Uri uri = new(_hostUri, _updateHorseOwnersUri);
+            var horse = await PostRequest<HorseRetrieveDto>(uri, horseOwners, accessToken);
+            return horse;
+        }
+
+        // не проверил
+        /// <summary>
+        /// Delete horse owner<br/>
+        /// DELETE request
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <param name="horseId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<ResponseResult> DeleteHorseOwner(string accessToken, long horseId, long userId)
+        {
+            Uri uri = new(_hostUri, $"{_horsesUri}?userId={userId}&horseId={horseId}");
+            var result = await DeleteRequest(uri, accessToken);
+            return result;
+        }
+
+        public async Task<ResponseResult<HorseUserDto>> AddOwner(string accessToken, AddingHorseOwner horseOwner)
+        {
+            string json = JsonConvert.SerializeObject(horseOwner);
 
             Uri uri = new(_hostUri, _updateHorseOwnersUri);
             StringContent content = new(json, Encoding.UTF8, "application/json");
@@ -349,25 +233,98 @@ namespace Ford.WebApi
 
             return ReturnBadResponse<HorseRetrieveDto>(responseText, response.StatusCode);
         }
+        #endregion
 
-        // не проверил
-        /// <summary>
-        /// Delete horse owner<br/>
-        /// DELETE request
-        /// </summary>
-        /// <param name="accessToken"></param>
-        /// <param name="horseId"></param>
-        /// <param name="userId"></param>
-        /// <returns></returns>
-        public async Task<ResponseResult> DeleteHorseOwner(string accessToken, long horseId, long userId)
+        private async Task<ResponseResult<T>> GetRequest<T>(Uri uri, string accessToken = "") where T : class
         {
             HttpClient client = new();
-            Uri uri = new(_hostUri, $"{_horsesUri}?userId={userId}&horseId={horseId}");
-            HttpRequestMessage request = new(HttpMethod.Delete, uri);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            HttpRequestMessage request = new(HttpMethod.Get, uri);
+
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            }
 
             var response = await client.SendAsync(request);
-            
+            string responseText = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonConvert.DeserializeObject<T>(responseText);
+                return new ResponseResult<T>(result);
+            }
+
+            return ReturnBadResponse<T>(responseText, response.StatusCode);
+        }
+
+        private async Task<ResponseResult<T>> PostRequest<T>(Uri uri, object transferObject, string accessToken = "") where T : class
+        {
+            string json = JsonConvert.SerializeObject(transferObject);
+            StringContent content = new(json, Encoding.UTF8, "application/json");
+            HttpClient client = new();
+
+            HttpRequestMessage request = new(HttpMethod.Post, uri)
+            {
+                Content = content
+            };
+
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            }
+
+            var response = await client.SendAsync(request);
+            string responseText = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var retrieveHorse = JsonConvert.DeserializeObject<T>(responseText);
+                return new ResponseResult<T>(retrieveHorse);
+            }
+
+            return ReturnBadResponse<T>(responseText, response.StatusCode);
+        }
+
+        private async Task<ResponseResult<T>> PutRequest<T>(Uri uri, object transferObject, string accessToken = "") where T : class
+        {
+            string json = JsonConvert.SerializeObject(transferObject);
+            StringContent content = new(json, Encoding.UTF8, "application/json");
+            HttpClient client = new();
+
+            HttpRequestMessage request = new(HttpMethod.Put, uri)
+            {
+                Content = content
+            };
+
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            }
+
+            var response = await client.SendAsync(request);
+            string responseText = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var retrieveHorse = JsonConvert.DeserializeObject<T>(responseText);
+                return new ResponseResult<T>(retrieveHorse);
+            }
+
+            return ReturnBadResponse<T>(responseText, response.StatusCode);
+        }
+
+        private async Task<ResponseResult> DeleteRequest(Uri uri, string accessToken = "")
+        {
+            HttpClient client = new();
+            HttpRequestMessage request = new(HttpMethod.Delete, uri);
+
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            }
+
+            var response = await client.SendAsync(request);
+
             if (response.IsSuccessStatusCode)
             {
                 return new ResponseResult(response.StatusCode);
@@ -376,7 +333,6 @@ namespace Ford.WebApi
             string responseText = await response.Content.ReadAsStringAsync();
             return ReturnBadResponse(responseText, response.StatusCode);
         }
-        #endregion
 
         private ResponseResult<T> ReturnBadResponse<T>(string responseText, HttpStatusCode code) where T : class
         {
