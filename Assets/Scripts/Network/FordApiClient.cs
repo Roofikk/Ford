@@ -141,8 +141,8 @@ namespace Ford.WebApi
         public async Task<ResponseResult<HorseRetrieveDto>> CreateHorseAsync(string accessToken, CreationHorse horse)
         {
             Uri uri = new(_hostUri, _horsesUri);
-            var horseDto = Crea
-            var result = await PostRequest<HorseRetrieveDto>(uri, horse, accessToken);
+            var horseDto = new CreationHorseDto(horse);
+            var result = await PostRequest<HorseRetrieveDto>(uri, horseDto, accessToken);
             return result;
         }
 
@@ -177,7 +177,6 @@ namespace Ford.WebApi
         #endregion
 
         #region HorseOwner
-        // не проверил
         /// <summary>
         /// Update horse owners<br/>
         /// POST request
@@ -185,14 +184,13 @@ namespace Ford.WebApi
         /// <param name="accessToken"></param>
         /// <param name="horseOwners"></param>
         /// <returns></returns>
-        public async Task<ResponseResult<HorseRetrieveDto>> UpdateHorseOwners(string accessToken, UpdatingHorseOwnersDto horseOwners)
+        public async Task<ResponseResult<HorseRetrieveDto>> UpdateHorseOwnersAsync(string accessToken, UpdatingHorseOwnersDto horseOwners)
         {
             Uri uri = new(_hostUri, _updateHorseOwnersUri);
             var horse = await PostRequest<HorseRetrieveDto>(uri, horseOwners, accessToken);
             return horse;
         }
 
-        // не проверил
         /// <summary>
         /// Delete horse owner<br/>
         /// DELETE request
@@ -201,37 +199,78 @@ namespace Ford.WebApi
         /// <param name="horseId"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task<ResponseResult> DeleteHorseOwner(string accessToken, long horseId, long userId)
+        public async Task<ResponseResult> DeleteHorseOwnerAsync(string accessToken, long horseId, long userId)
         {
             Uri uri = new(_hostUri, $"{_horsesUri}?userId={userId}&horseId={horseId}");
             var result = await DeleteRequest(uri, accessToken);
             return result;
         }
 
-        public async Task<ResponseResult<HorseUserDto>> AddOwner(string accessToken, AddingHorseOwner horseOwner)
+        /// <summary>
+        /// Add owner to horse<br/>
+        /// POST request
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <param name="horseOwner"></param>
+        /// <returns></returns>
+        public async Task<ResponseResult<HorseUserDto>> AddOwnerAsync(string accessToken, AddingHorseOwner horseOwner)
         {
-            string json = JsonConvert.SerializeObject(horseOwner);
-
             Uri uri = new(_hostUri, _updateHorseOwnersUri);
-            StringContent content = new(json, Encoding.UTF8, "application/json");
-            HttpClient client = new();
+            var ownerDto = new AddingHorseOwnerDto(horseOwner);
+            var result = await PostRequest<HorseUserDto>(uri, ownerDto, accessToken);
+            return result;
+        }
 
-            HttpRequestMessage request = new(HttpMethod.Post, uri)
-            {
-                Content = content
-            };
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        /// <summary>
+        /// Change owner role of horse<br/>
+        /// POST request
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <param name="horseOwner"></param>
+        /// <returns></returns>
+        public async Task<ResponseResult<HorseUserDto>> ChangeOwnerRoleAsync(string accessToken, AddingHorseOwner horseOwner)
+        {
+            Uri uri = new(_hostUri, _changeOwnerRoleUri);
+            var ownerDto = new AddingHorseOwnerDto(horseOwner);
+            var result = await PostRequest<HorseUserDto>(uri, ownerDto, accessToken);
+            return result;
+        }
+        #endregion
 
-            var response = await client.SendAsync(request);
-            string responseText = await response.Content.ReadAsStringAsync();
+        #region Saves
+        public async Task<ResponseResult<IEnumerable<SaveInfo>>> GetSavesAsync(string accessToken, long horseId)
+        {
+            Uri uri = new Uri(_hostUri, $"{_savesUri}?horseId={horseId}");
+            var result = await GetRequest<IEnumerable<SaveInfo>>(uri, accessToken);
+            return result;
+        }
 
-            if (response.IsSuccessStatusCode)
-            {
-                var retrieveHorse = JsonConvert.DeserializeObject<HorseRetrieveDto>(responseText);
-                return new ResponseResult<HorseRetrieveDto>(retrieveHorse);
-            }
+        public async Task<ResponseResult<FullSaveInfo>> GetSaveAsync(string accessToken, long horseId, long saveId)
+        {
+            Uri uri = new Uri(_hostUri, $"{_savesUri}?horseId={horseId}&saveId={saveId}");
+            var result = await GetRequest<FullSaveInfo>(uri, accessToken);
+            return result;
+        }
 
-            return ReturnBadResponse<HorseRetrieveDto>(responseText, response.StatusCode);
+        public async Task<ResponseResult<SaveInfo>> CreateSaveAsync(string accessToken, long horseId, FullSaveInfo fullSave)
+        {
+            Uri uri = new Uri(_hostUri, $"{_savesUri}&horseId={horseId}");
+            var result = await PostRequest<SaveInfo>(uri, fullSave, accessToken);
+            return result;
+        }
+
+        public async Task<ResponseResult<SaveInfo>> UpdateInfoAsync(string accessToken, SaveInfo save)
+        {
+            Uri uri = new Uri(_hostUri, _savesUri);
+            var result = await PutRequest<SaveInfo>(uri, save, accessToken);
+            return result;
+        }
+
+        public async Task<ResponseResult> DeleteSaveAsync(string accessToken, long saveId)
+        {
+            Uri uri = new Uri(_hostUri, $"{_savesUri}&saveId={saveId}");
+            var result = await DeleteRequest(uri, accessToken);
+            return result;
         }
         #endregion
 

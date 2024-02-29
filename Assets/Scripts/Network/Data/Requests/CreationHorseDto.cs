@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Ford.WebApi.Data
 {
@@ -30,7 +31,7 @@ namespace Ford.WebApi.Data
         public string City { get; set; }
         public string Region { get; set; }
         public string Country { get; set; }
-        public IEnumerable<CreationHorseOwnerDto> HorseOwners { get; set; }
+        public List<CreationHorseOwnerDto> HorseOwners { get; set; }
 
         public CreationHorseDto(CreationHorse horse)
         {
@@ -41,7 +42,12 @@ namespace Ford.WebApi.Data
             City = horse.City;
             Region = horse.Region;
             Country = horse.Country;
+            HorseOwners = new List<CreationHorseOwnerDto>();
 
+            foreach (var owner in horse.HorseOwners)
+            {
+                HorseOwners.Add(new CreationHorseOwnerDto(owner));
+            }
         }
     }
 
@@ -49,6 +55,12 @@ namespace Ford.WebApi.Data
     {
         public string UserId { get; set; }
         public string RuleAccess { get; set; }
+
+        public CreationHorseOwnerDto(CreationHorseOwner owner)
+        {
+            UserId = owner.UserId;
+            RuleAccess = owner.RuleAccess.ToString();
+        }
     }
 
     public enum RoleOwnerAccess
