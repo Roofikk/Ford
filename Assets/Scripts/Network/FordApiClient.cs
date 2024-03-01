@@ -1,24 +1,22 @@
-using Ford.SaveSystem.Ver2.Data;
 using Ford.WebApi.Data;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using UnityEditor.Experimental.GraphView;
 
 namespace Ford.WebApi
 {
     public class FordApiClient
     {
-        private Uri _hostUri; 
+        private Uri _hostUri;
 
         private readonly string _signUpUri = "api/identity/sign-up";
         private readonly string _signInUri = "api/identity/login";
+        private readonly string _refreshTokenUri = "api/identity/refresh-token";
         private readonly string _accountUri = "api/identity/account";
         private readonly string _passwordChangeUri = "api/identity/account/password";
 
@@ -54,10 +52,17 @@ namespace Ford.WebApi
         /// </summary>
         /// <param name="loginRequestData"></param>
         /// <returns></returns>
-        public async Task<ResponseResult<LoginResponseDto>> SignInAsync(LoginRequestDto loginRequestData)
+        public async Task<ResponseResult<TokenDto>> SignInAsync(LoginRequestDto loginRequestData)
         {
             Uri uri = new Uri(_hostUri, _signInUri);
-            var result = await PostRequest<LoginResponseDto>(uri, loginRequestData);
+            var result = await PostRequest<TokenDto>(uri, loginRequestData);
+            return result;
+        }
+
+        public async Task<ResponseResult<TokenDto>> RefreshTokenAsync(TokenDto requestToken)
+        {
+            Uri uri = new(_hostUri, _refreshTokenUri);
+            var result = await PostRequest<TokenDto>(uri, requestToken);
             return result;
         }
 
@@ -95,10 +100,10 @@ namespace Ford.WebApi
         /// <param name="accessToken"></param>
         /// <param name="passwordRequest"></param>
         /// <returns></returns>
-        public async Task<ResponseResult<LoginResponseDto>> ChangePasswordAsync(string accessToken, UpdatingPasswordDto passwordRequest)
+        public async Task<ResponseResult<TokenDto>> ChangePasswordAsync(string accessToken, UpdatingPasswordDto passwordRequest)
         {
             Uri uri = new(_hostUri, _passwordChangeUri);
-            var result = await PostRequest<LoginResponseDto>(uri, passwordRequest, accessToken);
+            var result = await PostRequest<TokenDto>(uri, passwordRequest, accessToken);
             return result;
         }
         #endregion

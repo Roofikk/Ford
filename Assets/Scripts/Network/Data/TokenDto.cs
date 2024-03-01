@@ -1,8 +1,8 @@
 namespace Ford.WebApi.Data
 {
-    public class LoginResponseDto
+    public class TokenDto
     {
-        public string Login { get; set; }
         public string Token { get; set; }
+        public string RefreshToken { get; set; }
     }
 }
