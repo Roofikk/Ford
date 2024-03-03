@@ -3,6 +3,7 @@ using UnityEngine;
 public class PageManager : MonoBehaviour
 {
     [SerializeField] private Page _startPage;
+    [SerializeField] private Page _loadingPage;
     [SerializeField] private WarningPage _warningPage;
 
     public Page StartPage { get { return _startPage; } }
@@ -17,8 +18,17 @@ public class PageManager : MonoBehaviour
 
     private void Start()
     {
-        if (_startPage != null)
-            (CurrentPage = _startPage).Open();
+        StartProjectObject.OnProjectStarted += OpenStartPage;
+
+        if (StartProjectObject.ProjectStarted)
+        {
+            OpenStartPage();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        StartProjectObject.OnProjectStarted -= OpenStartPage;
     }
 
     public void OpenStartPage()
@@ -53,5 +63,17 @@ public class PageManager : MonoBehaviour
     public void CloseWarningPage()
     {
         _warningPage.Close();
+    }
+
+    public void DisplayLoadingPage(bool enable, int popUpLevel = 0)
+    {
+        if (enable)
+        {
+            OpenPage(_loadingPage, popUpLevel);
+        }
+        else
+        {
+            ClosePage(_loadingPage);
+        }
     }
 }

@@ -1,8 +1,17 @@
-﻿using UnityEngine;
+﻿using Ford.SaveSystem.Ver2;
+using Ford.WebApi;
+using Ford.WebApi.Data;
+using System;
+using System.Net;
+using Unity.VisualScripting.Antlr3.Runtime;
+using UnityEngine;
 
 public class Player : MonoBehaviour
 {
     [SerializeField] private Settings _settings;
+    private static AccountDto _userData = null;
+    public static AccountDto UserData => _userData;
+    public static bool IsLoggedIn { get; private set; }
 
     public static Player Instance { get; private set; }
 
@@ -35,6 +44,73 @@ public class Player : MonoBehaviour
         {
             MoveOnPlane();
         }
+    }
+
+    public static void Authorize(TokenDto tokens, Action onAuthorizeFinished = null)
+    {
+        Storage storage = new();
+        storage.SaveAccessToken(tokens.Token);
+        storage.SaveRefreshToken(tokens.RefreshToken);
+
+        Authorize(tokens.Token, onAuthorizeFinished);
+    }
+
+    public static void Authorize(string accessToken = "", Action onAuthorizeFinished = null)
+    {
+        FordApiClient client = new();
+
+        if (string.IsNullOrEmpty(accessToken))
+        {
+            Storage storage = new Storage();
+            accessToken = storage.GetAccessToken();
+        }
+
+        if (!string.IsNullOrEmpty(accessToken))
+        {
+            client.GetUserInfoAsync(accessToken).RunOnMainThread(result =>
+            {
+                if (result.StatusCode == HttpStatusCode.OK)
+                {
+                    IsLoggedIn = true;
+                    _userData = result.Content;
+                    onAuthorizeFinished?.Invoke();
+                }
+
+                if (result.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    client.RefreshTokenAndReply(accessToken, client.GetUserInfoAsync)
+                        .RunOnMainThread(result =>
+                        {
+                            if (result.Content != null)
+                            {
+                                _userData = result.Content;
+                                IsLoggedIn = true;
+                            }
+                            else
+                            {
+                                _userData = null;
+                                IsLoggedIn = false;
+                            }
+                            onAuthorizeFinished?.Invoke();
+                        });
+                }
+            });
+        }
+        else
+        {
+            IsLoggedIn = false;
+            onAuthorizeFinished?.Invoke();
+        }
+    }
+
+    public static void Logout()
+    {
+        _userData = null;
+        IsLoggedIn = false;
+
+        Storage storage = new();
+        storage.ClearAccessToken();
+        storage.ClearRefreshToken();
     }
 
     private void MoveOnPlane()

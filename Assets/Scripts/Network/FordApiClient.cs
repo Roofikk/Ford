@@ -12,7 +12,7 @@ namespace Ford.WebApi
 {
     public class FordApiClient
     {
-        private Uri _hostUri;
+        private static Uri _hostUri;
 
         private readonly string _signUpUri = "api/identity/sign-up";
         private readonly string _signInUri = "api/identity/login";
@@ -27,9 +27,9 @@ namespace Ford.WebApi
 
         private readonly string _savesUri = "api/saves";
 
-        public FordApiClient(string hostUrl = "https://localhost:5000")
+        public static void SetHost(string host)
         {
-            _hostUri= new Uri(hostUrl);
+            _hostUri = new Uri(host);
         }
 
         #region Account
@@ -383,7 +383,7 @@ namespace Ford.WebApi
             var badResponse = JsonConvert.DeserializeObject<BadRequestDto>(responseText);
             if (badResponse != null)
             {
-                return new ResponseResult<T>(null, (HttpStatusCode)badResponse.Status, badResponse.Errors);
+                return new ResponseResult<T>(null, code, badResponse?.Errors);
             }
 
             return new ResponseResult<T>(null, code, new List<ResponseError>()
@@ -401,7 +401,7 @@ namespace Ford.WebApi
             var badResponse = JsonConvert.DeserializeObject<BadRequestDto>(responseText);
             if (badResponse != null)
             {
-                return new ResponseResult((HttpStatusCode)badResponse.Status, badResponse.Errors);
+                return new ResponseResult(code, badResponse?.Errors);
             }
 
             return new ResponseResult(code, new List<ResponseError>()

@@ -15,8 +15,12 @@ namespace Ford.SaveSystem.Ver2
     {
         private string _storagePath;
         private string _savesPath;
+
         private readonly string _horsesFileName = "horses.json";
         private readonly string _storageSettingsFileName = "storageSettings.json";
+
+        private readonly string ACCESS_TOKEN_KEY = "ACCESS_TOKEN_KEY";
+        private readonly string REFRESH_TOKEN_KEY = "REFRESH_TOKEN_KEY";
 
         private List<HorseData> _horses;
 
@@ -371,6 +375,40 @@ namespace Ford.SaveSystem.Ver2
             RewriteSaveBonesFile(pathSave, saves);
         }
         #endregion
+
+        public string GetAccessToken()
+        {
+            return PlayerPrefs.GetString(ACCESS_TOKEN_KEY, "");
+        }
+
+        public string GetRefreshToken()
+        {
+            return PlayerPrefs.GetString(REFRESH_TOKEN_KEY, "");
+        }
+
+        public void SaveAccessToken(string accessToken)
+        {
+            PlayerPrefs.SetString(ACCESS_TOKEN_KEY, accessToken);
+            PlayerPrefs.Save();
+        }
+
+        public void SaveRefreshToken(string refreshToken)
+        {
+            PlayerPrefs.SetString(REFRESH_TOKEN_KEY, refreshToken);
+            PlayerPrefs.Save();
+        }
+
+        public void ClearAccessToken()
+        {
+            PlayerPrefs.SetString(ACCESS_TOKEN_KEY, "");
+            PlayerPrefs.Save();
+        }
+
+        public void ClearRefreshToken()
+        {
+            PlayerPrefs.SetString(REFRESH_TOKEN_KEY, "");
+            PlayerPrefs.Save();
+        }
 
         private string GetSaveFileName()
         {

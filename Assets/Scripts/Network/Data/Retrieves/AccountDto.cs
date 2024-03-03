@@ -14,7 +14,7 @@ namespace Ford.WebApi.Data
         public string Region { get; set; }
         public string Country { get; set; }
         public DateTime? BirthDate { get; set; }
-        public DateTime? CreationDate { get; set; }
-        public DateTime? LastUpdatedDate { get; set; }
+        public DateTime CreationDate { get; set; }
+        public DateTime LastUpdatedDate { get; set; }
     }
 }

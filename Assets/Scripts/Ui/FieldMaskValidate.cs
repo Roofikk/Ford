@@ -11,6 +11,8 @@ public abstract class FieldMaskValidate : MonoBehaviour
     private TMP_InputField _inputField;
     private InputFieldValidateStroke _stroke;
 
+    public string ExceptionMessage { get { return _descriptionString; } protected set { _descriptionString = value; } }
+
     public bool ShowStroke { get { return _showStroke; } set { _showStroke = value; } }
     public string Text { get { return _inputField.text; } }
     public Action<bool> OnValidate { get; set; }
@@ -25,7 +27,11 @@ public abstract class FieldMaskValidate : MonoBehaviour
             return;
         }
 
-        _invalidDescriptionText.gameObject.SetActive(false);
+        if (_invalidDescriptionText != null)
+        {
+            _invalidDescriptionText?.gameObject.SetActive(false);
+        }
+
         OnValidate += (bool value) => { if (!value) DisplayException(true); };
 
         _stroke = _inputField.GetComponent<InputFieldValidateStroke>();
@@ -35,8 +41,6 @@ public abstract class FieldMaskValidate : MonoBehaviour
             Debug.LogError("Компонента \"InputFieldValidateStroke\" не была найдена");
             return;
         }
-
-        //_stroke.Initiate(this);
     }
 
     private void OnEnable()
@@ -57,6 +61,11 @@ public abstract class FieldMaskValidate : MonoBehaviour
         _inputField.onSelect.RemoveAllListeners();
         _inputField.onDeselect.RemoveAllListeners();
 
+        if (_invalidDescriptionText != null)
+        {
+            _invalidDescriptionText.gameObject.SetActive(false);
+        }
+
         _stroke?.DisplayStroke(false);
 
         if (_stroke != null)
@@ -74,17 +83,15 @@ public abstract class FieldMaskValidate : MonoBehaviour
 
     public void DisplayException(bool value)
     {
-        _invalidDescriptionText.text = _descriptionString;
-        _invalidDescriptionText.gameObject.SetActive(value);
+        if (_invalidDescriptionText != null)
+        {
+            _invalidDescriptionText.text = _descriptionString;
+            _invalidDescriptionText.gameObject.SetActive(value);
+        }
 
         if (ShowStroke)
         {
             _stroke?.DisplayStroke(value);
         }
-    }
-
-    public virtual bool IsTextEmpty()
-    {
-        return string.IsNullOrEmpty(_inputField.text);
     }
 }

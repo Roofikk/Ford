@@ -46,15 +46,6 @@ public class InputFieldValidateStroke : MonoBehaviour
         _inputField.onSelect.AddListener((string str) => { DisplayStroke(false); });
     }
 
-    internal void Initiate(FieldMaskValidate fieldMaskValidate)
-    {
-        //fieldMaskValidate.OnValidate += (bool value) => 
-        //{
-        //    if (fieldMaskValidate.ShowStroke)
-        //        DisplayStroke(!value); 
-        //};
-    }
-
     public void DisplayStroke(bool value)
     {
         _strokeObject?.SetActive(value);

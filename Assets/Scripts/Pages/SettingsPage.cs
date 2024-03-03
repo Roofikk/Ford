@@ -15,7 +15,6 @@ public class SettingsPage : Page
 
     [Space(10)]
     [SerializeField] private TMP_InputField _pathSaveText;
-    [SerializeField] private Button _changePathSaveButton;
     [SerializeField] private Button _showInFolderButton;
 
     [SerializeField] private Toggle _inverseMovementPlayerToggle;
@@ -32,7 +31,6 @@ public class SettingsPage : Page
 
     public void Start()
     {
-        _changePathSaveButton.onClick.AddListener(OpenSelectFolderWithExplorer);
         _showInFolderButton.onClick.AddListener(ShowSavePathFolder);
         _showInFolderButton.onClick.AddListener(_showInFolderButton.Select);
     }
@@ -81,23 +79,12 @@ public class SettingsPage : Page
         _sensetivityMovementPlayerSlider.onValueChanged.AddListener(OnChangedMovement);
         _sensetivityRotationCameraSlider.onValueChanged.AddListener(OnChangedRotation);
         _sensetivityScrollPlayerSlider.onValueChanged.AddListener(OnChangedScroll);
-
-        //Other settings
-        if (SceneManager.GetActiveScene().buildIndex == 1)
-        {
-            _changePathSaveButton.gameObject.SetActive(false);
-        }
-        else
-        {
-            _changePathSaveButton.gameObject.SetActive(true);
-        }
     }
 
     private void OnDestroy()
     {
         Close();
 
-        _changePathSaveButton.onClick.RemoveListener(OpenSelectFolderWithExplorer);
         _showInFolderButton.onClick.RemoveListener(ShowSavePathFolder);
     }
 
@@ -163,24 +150,6 @@ public class SettingsPage : Page
 
     private void OpenSelectFolderWithExplorer()
     {
-#if UNITY_EDITOR
-        //string targetPath = EditorUtility.OpenFolderPanel("Выберите папку...", _settings.PathSave, "");
-
-        //if (!string.IsNullOrEmpty(targetPath))
-        //{
-        //    PageManager.Instance.OpenPage(_warningPage, new WarningData(
-        //            "Внимание",
-        //            "Перенести сохранения с предыдущей папки?\r\nЕсли отмените, то сохранения с предыдущей папки удалятся",
-        //            () => { TransferSaves(_settings.PathSave, targetPath); },
-        //            () => { CancelTransferSave(_settings.PathSave, targetPath); },
-        //            CancelChangePathSave), 1);
-        //}
-        //else
-        //{
-        //    Instantiate(_toastPrefab.gameObject, transform.parent).GetComponent<ToastMessage>().Show("Не удалось изменить путь сохранения");
-        //}
-#endif
-
 #if PLATFORM_STANDALONE_WIN
         BrowserProperties bp = new BrowserProperties("Выберете папку");
         bp.filter = "txt files (*.txt)|*.txt|All Files (*.*)|*.*";
@@ -286,9 +255,9 @@ public class SettingsPage : Page
         long size = 0;
 
         // Add file sizes.
-        System.IO.FileInfo[] fis = d.GetFiles();
+        FileInfo[] fis = d.GetFiles();
 
-        foreach (System.IO.FileInfo fi in fis)
+        foreach (FileInfo fi in fis)
         {
             size += fi.Length;
         }

@@ -10,14 +10,7 @@ public class TestFordApi : MonoBehaviour
 
     private void Start()
     {
-        _client = new();
-        SignIn(() =>
-        {
-            CreateHorse();
-            UpdateHorse();
-            GetHorse(1);
-            GetHorses();
-        });
+
     }
 
     private void SignIn(Action callback)

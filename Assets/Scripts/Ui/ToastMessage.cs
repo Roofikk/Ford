@@ -83,7 +83,7 @@ public class ToastMessage : MonoBehaviour
 
     public static void Show(string message, Transform parent)
     {
-        GameObject toastPrefab = (GameObject)Resources.Load("Prefabs/Toast", typeof(GameObject));
+        GameObject toastPrefab = (GameObject)Resources.Load("Prefabs/UI/Toast", typeof(GameObject));
         GameObject toastObject = Instantiate(toastPrefab, parent);
         ToastMessage toast = toastObject.GetComponent<ToastMessage>();
 

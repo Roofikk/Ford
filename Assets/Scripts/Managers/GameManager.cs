@@ -7,10 +7,7 @@ public class GameManager : MonoBehaviour
 {
     [SerializeField] private Settings _settings;
 
-    private readonly string TOKEN_KEY = "TOKEN_KEY";
-
     private bool _devMode = false;
-
     private List<IMouseTouchLocker> _touchLockerList = new();
 
     public static GameManager Instance { get; private set; }
@@ -31,14 +28,6 @@ public class GameManager : MonoBehaviour
         UIHandler.OnMouseLeaveUI += UnlockTouchObjects;
 
         _settings.Initiate();
-
-        string token = PlayerPrefs.GetString(TOKEN_KEY, "");
-
-        if (string.IsNullOrEmpty(token))
-        {
-            PlayerPrefs.SetString(TOKEN_KEY, "y0_AgAAAAAg6hPEAAmmlQAAAADgTPKrE-z4xPMATASpb5E0-OFbvakQOHk");
-            token = "y0_AgAAAAAg6hPEAAmmlQAAAADgTPKrE-z4xPMATASpb5E0-OFbvakQOHk";
-        }
     }
 
     private void OnDestroy()
