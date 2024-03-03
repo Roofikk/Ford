@@ -2,7 +2,7 @@
 
 namespace Ford.WebApi.Data
 {
-    internal class BadRequestDto
+    internal class BadResponseDto
     {
         public string Uri { get; set; }
         public string Header { get; set; }

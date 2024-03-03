@@ -104,6 +104,7 @@ public class SignUpPage : Page
 
                         ToastMessage.Show("Вы успешно зарегистрировались", transform.parent);
                         PageManager.Instance.ClosePage(this);
+                        PageManager.Instance.OpenPage(_backPage, 2);
                         break;
                     case HttpStatusCode.BadRequest:
                         Debug.LogError($"Request with status {result.StatusCode}");

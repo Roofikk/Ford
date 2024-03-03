@@ -69,16 +69,15 @@ public class Player : MonoBehaviour
         {
             client.GetUserInfoAsync(accessToken).RunOnMainThread(result =>
             {
-                if (result.StatusCode == HttpStatusCode.OK)
+                switch (result.StatusCode)
                 {
-                    IsLoggedIn = true;
-                    _userData = result.Content;
-                    onAuthorizeFinished?.Invoke();
-                }
-
-                if (result.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    client.RefreshTokenAndReply(accessToken, client.GetUserInfoAsync)
+                    case HttpStatusCode.OK:
+                        IsLoggedIn = true;
+                        _userData = result.Content;
+                        onAuthorizeFinished?.Invoke();
+                        break;
+                    case HttpStatusCode.Unauthorized:
+                        client.RefreshTokenAndReply(accessToken, client.GetUserInfoAsync)
                         .RunOnMainThread(result =>
                         {
                             if (result.Content != null)
@@ -93,6 +92,12 @@ public class Player : MonoBehaviour
                             }
                             onAuthorizeFinished?.Invoke();
                         });
+                        break;
+                    default:
+                        _userData = null;
+                        IsLoggedIn = false;
+                        onAuthorizeFinished?.Invoke();
+                        break;
                 }
             });
         }
@@ -111,6 +116,11 @@ public class Player : MonoBehaviour
         Storage storage = new();
         storage.ClearAccessToken();
         storage.ClearRefreshToken();
+    }
+
+    public void Show()
+    {
+
     }
 
     private void MoveOnPlane()

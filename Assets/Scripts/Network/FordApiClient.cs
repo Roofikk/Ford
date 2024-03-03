@@ -289,16 +289,30 @@ namespace Ford.WebApi
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             }
 
-            var response = await client.SendAsync(request);
-            string responseText = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                var result = JsonConvert.DeserializeObject<T>(responseText);
-                return new ResponseResult<T>(result);
-            }
+                var response = await client.SendAsync(request);
+                string responseText = await response.Content.ReadAsStringAsync();
 
-            return ReturnBadResponse<T>(responseText, response.StatusCode);
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = JsonConvert.DeserializeObject<T>(responseText);
+                    return new ResponseResult<T>(result);
+                }
+
+                return ReturnBadResponse<T>(responseText, response.StatusCode);
+            }
+            catch (HttpRequestException ex)
+            {
+                return new ResponseResult<T>(null, HttpStatusCode.InternalServerError, new List<ResponseError>()
+                {
+                    new()
+                    {
+                        Title = "ConnectionFailure",
+                        Message = "Check your connection or repeat the request later"
+                    }
+                });
+            }
         }
 
         private async Task<ResponseResult<T>> PostRequest<T>(Uri uri, object transferObject, string accessToken = "") where T : class
@@ -317,16 +331,30 @@ namespace Ford.WebApi
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             }
 
-            var response = await client.SendAsync(request);
-            string responseText = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                var retrieveHorse = JsonConvert.DeserializeObject<T>(responseText);
-                return new ResponseResult<T>(retrieveHorse);
-            }
+                var response = await client.SendAsync(request);
+                string responseText = await response.Content.ReadAsStringAsync();
 
-            return ReturnBadResponse<T>(responseText, response.StatusCode);
+                if (response.IsSuccessStatusCode)
+                {
+                    var retrieveHorse = JsonConvert.DeserializeObject<T>(responseText);
+                    return new ResponseResult<T>(retrieveHorse);
+                }
+
+                return ReturnBadResponse<T>(responseText, response.StatusCode);
+            }
+            catch (HttpRequestException ex)
+            {
+                return new ResponseResult<T>(null, HttpStatusCode.InternalServerError, new List<ResponseError>()
+                {
+                    new()
+                    {
+                        Title = "ConnectionFailure",
+                        Message = "Check your connection or repeat the request later"
+                    }
+                });
+            }
         }
 
         private async Task<ResponseResult<T>> PutRequest<T>(Uri uri, object transferObject, string accessToken = "") where T : class
@@ -345,16 +373,30 @@ namespace Ford.WebApi
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             }
 
-            var response = await client.SendAsync(request);
-            string responseText = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                var retrieveHorse = JsonConvert.DeserializeObject<T>(responseText);
-                return new ResponseResult<T>(retrieveHorse);
-            }
+                var response = await client.SendAsync(request);
+                string responseText = await response.Content.ReadAsStringAsync();
 
-            return ReturnBadResponse<T>(responseText, response.StatusCode);
+                if (response.IsSuccessStatusCode)
+                {
+                    var retrieveHorse = JsonConvert.DeserializeObject<T>(responseText);
+                    return new ResponseResult<T>(retrieveHorse);
+                }
+
+                return ReturnBadResponse<T>(responseText, response.StatusCode);
+            }
+            catch (HttpRequestException ex)
+            {
+                return new ResponseResult<T>(null, HttpStatusCode.InternalServerError, new List<ResponseError>()
+                {
+                    new()
+                    {
+                        Title = "ConnectionFailure",
+                        Message = "Check your connection or repeat the request later"
+                    }
+                });
+            }
         }
 
         private async Task<ResponseResult> DeleteRequest(Uri uri, string accessToken = "")
@@ -367,38 +409,54 @@ namespace Ford.WebApi
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             }
 
-            var response = await client.SendAsync(request);
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                return new ResponseResult(response.StatusCode);
-            }
+                var response = await client.SendAsync(request);
 
-            string responseText = await response.Content.ReadAsStringAsync();
-            return ReturnBadResponse(responseText, response.StatusCode);
+                if (response.IsSuccessStatusCode)
+                {
+                    return new ResponseResult(response.StatusCode);
+                }
+
+                string responseText = await response.Content.ReadAsStringAsync();
+                return ReturnBadResponse(responseText, response.StatusCode);
+            }
+            catch (HttpRequestException ex)
+            {
+                return new ResponseResult(HttpStatusCode.InternalServerError, new List<ResponseError>()
+                {
+                    new()
+                    {
+                        Title = "ConnectionFailure",
+                        Message = "Check your connection or repeat the request later"
+                    }
+                });
+            }
         }
 
         private ResponseResult<T> ReturnBadResponse<T>(string responseText, HttpStatusCode code) where T : class
         {
-            var badResponse = JsonConvert.DeserializeObject<BadRequestDto>(responseText);
-            if (badResponse != null)
+            try
             {
+                BadResponseDto badResponse = JsonConvert.DeserializeObject<BadResponseDto>(responseText);
                 return new ResponseResult<T>(null, code, badResponse?.Errors);
             }
-
-            return new ResponseResult<T>(null, code, new List<ResponseError>()
+            catch (JsonSerializationException ex)
             {
-                new()
+                return new ResponseResult<T>(null, code, new List<ResponseError>()
                 {
-                    Title = "Unknown error",
-                    Message = "Unknown error"
-                }
-            });
+                    new()
+                    {
+                        Title = "JsonSerializer",
+                        Message = $"Text could not be serialized\nText: {responseText}"
+                    }
+                });
+            }
         }
 
         private ResponseResult ReturnBadResponse(string responseText, HttpStatusCode code)
         {
-            var badResponse = JsonConvert.DeserializeObject<BadRequestDto>(responseText);
+            var badResponse = JsonConvert.DeserializeObject<BadResponseDto>(responseText);
             if (badResponse != null)
             {
                 return new ResponseResult(code, badResponse?.Errors);
