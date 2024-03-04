@@ -118,9 +118,9 @@ public class Player : MonoBehaviour
         storage.ClearRefreshToken();
     }
 
-    public void Show()
+    public static void UpdateUserInfo(AccountDto data)
     {
-
+        _userData = data;
     }
 
     private void MoveOnPlane()

@@ -158,7 +158,7 @@ public class HorsePage : Page
         {
             Name = _horseNameInputField.text,
             Description = _descriptionInputField.text,
-            BirthDate = _birthdayInputFiled.GetComponent<InputFieldDateValidate>().Date,
+            BirthDate = _birthdayInputFiled.GetComponent<InputFieldDateValidator>().Date,
             Sex = _sexText.text,
             Country = _countryInputFiled.text,
             City = _cityInputFiled.text,
@@ -196,7 +196,7 @@ public class HorsePage : Page
         {
             Name = _horseNameInputField.text,
             Sex = _sexText.text,
-            BirthDate = _birthdayInputFiled.GetComponent<InputFieldDateValidate>().Date,
+            BirthDate = _birthdayInputFiled.GetComponent<InputFieldDateValidator>().Date,
             Description = _descriptionInputField.text,
             Country = _countryInputFiled.text,
             City = _cityInputFiled.text,

@@ -89,7 +89,7 @@ public class SignUpPage : Page
             Email = _emailField.text,
             FirstName = _firstNameField.text,
             LastName = _lastNameField.text,
-            BirthDate = _birthDateField.GetComponent<InputFieldDateValidate>().Date,
+            BirthDate = _birthDateField.GetComponent<InputFieldDateValidator>().Date,
             Password = _passwordField.text,
         };
 

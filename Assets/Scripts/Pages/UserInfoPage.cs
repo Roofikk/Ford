@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 public class UserInfoPage : Page
 {
+    [SerializeField] private Page _editUserInfoPage;
+
+    [Space(10)]
     [SerializeField] private TextMeshProUGUI _fullNameText;
     [SerializeField] private TextMeshProUGUI _regionAndCityText;
     [SerializeField] private TextMeshProUGUI _roleText;
@@ -23,7 +26,10 @@ public class UserInfoPage : Page
     public void Start()
     {
         _logoutButton.onClick.AddListener(Logout);
-        _editButton.onClick.AddListener(() => { });
+        _editButton.onClick.AddListener(() =>
+        {
+            PageManager.Instance.OpenPage(_editUserInfoPage, 2);
+        });
         _closeButton.onClick.AddListener(() =>
         {
             PageManager.Instance.ClosePage(this);

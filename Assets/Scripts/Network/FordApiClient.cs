@@ -264,7 +264,7 @@ namespace Ford.WebApi
             return result;
         }
 
-        public async Task<ResponseResult<SaveInfo>> UpdateInfoAsync(string accessToken, SaveInfo save)
+        public async Task<ResponseResult<SaveInfo>> UpdateSaveInfoAsync(string accessToken, SaveInfo save)
         {
             Uri uri = new Uri(_hostUri, _savesUri);
             var result = await PutRequest<SaveInfo>(uri, save, accessToken);

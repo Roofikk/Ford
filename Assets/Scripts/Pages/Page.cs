@@ -47,29 +47,6 @@ public class Page : MonoBehaviour
 
     public virtual void Open<T>(T param, int popUpLevel = 0)
     {
-        gameObject.SetActive(true);
-        IsOpen = true;
-
-        if (popUpLevel > 0)
-        {
-            if (TryGetComponent(out _image))
-            {
-                _image.enabled = true;
-            }
-
-            if (TryGetComponent(out _canvas))
-            {
-                _canvas.enabled = true;
-                _canvas.overrideSorting = true;
-                _canvas.sortingOrder = popUpLevel;
-            }
-        }
-        else
-        {
-            if (TryGetComponent(out _image))
-            {
-                _image.enabled = false;
-            }
-        }
+        Open(popUpLevel);
     }
 }

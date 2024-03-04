@@ -149,7 +149,7 @@ public class SavePanel : Page
         {
             Header = _headerInputField.text,
             Description = _descriptionInputField.text,
-            Date = _dateInputField.GetComponent<InputFieldDateValidate>().Date.Value,
+            Date = _dateInputField.GetComponent<InputFieldDateValidator>().Date.Value,
             Bones = _skeleton.GetBonesForSave()
         };
 
