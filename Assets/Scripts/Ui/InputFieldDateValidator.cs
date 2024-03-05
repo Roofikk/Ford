@@ -12,11 +12,20 @@ public class InputFieldDateValidator : FieldMaskValidate
 
     public override bool ValidateInput(string str)
     {
-        if (!_validateEmpty)
-            if (string.IsNullOrEmpty(str))
-                return true;
+        ExceptionMessage = "Неверный формат даты";
 
-        var formats = new[] { "d/M/yyyy", "d\\M\\yyyy", "d.M.yyyy", "d,M,yyyy" };
+        if (string.IsNullOrEmpty(str))
+        {
+            _date = null;
+            if (_validateEmpty)
+            {
+                ExceptionMessage = "Поле не может быть пустым";
+                OnValidate?.Invoke(false);
+                return false;
+            }
+            OnValidate?.Invoke(true);
+            return true;
+        }
 
         var regex = new Regex(@"^(\d{1,2})[-\s.,\/\\]{1}(\d{1,2})[-\s.,\/\\](\d{4})");
         var match = regex.Match(str);

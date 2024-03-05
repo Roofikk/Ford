@@ -46,7 +46,12 @@ public class EditUserInfoPage : Page
         _closeButton.onClick.AddListener(() =>
         {
             PageManager.Instance.ClosePage(this);
-            PageManager.Instance.OpenPage(_backPage);
+            PageManager.Instance.OpenPage(_backPage, 2);
+        });
+
+        _applyButton.onClick.AddListener(() =>
+        {
+            Apply();
         });
     }
 
@@ -64,7 +69,7 @@ public class EditUserInfoPage : Page
 
         _firstNameInput.text = data.FirstName;
         _lastNameInput.text = data.LastName;
-        _phoneNumberInput.text = data.Phone;
+        _phoneNumberInput.text = data.PhoneNumber;
         _birthDateInput.text = data.BirthDate?.ToString("dd.MM.yyyy");
         _cityInput.text = data.City;
         _regionInput.text = data.Region;
@@ -84,6 +89,11 @@ public class EditUserInfoPage : Page
 
     private void Apply()
     {
+        if (!ValidInputs())
+        {
+            return;
+        }
+
         FordApiClient client = new();
         Storage storage = new();
         var accessToken = storage.GetAccessToken();
@@ -110,7 +120,7 @@ public class EditUserInfoPage : Page
                     ToastMessage.Show("Данные изменены", transform.parent);
                     PageManager.Instance.DisplayLoadingPage(false);
                     PageManager.Instance.ClosePage(this);
-                    PageManager.Instance.OpenPage(_backPage);
+                    PageManager.Instance.OpenPage(_backPage, 2);
                     break;
                 case HttpStatusCode.BadRequest:
                     string message = "";
@@ -131,7 +141,7 @@ public class EditUserInfoPage : Page
 
                                 ToastMessage.Show("Данные изменены", transform.parent);
                                 PageManager.Instance.ClosePage(this);
-                                PageManager.Instance.OpenPage(PageManager.Instance.StartPage);
+                                PageManager.Instance.OpenPage(_backPage, 2);
                                 break;
                             case HttpStatusCode.BadRequest:
                                 string message = "";

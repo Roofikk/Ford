@@ -56,7 +56,7 @@ public class UserInfoPage : Page
 
         _loginText.text = data.Login;
         _emailText.text = data.Email;
-        _phoneText.text = data.Phone;
+        _phoneText.text = data.PhoneNumber;
         _countryText.text = data.Country;
 
         if (data.BirthDate.HasValue)
