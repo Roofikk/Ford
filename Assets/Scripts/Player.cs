@@ -3,7 +3,6 @@ using Ford.WebApi;
 using Ford.WebApi.Data;
 using System;
 using System.Net;
-using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -12,6 +11,7 @@ public class Player : MonoBehaviour
     private static AccountDto _userData = null;
     public static AccountDto UserData => _userData;
     public static bool IsLoggedIn { get; private set; }
+    public static event Action OnChangedAuthState;
 
     public static Player Instance { get; private set; }
 
@@ -75,6 +75,7 @@ public class Player : MonoBehaviour
                         IsLoggedIn = true;
                         _userData = result.Content;
                         onAuthorizeFinished?.Invoke();
+                        OnChangedAuthState?.Invoke();
                         break;
                     case HttpStatusCode.Unauthorized:
                         client.RefreshTokenAndReply(accessToken, client.GetUserInfoAsync)
@@ -91,12 +92,14 @@ public class Player : MonoBehaviour
                                 IsLoggedIn = false;
                             }
                             onAuthorizeFinished?.Invoke();
+                            OnChangedAuthState?.Invoke();
                         });
                         break;
                     default:
                         _userData = null;
                         IsLoggedIn = false;
                         onAuthorizeFinished?.Invoke();
+                        OnChangedAuthState?.Invoke();
                         break;
                 }
             });
@@ -105,6 +108,7 @@ public class Player : MonoBehaviour
         {
             IsLoggedIn = false;
             onAuthorizeFinished?.Invoke();
+            OnChangedAuthState?.Invoke();
         }
     }
 
@@ -116,6 +120,8 @@ public class Player : MonoBehaviour
         Storage storage = new();
         storage.ClearAccessToken();
         storage.ClearRefreshToken();
+
+        OnChangedAuthState?.Invoke();
     }
 
     public static void UpdateUserInfo(AccountDto data)

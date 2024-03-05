@@ -74,7 +74,8 @@ public class WarningData
     public UnityAction OnDecline;
     public UnityAction OnCancel;
 
-    public WarningData(string header, string message, UnityAction onApply, UnityAction onDecline, UnityAction onCancel)
+    public WarningData(string header, string message, UnityAction onApply, 
+        UnityAction onDecline = null, UnityAction onCancel = null)
     {
         Header = header;
         Message = message;

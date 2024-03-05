@@ -41,12 +41,19 @@ public class MainMenuPage : Page
         _loadProjectButton.onClick.AddListener(() => { _pageManager.ClosePage(this); });
         _settingsButton.onClick.AddListener(() => { _pageManager.ClosePage(this); });
         _guideButton.onClick.AddListener(() => { _pageManager.ClosePage(this); });
+
+        Player.OnChangedAuthState += UpdatePage;
     }
 
     public override void Open(int popUpLevel = 0)
     {
         base.Open(popUpLevel);
 
+        UpdatePage();
+    }
+
+    public void UpdatePage()
+    {
         _authButton.onClick.RemoveAllListeners();
 
         if (Player.IsLoggedIn)
@@ -60,6 +67,7 @@ public class MainMenuPage : Page
             _authButton.onClick.AddListener(() => { _pageManager.OpenPage(_loginPage, 1); });
         }
     }
+
 
     public override void Close()
     {
@@ -76,6 +84,8 @@ public class MainMenuPage : Page
         _settingsButton.onClick.RemoveAllListeners();
         _guideButton.onClick.RemoveAllListeners();
         _authButton.onClick.RemoveAllListeners();
+
+        Player.OnChangedAuthState -= UpdatePage;
     }
 
 

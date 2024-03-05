@@ -5,6 +5,8 @@ using UnityEngine.UI;
 public class UserInfoPage : Page
 {
     [SerializeField] private Page _editUserInfoPage;
+    [SerializeField] private Page _signInPage;
+    [SerializeField] private Page _changePasswordPage;
 
     [Space(10)]
     [SerializeField] private TextMeshProUGUI _fullNameText;
@@ -20,20 +22,32 @@ public class UserInfoPage : Page
 
     [Space(10)]
     [SerializeField] private Button _editButton;
+    [SerializeField] private Button _changePasswordButton;
     [SerializeField] private Button _logoutButton;
     [SerializeField] private Button _closeButton;
 
     public void Start()
     {
-        _logoutButton.onClick.AddListener(Logout);
+        _logoutButton.onClick.AddListener(() =>
+        {
+            PageManager.Instance.OpenWarningPage(new("Выйти из учетной записи?", 
+                "Вы уверены, что хотите выйти из своей учетной записи?\nВсе сохранения будут утеряны до повторного входа.", Logout),4);
+        });
+
         _editButton.onClick.AddListener(() =>
         {
             PageManager.Instance.OpenPage(_editUserInfoPage, 2);
         });
+
         _closeButton.onClick.AddListener(() =>
         {
             PageManager.Instance.ClosePage(this);
             PageManager.Instance.OpenPage(PageManager.Instance.StartPage);
+        });
+
+        _changePasswordButton.onClick.AddListener(() =>
+        {
+            PageManager.Instance.OpenPage(_changePasswordPage, 4);
         });
     }
 
@@ -77,7 +91,7 @@ public class UserInfoPage : Page
         Player.Logout();
 
         PageManager.Instance.ClosePage(this);
-        PageManager.Instance.OpenPage(PageManager.Instance.StartPage);
+        PageManager.Instance.OpenPage(_signInPage, 2);
     }
 
     public override void Close()
