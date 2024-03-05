@@ -21,9 +21,9 @@ namespace Ford.WebApi
         private readonly string _passwordChangeUri = "api/identity/account/password";
 
         private readonly string _horsesUri = "api/horses";
-        private readonly string _updateHorseOwnersUri = "api/horses/owners";
-        private readonly string _addHorseOwnersUri = "api/horses/add-owner";
-        private readonly string _changeOwnerRoleUri = "api/horses/change-owner-role";
+        private readonly string _updateHorseOwnersUri = "api/horseOwners";
+        private readonly string _addHorseOwnersUri = "api/horseOwners/add-owner";
+        private readonly string _changeOwnerRoleUri = "api/horseOwners/change-owner-role";
 
         private readonly string _savesUri = "api/saves";
 
