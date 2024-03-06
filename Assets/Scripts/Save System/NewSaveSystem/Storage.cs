@@ -22,7 +22,7 @@ namespace Ford.SaveSystem.Ver2
         private readonly string ACCESS_TOKEN_KEY = "ACCESS_TOKEN_KEY";
         private readonly string REFRESH_TOKEN_KEY = "REFRESH_TOKEN_KEY";
 
-        private List<HorseData> _horses;
+        private List<HorseBase> _horses;
 
         public Storage()
         {
@@ -49,7 +49,7 @@ namespace Ford.SaveSystem.Ver2
         }
 
         #region Horse CRUD
-        public ICollection<HorseData> GetHorses()
+        public ICollection<HorseBase> GetHorses()
         {
             if (_horses.Count > 0)
             {
@@ -63,7 +63,7 @@ namespace Ford.SaveSystem.Ver2
                 return null;
             }
 
-            ICollection<HorseData> horseData = GetSerializableArrayFromFile<HorseData>(pathHorses);
+            ICollection<HorseBase> horseData = GetSerializableArrayFromFile<HorseBase>(pathHorses);
             using (StreamReader sr = new(pathHorses))
             using (JsonTextReader reader = new(sr))
             {
@@ -74,7 +74,7 @@ namespace Ford.SaveSystem.Ver2
                 {
                     if (reader.TokenType == JsonToken.StartObject)
                     {
-                        horseData = serializer.Deserialize<ArraySerializable<HorseData>>(reader)?.Items;
+                        horseData = serializer.Deserialize<ArraySerializable<HorseBase>>(reader)?.Items;
                     }
                 }
             }
@@ -83,7 +83,7 @@ namespace Ford.SaveSystem.Ver2
             return _horses;
         }
 
-        public HorseData GetHorse(string id)
+        public HorseBase GetHorse(string id)
         {
             var horses = GetHorses();
 
@@ -92,14 +92,14 @@ namespace Ford.SaveSystem.Ver2
                 return null;
             }
 
-            var findHorse = horses.FirstOrDefault(h => h.Id == id);
+            var findHorse = horses.FirstOrDefault(h => h.HorseId == id);
             return findHorse;
         }
 
-        public HorseData CreateHorse(CreationHorseData horseData)
+        public HorseBase CreateHorse(CreationHorseData horseData)
         {
-            ICollection<HorseData> horses = GetHorses();
-            horses ??= new Collection<HorseData>();
+            ICollection<HorseBase> horses = GetHorses();
+            horses ??= new Collection<HorseBase>();
 
             if (string.IsNullOrEmpty(horseData.Id))
             {
@@ -107,7 +107,7 @@ namespace Ford.SaveSystem.Ver2
             }
             else
             {
-                var horseExist = horses.FirstOrDefault(h => h.Id == horseData.Id);
+                var horseExist = horses.FirstOrDefault(h => h.HorseId == horseData.Id);
 
                 if (horseExist is not null)
                 {
@@ -115,9 +115,9 @@ namespace Ford.SaveSystem.Ver2
                 }
             }
 
-            HorseData addHorse = new()
+            HorseBase addHorse = new()
             {
-                Id = horseData.Id,
+                HorseId = horseData.Id,
                 Name = horseData.Name,
                 Description = horseData.Description,
                 BirthDate = horseData.BirthDate,
@@ -125,18 +125,15 @@ namespace Ford.SaveSystem.Ver2
                 City = horseData.City,
                 Region = horseData.Region,
                 Country = horseData.Country,
-                DateCreation = DateTime.Now,
+                CreationDate = DateTime.Now,
                 LastUpdate = DateTime.Now,
                 Saves = new List<SaveData>(),
             };
 
             if (!string.IsNullOrEmpty(horseData.OwnerName))
             {
-                addHorse.Owner = new HorseOwnerData()
-                {
-                    Name = horseData.OwnerName,
-                    PhoneNumber = horseData.PhoneNumber,
-                };
+                addHorse.OwnerName = horseData.OwnerName;
+                addHorse.OwnerPhoneNumber = horseData.PhoneNumber;
             }
 
             horses.Add(addHorse);
@@ -144,7 +141,7 @@ namespace Ford.SaveSystem.Ver2
             return addHorse;
         }
 
-        public HorseData UpdateHorse(CreationHorseData horseData)
+        public HorseBase UpdateHorse(CreationHorseData horseData)
         {
             var horses = GetHorses();
 
@@ -153,7 +150,7 @@ namespace Ford.SaveSystem.Ver2
                 return null;
             }
 
-            HorseData existHorse = horses.FirstOrDefault(h => h.Id == horseData.Id);
+            HorseBase existHorse = horses.FirstOrDefault(h => h.HorseId == horseData.Id);
 
             if (existHorse is null)
             {
@@ -172,11 +169,8 @@ namespace Ford.SaveSystem.Ver2
 
             if (!string.IsNullOrEmpty(horseData.OwnerName))
             {
-                existHorse.Owner = new HorseOwnerData()
-                {
-                    Name = horseData.OwnerName,
-                    PhoneNumber = horseData.PhoneNumber,
-                };
+                existHorse.OwnerName= horseData.OwnerName;
+                existHorse.OwnerPhoneNumber = horseData.PhoneNumber;
             }
             //
 
@@ -194,7 +188,7 @@ namespace Ford.SaveSystem.Ver2
                 return false;
             }
 
-            var findHorse = horses.FirstOrDefault(h => h.Id == id);
+            var findHorse = horses.FirstOrDefault(h => h.HorseId == id);
             var query = findHorse.Saves.GroupBy(s => s.SaveFileName).Select(q => new { FileName = q.Key, Ids = q.Select(id => id.Id)});
 
             foreach (var path in query)
@@ -227,7 +221,7 @@ namespace Ford.SaveSystem.Ver2
             return GetSerializableArrayFromFile<SaveBonesData>(savePath);
         }
 
-        public SaveBonesData GetSave(string fileName, string saveId)
+        public SaveBonesData GetSave(string fileName, long saveId)
         {
             List<SaveBonesData> saves = GetSaves(fileName).ToList();
 
@@ -239,13 +233,13 @@ namespace Ford.SaveSystem.Ver2
             return saves.FirstOrDefault(s => s.SaveId == saveId);
         }
 
-        public SaveBonesData GetSave(string saveId)
+        public SaveBonesData GetSave(long saveId)
         {
             SaveData saveData = GetSaveInfo(saveId);
             return GetSave(saveData.SaveFileName, saveId);
         }
 
-        public SaveData GetSaveInfo(string saveId)
+        public SaveData GetSaveInfo(long saveId)
         {
             SaveData save = null;
 
@@ -265,7 +259,7 @@ namespace Ford.SaveSystem.Ver2
                 return null;
             }
 
-            HorseData existingHorse = horses.FirstOrDefault(h => h.Id == horseId);
+            HorseBase existingHorse = horses.FirstOrDefault(h => h.HorseId == horseId);
 
             if (existingHorse is null)
             {
@@ -273,13 +267,12 @@ namespace Ford.SaveSystem.Ver2
             }
 
             string fileName = GetSaveFileName();
-
-            saveData.Id ??= Guid.NewGuid().ToString();
             existingHorse.Saves ??= new Collection<SaveData>();
 
+            long saveId = IncrementSaveId();
             SaveData save = new()
             {
-                Id = saveData.Id,
+                Id = saveId,
                 Header = saveData.Header,
                 Description = saveData.Description,
                 Date = saveData.Date,
@@ -294,7 +287,7 @@ namespace Ford.SaveSystem.Ver2
             string pathSave = Path.Combine(_savesPath, fileName);
             SaveBonesData saveBones = new()
             {
-                SaveId = saveData.Id,
+                SaveId = saveId,
                 Bones = saveData.Bones
             };
 
@@ -338,7 +331,7 @@ namespace Ford.SaveSystem.Ver2
             return save;
         }
 
-        public bool DeleteSave(string saveId)
+        public bool DeleteSave(long saveId)
         {
             var horses = GetHorses();
 
@@ -367,7 +360,7 @@ namespace Ford.SaveSystem.Ver2
             return true;
         }
 
-        private void DeleteSaves(string pathSave, string[] saveIds)
+        private void DeleteSaves(string pathSave, long[] saveIds)
         {
             var saves = GetSerializableArrayFromFile<SaveBonesData>(pathSave).ToList() ?? throw new Exception($"Saves not serialized is {pathSave} file");
 
@@ -444,7 +437,9 @@ namespace Ford.SaveSystem.Ver2
             using JsonWriter jsonWriter = new JsonTextWriter(sw);
             JsonSerializer.CreateDefault().Serialize(jsonWriter, new StorageSettingsData()
             {
-                LastSaveFileName = fileName
+                LastSaveFileName = fileName,
+                IncrementSave = 0,
+                IncrementHorse = 0,
             });
 
             return fileName;
@@ -472,12 +467,12 @@ namespace Ford.SaveSystem.Ver2
             return collection;
         }
 
-        private void RewriteHorseFile(ICollection<HorseData> horses)
+        private void RewriteHorseFile(ICollection<HorseBase> horses)
         {
             string path = Path.Combine(_storagePath, _horsesFileName);
             using StreamWriter sw = new(path);
             using JsonWriter jsonWriter = new JsonTextWriter(sw);
-            JsonSerializer.CreateDefault().Serialize(jsonWriter, new ArraySerializable<HorseData>(horses));
+            JsonSerializer.CreateDefault().Serialize(jsonWriter, new ArraySerializable<HorseBase>(horses));
         }
 
         private void RewriteSaveBonesFile(string path, ICollection<SaveBonesData> saves)
@@ -491,6 +486,49 @@ namespace Ford.SaveSystem.Ver2
             using StreamWriter sw = new(path);
             using JsonWriter jsonWriter = new JsonTextWriter(sw);
             JsonSerializer.CreateDefault().Serialize(jsonWriter, new ArraySerializable<SaveBonesData>(saves));
+        }
+
+        private long IncrementSaveId()
+        {
+            string pathSettings = Path.Combine(_storagePath, _storageSettingsFileName);
+            long inc = 0;
+            StorageSettingsData settings = null;
+
+            if (File.Exists(pathSettings))
+            {
+                using StreamReader sr = new StreamReader(pathSettings);
+                using JsonReader reader = new JsonTextReader(sr);
+
+                while (reader.Read())
+                {
+                    reader.SupportMultipleContent = true;
+                    var serializer = new JsonSerializer();
+                    if (reader.TokenType == JsonToken.StartObject)
+                    {
+                        settings = serializer.Deserialize<StorageSettingsData>(reader) ?? throw new Exception("File not exists");
+                        inc = ++settings.IncrementSave;
+                    }
+                }
+            }
+
+            using StreamWriter sw = new StreamWriter(pathSettings);
+            using JsonWriter jsonWriter = new JsonTextWriter(sw);
+
+            settings ??= new StorageSettingsData()
+            {
+                LastSaveFileName = Guid.NewGuid().ToString(),
+                IncrementSave = inc,
+                IncrementHorse = 0
+            };
+
+            JsonSerializer.CreateDefault().Serialize(jsonWriter, new StorageSettingsData()
+            {
+                LastSaveFileName = settings.LastSaveFileName,
+                IncrementSave = inc,
+                IncrementHorse = settings.IncrementHorse,
+            });
+
+            return inc;
         }
     }
 }

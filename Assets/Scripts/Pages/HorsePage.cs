@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using Ford.SaveSystem.Ver2.Data;
 using Ford.SaveSystem.Ver2;
 using Ford.SaveSystem.Ver2.Dto;
+using Ford.SaveSystem;
 
 public class HorsePage : Page
 {
@@ -38,7 +39,7 @@ public class HorsePage : Page
     [SerializeField] private ToastMessage _toastMessagePrefab;
 
     private List<TMP_InputField> _inputFields;
-    public event Action<HorseData> OnApply;
+    public event Action<HorseBase> OnApply;
 
     /// <summary>
     /// Open page with field inputs. This methods for update horse save, not create horse
@@ -49,7 +50,7 @@ public class HorsePage : Page
     {
         base.Open(horseData, popUpLevel);
 
-        if (horseData is not HorseData data)
+        if (horseData is not HorseBase data)
         {
             Debug.LogError("ѕараметр не соответствует запрашиваемому");
             return;
@@ -61,8 +62,8 @@ public class HorsePage : Page
         _sexText.text = data.Sex;
         _birthdayInputFiled.text = data.BirthDate?.ToString("dd.MM.yyyy");
         _descriptionInputField.text = data.Description;
-        _ownerNameInputFiled.text = data.Owner.Name;
-        _phoneNumberInputField.text = data.Owner.PhoneNumber;
+        _ownerNameInputFiled.text = data.OwnerName;
+        _phoneNumberInputField.text = data.OwnerPhoneNumber;
         _countryInputFiled.text = data.Country;
         _cityInputFiled.text = data.City;
         _regionInputFiled.text = data.Region;
@@ -206,7 +207,7 @@ public class HorsePage : Page
         };
 
         var creatingHorse = storage.CreateHorse(horse);
-        storage.CreateSave(creatingHorse.Id, save);
+        storage.CreateSave(creatingHorse.HorseId, save);
 
         SceneParameters.AddParam(creatingHorse);
         AsyncOperation loadingOperation = SceneManager.LoadSceneAsync(1);

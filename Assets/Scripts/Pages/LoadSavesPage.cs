@@ -1,5 +1,5 @@
+using Ford.SaveSystem;
 using Ford.SaveSystem.Ver2;
-using Ford.SaveSystem.Ver2.Data;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -14,7 +14,7 @@ public class LoadSavesPage : Page
     [Space(10)]
     [SerializeField] private LoadScenePage _loadScenePage;
 
-    private HorseData _horseData;
+    private HorseBase _horseData;
     public HorseInfoPanel HorseInfoPanel { get { return _horseInfoPanel; } }
 
     private void Start()
@@ -22,7 +22,7 @@ public class LoadSavesPage : Page
         _loadButton.onClick.AddListener(Load);
     }
 
-    public void Open(HorseData horseData)
+    public void Open(HorseBase horseData)
     {
         _horseData = horseData;
 

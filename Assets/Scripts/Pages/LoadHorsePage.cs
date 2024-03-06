@@ -1,3 +1,4 @@
+using Ford.SaveSystem;
 using Ford.SaveSystem.Ver2;
 using Ford.SaveSystem.Ver2.Data;
 using System.Collections.Generic;
@@ -31,14 +32,14 @@ public class LoadHorsePage : Page
         base.Open(popUpLevel);
 
         Storage storage = new(GameManager.Instance.Settings.PathSave);
-        List<HorseData> horses = storage.GetHorses().ToList();
-        horses.Sort((x, y) => x.DateCreation.CompareTo(y.DateCreation));
+        List<HorseBase> horses = storage.GetHorses().ToList();
+        horses.Sort((x, y) => x.CreationDate.CompareTo(y.CreationDate));
 
         foreach(var horse in horses)
         {
             var horseUi = Instantiate(_horseUiPrefab.gameObject, _horsesScrollRect.content).GetComponent<HorseLoadUI>();
 
-            UnityAction<HorseData> onHorseClicked = new(_savesPage.Open);
+            UnityAction<HorseBase> onHorseClicked = new(_savesPage.Open);
             horseUi.Initiate(horse, onHorseClicked, _toggleGroup);
             horseUi.OnDestroyed += OnHorseRemoved;
             _savesPage.HorseInfoPanel.HorseUpdated += horseUi.UpdateHorseInfo;

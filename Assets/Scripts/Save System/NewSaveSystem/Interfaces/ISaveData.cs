@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace Ford.SaveSystem.Interfaces
+namespace Ford.SaveSystem
 {
     internal interface ISaveData
     {
-        public string Id { get; set; }
+        public long Id { get; set; }
         public string Header { get; set; }
         public string Description { get; set; }
         public DateTime Date { get; set; }

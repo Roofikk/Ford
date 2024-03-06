@@ -1,4 +1,4 @@
-using Ford.SaveSystem.Ver2.Data;
+using Ford.SaveSystem;
 using System;
 using TMPro;
 using UnityEngine;
@@ -20,7 +20,7 @@ public class HorseInfoPanel : MonoBehaviour
     [Space(15)]
     [SerializeField] private HorsePage _horsePage;
 
-    private HorseData _horseData;
+    private HorseBase _horseData;
 
     public event Action HorseUpdated;
 
@@ -36,7 +36,7 @@ public class HorseInfoPanel : MonoBehaviour
         _horsePage.OnApply -= UpdateHorseInfo;
     }
 
-    public void FillData(HorseData horseData)
+    public void FillData(HorseBase horseData)
     {
         _horseData = horseData;
 
@@ -57,10 +57,10 @@ public class HorseInfoPanel : MonoBehaviour
         _descriptionText.text = horseData.Description;
         _localityText.text = horseData.City;
 
-        if (horseData.Owner != null)
+        if (string.IsNullOrEmpty(horseData.OwnerName))
         {
-            _ownerNameText.text = horseData.Owner.Name;
-            _phoneNumberText.text = horseData.Owner.PhoneNumber;
+            _ownerNameText.text = horseData.OwnerName;
+            _phoneNumberText.text = horseData.OwnerPhoneNumber;
         }
         else
         {
@@ -69,7 +69,7 @@ public class HorseInfoPanel : MonoBehaviour
         }
     }
 
-    private void UpdateHorseInfo(HorseData horseData)
+    private void UpdateHorseInfo(HorseBase horseData)
     {
         FillData(horseData);
         HorseUpdated?.Invoke();

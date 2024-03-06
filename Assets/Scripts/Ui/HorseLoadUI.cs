@@ -1,3 +1,4 @@
+using Ford.SaveSystem;
 using Ford.SaveSystem.Ver2;
 using Ford.SaveSystem.Ver2.Data;
 using System;
@@ -21,18 +22,18 @@ public class HorseLoadUI : MonoBehaviour
 
     private Image _image;
     private Toggle _toggle;
-    private HorseData _horseData;
+    private HorseBase _horseData;
 
     public event Action OnDestroyed;
 
-    public void Initiate(HorseData horse, UnityAction<HorseData> onClick, ToggleGroup group)
+    public void Initiate(HorseBase horse, UnityAction<HorseBase> onClick, ToggleGroup group)
     {
         _horseData = horse;
         _horseNameText.text = horse.Name;
 
-        if (horse.Owner != null)
+        if (string.IsNullOrEmpty(horse.OwnerName))
         {
-            _ownerNameText.text = horse.Owner.Name;
+            _ownerNameText.text = horse.OwnerName;
         }
         else
         {
@@ -71,7 +72,7 @@ public class HorseLoadUI : MonoBehaviour
     public void UpdateHorseInfo()
     {
         _horseNameText.text = _horseData.Name;
-        _ownerNameText.text = _horseData.Owner.Name;
+        _ownerNameText.text = _horseData.OwnerName;
         _cityText.text = _horseData.City;
     }
 
@@ -83,7 +84,7 @@ public class HorseLoadUI : MonoBehaviour
     private void RemoveHorse()
     {
         Storage storage = new(GameManager.Instance.Settings.PathSave);
-        storage.DeleteHorse(_horseData.Id);
+        storage.DeleteHorse(_horseData.HorseId);
 
         Destroy(gameObject);
 

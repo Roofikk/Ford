@@ -7,7 +7,7 @@ namespace QueueRequest
     public class RequestQueue
     {
         private Queue<ICommand> _queueRequests = new();
-        private Task _runQueue;
+        private System.Threading.Tasks.Task _runQueue;
 
         public int Count { get {  return _queueRequests.Count; } }
         public bool BreakOnFailedRequest = false;
@@ -37,12 +37,12 @@ namespace QueueRequest
 
         private void WhileNotEmpty()
         {
-            _runQueue = Task.Run(async () =>
+            _runQueue = System.Threading.Tasks.Task.Run(async () =>
             {
                 while (_queueRequests.Count > 0)
                 {
                     var command = _queueRequests.Peek();
-                    Task task = command.Execute();
+                    System.Threading.Tasks.Task task = command.Execute();
                     await task;
 
                     if (!task.IsCompletedSuccessfully && BreakOnFailedRequest)
@@ -71,7 +71,7 @@ namespace QueueRequest
             _response = response;
         }
 
-        public async Task Execute()
+        public async System.Threading.Tasks.Task Execute()
         {
             await Request;
             Response?.Invoke(Request.Result);
@@ -80,6 +80,6 @@ namespace QueueRequest
 
     public interface ICommand
     {
-        public Task Execute();
+        public System.Threading.Tasks.Task Execute();
     }
 }

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Ford.SaveSystem.Ver2;
 using Ford.SaveSystem.Ver2.Dto;
-using Ford.SaveSystem.Ver2.Data;
+using Ford.SaveSystem;
 
 public class SavePanel : Page
 {
@@ -154,7 +154,7 @@ public class SavePanel : Page
         };
 
         Storage storage = new(GameManager.Instance.Settings.PathSave);
-        storage.CreateSave(_skeleton.Data.Id, save);
+        storage.CreateSave(_skeleton.Data.HorseId, save);
 
         toast = Instantiate(_toastMessage.gameObject, transform.parent).GetComponent<ToastMessage>();
         toast.Show("Сохранение завершено");

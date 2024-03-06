@@ -1,3 +1,4 @@
+using Ford.SaveSystem;
 using Ford.WebApi.Data;
 using Newtonsoft.Json;
 using System;
@@ -116,10 +117,10 @@ namespace Ford.WebApi
         /// <param name="accessToken">Access token</param>
         /// <param name="horseId">Horse id</param>
         /// <returns>Horse object</returns>
-        public async Task<ResponseResult<HorseRetrieveDto>> GetHorseAsync(string accessToken, long horseId)
+        public async Task<ResponseResult<HorseBase>> GetHorseAsync(string accessToken, long horseId)
         {
             Uri uri = new(_hostUri, $"{_horsesUri}?horseId={horseId}");
-            var horse = await GetRequest<HorseRetrieveDto>(uri, accessToken);
+            var horse = await GetRequest<HorseBase>(uri, accessToken);
             return horse;
         }
 
@@ -129,11 +130,11 @@ namespace Ford.WebApi
         /// </summary>
         /// <param name="accessToken"></param>
         /// <returns></returns>
-        public async Task<ResponseResult<IEnumerable<HorseRetrieveDto>>> GetHorsesAsync(string accessToken)
+        public async Task<ResponseResult<IEnumerable<HorseBase>>> GetHorsesAsync(string accessToken)
         {
             Uri uri = new(_hostUri, _horsesUri);
-            var horses = await GetRequest<IEnumerable<HorseRetrieveDto>>(uri, accessToken);
-            return horses;
+            var result = await GetRequest<RetrieveArray<HorseBase>>(uri, accessToken);
+            return new ResponseResult<IEnumerable<HorseBase>>(result.Content.Items, result.StatusCode, result.Errors);
         }
 
         /// <summary>
@@ -143,11 +144,11 @@ namespace Ford.WebApi
         /// <param name="accessToken">Access token</param>
         /// <param name="horse">Horse object for creation</param>
         /// <returns></returns>
-        public async Task<ResponseResult<HorseRetrieveDto>> CreateHorseAsync(string accessToken, CreationHorse horse)
+        public async Task<ResponseResult<HorseBase>> CreateHorseAsync(string accessToken, CreationHorse horse)
         {
             Uri uri = new(_hostUri, _horsesUri);
             var horseDto = new CreationHorseDto(horse);
-            var result = await PostRequest<HorseRetrieveDto>(uri, horseDto, accessToken);
+            var result = await PostRequest<HorseBase>(uri, horseDto, accessToken);
             return result;
         }
 
@@ -158,10 +159,10 @@ namespace Ford.WebApi
         /// <param name="accessToken"></param>
         /// <param name="horse"></param>
         /// <returns></returns>
-        public async Task<ResponseResult<HorseRetrieveDto>> UpdateHorseAsync(string accessToken, UpdatingHorseDto horse)
+        public async Task<ResponseResult<HorseBase>> UpdateHorseAsync(string accessToken, UpdatingHorseDto horse)
         {
             Uri uri = new(_hostUri, _horsesUri);
-            var result = await PutRequest<HorseRetrieveDto>(uri, horse, accessToken);
+            var result = await PutRequest<HorseBase>(uri, horse, accessToken);
             return result;
         }
         
@@ -189,10 +190,10 @@ namespace Ford.WebApi
         /// <param name="accessToken"></param>
         /// <param name="horseOwners"></param>
         /// <returns></returns>
-        public async Task<ResponseResult<HorseRetrieveDto>> UpdateHorseOwnersAsync(string accessToken, UpdatingHorseOwnersDto horseOwners)
+        public async Task<ResponseResult<HorseBase>> UpdateHorseOwnersAsync(string accessToken, UpdatingHorseOwnersDto horseOwners)
         {
             Uri uri = new(_hostUri, _updateHorseOwnersUri);
-            var horse = await PostRequest<HorseRetrieveDto>(uri, horseOwners, accessToken);
+            var horse = await PostRequest<HorseBase>(uri, horseOwners, accessToken);
             return horse;
         }
 
