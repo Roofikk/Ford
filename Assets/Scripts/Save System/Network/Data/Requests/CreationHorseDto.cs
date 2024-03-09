@@ -19,7 +19,7 @@ namespace Ford.WebApi.Data
     public class CreationHorseOwner
     {
         public string UserId { get; set; }
-        public RoleOwnerAccess RuleAccess { get; set; }
+        public UserRoleAccess RuleAccess { get; set; }
     }
 
     internal class CreationHorseDto
@@ -63,7 +63,7 @@ namespace Ford.WebApi.Data
         }
     }
 
-    public enum RoleOwnerAccess
+    public enum UserRoleAccess
     {
         Read,
         Write,

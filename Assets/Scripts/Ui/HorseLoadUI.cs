@@ -1,6 +1,5 @@
 using Ford.SaveSystem;
 using Ford.SaveSystem.Ver2;
-using Ford.SaveSystem.Ver2.Data;
 using System;
 using TMPro;
 using UnityEngine;

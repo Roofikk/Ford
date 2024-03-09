@@ -12,11 +12,11 @@ public class TestSaveSystem : MonoBehaviour
 
     private void OnStarted()
     {
-        StorageSystem storage = new();
+        //StorageSystem storage = new();
 
-        storage.GetHorses((result) =>
-        {
-            Debug.Log("Retrieve horses");
-        });
+        //storage.GetHorses((result) =>
+        //{
+        //    Debug.Log("Retrieve horses");
+        //});
     }
 }

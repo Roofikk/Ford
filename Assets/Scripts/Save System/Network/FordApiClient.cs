@@ -1,5 +1,6 @@
 using Ford.SaveSystem;
 using Ford.WebApi.Data;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,8 @@ namespace Ford.WebApi
     public class FordApiClient
     {
         private static Uri _hostUri;
+
+        private readonly string _usersUri = "api/users";
 
         private readonly string _signUpUri = "api/identity/sign-up";
         private readonly string _signInUri = "api/identity/login";
@@ -32,6 +35,15 @@ namespace Ford.WebApi
         {
             _hostUri = new Uri(host);
         }
+
+        #region User
+        public async Task<ResponseResult<User>> FindUser(string login)
+        {
+            Uri uri = new(_hostUri, $"{_usersUri}/search?userName={login}");
+            var result = await GetRequest<User>(uri);
+            return result;
+        }
+        #endregion
 
         #region Account
         /// <summary>

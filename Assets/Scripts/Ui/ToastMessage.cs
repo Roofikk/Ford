@@ -81,10 +81,19 @@ public class ToastMessage : MonoBehaviour
         _isShowing = true;
     }
 
-    public static void Show(string message, Transform parent)
+    public static void Show(string message, Transform parent = null)
     {
         GameObject toastPrefab = (GameObject)Resources.Load("Prefabs/UI/Toast", typeof(GameObject));
-        GameObject toastObject = Instantiate(toastPrefab, parent);
+        GameObject toastObject = null;
+        if (parent != null)
+        {
+            toastObject = Instantiate(toastPrefab, parent);
+        }
+        else
+        {
+            toastObject = Instantiate(toastPrefab, GameObject.Find("ToastCanvas").transform);
+        }
+
         ToastMessage toast = toastObject.GetComponent<ToastMessage>();
 
         toast.Show(message);

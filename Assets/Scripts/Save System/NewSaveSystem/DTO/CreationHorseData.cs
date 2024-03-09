@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Ford.SaveSystem.Ver2.Dto
 {
@@ -14,5 +15,13 @@ namespace Ford.SaveSystem.Ver2.Dto
         public string Country { get; set; }
         public string OwnerName { get; set; }
         public string PhoneNumber { get; set; }
+        public ICollection<RequestHorseUserDto> Users { get; set; }
     }
+
+    public class RequestHorseUserDto
+    {
+        public long UserId { get; set; }
+        public string RuleAccess { get; set; }
+        public bool IsOwner { get; set; }
+    } 
 }
