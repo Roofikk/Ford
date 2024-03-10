@@ -142,11 +142,11 @@ namespace Ford.WebApi
         /// </summary>
         /// <param name="accessToken"></param>
         /// <returns></returns>
-        public async Task<ResponseResult<IEnumerable<HorseBase>>> GetHorsesAsync(string accessToken)
+        public async Task<ResponseResult<ICollection<HorseBase>>> GetHorsesAsync(string accessToken, int below = 0, int above = 20)
         {
-            Uri uri = new(_hostUri, _horsesUri);
+            Uri uri = new(_hostUri, $"{_horsesUri}?below={below}&above={above}");
             var result = await GetRequest<RetrieveArray<HorseBase>>(uri, accessToken);
-            return new ResponseResult<IEnumerable<HorseBase>>(result.Content.Items, result.StatusCode, result.Errors);
+            return new ResponseResult<ICollection<HorseBase>>(result.Content.Items, result.StatusCode, result.Errors);
         }
 
         /// <summary>
@@ -159,8 +159,7 @@ namespace Ford.WebApi
         public async Task<ResponseResult<HorseBase>> CreateHorseAsync(string accessToken, CreationHorse horse)
         {
             Uri uri = new(_hostUri, _horsesUri);
-            var horseDto = new CreationHorseDto(horse);
-            var result = await PostRequest<HorseBase>(uri, horseDto, accessToken);
+            var result = await PostRequest<HorseBase>(uri, horse, accessToken);
             return result;
         }
 
@@ -171,7 +170,7 @@ namespace Ford.WebApi
         /// <param name="accessToken"></param>
         /// <param name="horse"></param>
         /// <returns></returns>
-        public async Task<ResponseResult<HorseBase>> UpdateHorseAsync(string accessToken, UpdatingHorseDto horse)
+        public async Task<ResponseResult<HorseBase>> UpdateHorseAsync(string accessToken, UpdatingHorse horse)
         {
             Uri uri = new(_hostUri, _horsesUri);
             var result = await PutRequest<HorseBase>(uri, horse, accessToken);

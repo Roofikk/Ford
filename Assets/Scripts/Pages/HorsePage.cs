@@ -8,6 +8,7 @@ using Ford.SaveSystem.Ver2;
 using Ford.SaveSystem.Ver2.Dto;
 using Ford.SaveSystem;
 using System.Linq;
+using Ford.WebApi.Data;
 
 public class HorsePage : Page
 {
@@ -146,13 +147,13 @@ public class HorsePage : Page
             City = _cityInputFiled.text,
             Region = _regionInputFiled.text,
             OwnerName = _ownerPanel.OwnerName,
-            PhoneNumber = _ownerPanel.OwnerNumber,
+            OwnerPhoneNumber = _ownerPanel.OwnerPhoneNumber,
         };
 
-        Storage storage = new(GameManager.Instance.Settings.PathSave);
-        var horseData = storage.UpdateHorse(horse);
+        //Storage storage = new(GameManager.Instance.Settings.PathSave);
+        //var horseData = storage.UpdateHorse(horse);
 
-        OnApply?.Invoke(horseData);
+        //OnApply?.Invoke(horseData);
         Close();
 
         ToastMessage toast = Instantiate(_toastMessagePrefab.gameObject, transform.parent).GetComponent<ToastMessage>();
@@ -164,8 +165,6 @@ public class HorsePage : Page
         if (!CheckValidData())
             return;
 
-        Storage storage = new(GameManager.Instance.Settings.PathSave);
-
         CreateSaveDto save = new()
         {
             Header = "Ќовый проект",
@@ -174,7 +173,7 @@ public class HorsePage : Page
             Bones = null
         };
 
-        CreationHorseData horse = new()
+        CreationHorse horse = new()
         {
             Name = _horseNameInputField.text,
             Sex = _sexText.text,
@@ -183,16 +182,54 @@ public class HorsePage : Page
             Country = _countryInputFiled.text,
             City = _cityInputFiled.text,
             Region = _regionInputFiled.text,
-            OwnerName = _ownerPanel.OwnerName,
-            PhoneNumber = _ownerPanel.OwnerNumber,
         };
 
-        var creatingHorse = storage.CreateHorse(horse);
-        storage.CreateSave(creatingHorse.HorseId, save);
+        if (_ownerPanel.Owner == null)
+        {
+            horse.OwnerName = _ownerPanel.OwnerName;
+            horse.OwnerPhoneNumber = _ownerPanel.OwnerPhoneNumber;
 
-        SceneParameters.AddParam(creatingHorse);
-        AsyncOperation loadingOperation = SceneManager.LoadSceneAsync(1);
-        _loadScenePage.Open(loadingOperation);
+            foreach (var user in _ownerPanel.Users)
+            {
+                user.IsOwner = false;
+            }
+        }
+
+        foreach (var user in _ownerPanel.Users)
+        {
+            horse.Users.Add(new()
+            {
+                UserId = user.Id,
+                IsOwner = user.IsOwner,
+                RuleAccess = user.RuleAccess,
+            });
+        }
+
+        horse.Saves.Add(new()
+        {
+            Header = "Ќачальное сохранение",
+            Description = "Ёто начальное сохранение, оно всегда создаетс€ при создании нового проекта",
+            Date = DateTime.Now,
+        });
+
+        PageManager.Instance.DisplayLoadingPage(true, 4);
+        StorageSystem storage = new();
+        storage.CreateHorse(horse).RunOnMainThread((result) =>
+        {
+            var horse = result;
+
+            if (result == null)
+            {
+                throw new Exception("¬се пошло по пизде");
+            }
+
+            SceneParameters.AddParam(horse);
+            AsyncOperation loadingOperation = SceneManager.LoadSceneAsync(1);
+            loadingOperation.completed += (res) =>
+            {
+                PageManager.Instance.DisplayLoadingPage(false);
+            };
+        });
     }
 
     public bool CheckValidData()

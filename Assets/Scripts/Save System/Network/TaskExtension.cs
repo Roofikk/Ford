@@ -12,4 +12,14 @@ public static class TaskExtension
 
         return task;
     }
+
+    public static Task RunOnMainThread(this Task task, Action continuation)
+    {
+        task.ConfigureAwait(true).GetAwaiter().OnCompleted(() =>
+        {
+            continuation?.Invoke();
+        });
+
+        return task;
+    }
 }

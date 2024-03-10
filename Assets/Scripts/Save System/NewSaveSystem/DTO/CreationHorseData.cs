@@ -14,7 +14,7 @@ namespace Ford.SaveSystem.Ver2.Dto
         public string Region { get; set; }
         public string Country { get; set; }
         public string OwnerName { get; set; }
-        public string PhoneNumber { get; set; }
+        public string OwnerPhoneNumber { get; set; }
         public ICollection<RequestHorseUserDto> Users { get; set; }
     }
 

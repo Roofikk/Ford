@@ -1,6 +1,7 @@
 using Ford.SaveSystem.Data;
 using Ford.SaveSystem.Ver2.Data;
 using Ford.SaveSystem.Ver2.Dto;
+using Ford.WebApi.Data;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace Ford.SaveSystem.Ver2
 
         private readonly string _horsesFileName = "horses.json";
         private readonly string _storageSettingsFileName = "storageSettings.json";
+        private readonly string _storageStackPath = "storageStack.json";
 
         private readonly string ACCESS_TOKEN_KEY = "ACCESS_TOKEN_KEY";
         private readonly string REFRESH_TOKEN_KEY = "REFRESH_TOKEN_KEY";
@@ -83,7 +85,7 @@ namespace Ford.SaveSystem.Ver2
             return _horses;
         }
 
-        public HorseBase GetHorse(string id)
+        public HorseBase GetHorse(long id)
         {
             var horses = GetHorses();
 
@@ -96,28 +98,16 @@ namespace Ford.SaveSystem.Ver2
             return findHorse;
         }
 
-        public HorseBase CreateHorse(CreationHorseData horseData)
+        public HorseBase CreateHorse(CreationHorse horseData)
         {
             ICollection<HorseBase> horses = GetHorses();
             horses ??= new Collection<HorseBase>();
 
-            if (string.IsNullOrEmpty(horseData.Id))
-            {
-                horseData.Id = Guid.NewGuid().ToString();
-            }
-            else
-            {
-                var horseExist = horses.FirstOrDefault(h => h.HorseId == horseData.Id);
-
-                if (horseExist is not null)
-                {
-                    return null;
-                }
-            }
+            var horseId = IncrementHorseId();
 
             HorseBase addHorse = new()
             {
-                HorseId = horseData.Id,
+                HorseId = horseId,
                 Name = horseData.Name,
                 Description = horseData.Description,
                 BirthDate = horseData.BirthDate,
@@ -133,7 +123,7 @@ namespace Ford.SaveSystem.Ver2
             if (!string.IsNullOrEmpty(horseData.OwnerName))
             {
                 addHorse.OwnerName = horseData.OwnerName;
-                addHorse.OwnerPhoneNumber = horseData.PhoneNumber;
+                addHorse.OwnerPhoneNumber = horseData.OwnerPhoneNumber;
             }
 
             horses.Add(addHorse);
@@ -141,7 +131,7 @@ namespace Ford.SaveSystem.Ver2
             return addHorse;
         }
 
-        public HorseBase UpdateHorse(CreationHorseData horseData)
+        public HorseBase UpdateHorse(UpdatingHorse horseData)
         {
             var horses = GetHorses();
 
@@ -150,7 +140,7 @@ namespace Ford.SaveSystem.Ver2
                 return null;
             }
 
-            HorseBase existHorse = horses.FirstOrDefault(h => h.HorseId == horseData.Id);
+            HorseBase existHorse = horses.FirstOrDefault(h => h.HorseId == horseData.HorseId);
 
             if (existHorse is null)
             {
@@ -166,12 +156,6 @@ namespace Ford.SaveSystem.Ver2
             existHorse.Region = horseData.Region;
             existHorse.Country = horseData.Country;
             existHorse.LastUpdate = DateTime.Now;
-
-            if (!string.IsNullOrEmpty(horseData.OwnerName))
-            {
-                existHorse.OwnerName= horseData.OwnerName;
-                existHorse.OwnerPhoneNumber = horseData.PhoneNumber;
-            }
             //
 
             RewriteHorseFile(horses);
@@ -179,7 +163,7 @@ namespace Ford.SaveSystem.Ver2
         }
 
         // не забыть удалить сохранения лошади, поскольку они не нужны.
-        public bool DeleteHorse(string id)
+        public bool DeleteHorse(long id)
         {
             var horses = GetHorses();
 
@@ -250,7 +234,7 @@ namespace Ford.SaveSystem.Ver2
             return save;
         }
 
-        public SaveData CreateSave(string horseId, CreateSaveDto saveData)
+        public SaveData CreateSave(long horseId, CreateSaveDto saveData)
         {
             var horses = GetHorses();
 
@@ -526,6 +510,49 @@ namespace Ford.SaveSystem.Ver2
                 LastSaveFileName = settings.LastSaveFileName,
                 IncrementSave = inc,
                 IncrementHorse = settings.IncrementHorse,
+            });
+
+            return inc;
+        }
+
+        private long IncrementHorseId()
+        {
+            string pathSettings = Path.Combine(_storagePath, _storageSettingsFileName);
+            long inc = 0;
+            StorageSettingsData settings = null;
+
+            if (File.Exists(pathSettings))
+            {
+                using StreamReader sr = new StreamReader(pathSettings);
+                using JsonReader reader = new JsonTextReader(sr);
+
+                while (reader.Read())
+                {
+                    reader.SupportMultipleContent = true;
+                    var serializer = new JsonSerializer();
+                    if (reader.TokenType == JsonToken.StartObject)
+                    {
+                        settings = serializer.Deserialize<StorageSettingsData>(reader) ?? throw new Exception("File not exists");
+                        inc = ++settings.IncrementHorse;
+                    }
+                }
+            }
+
+            using StreamWriter sw = new StreamWriter(pathSettings);
+            using JsonWriter jsonWriter = new JsonTextWriter(sw);
+
+            settings ??= new StorageSettingsData()
+            {
+                LastSaveFileName = Guid.NewGuid().ToString(),
+                IncrementSave = 0,
+                IncrementHorse = inc
+            };
+
+            JsonSerializer.CreateDefault().Serialize(jsonWriter, new StorageSettingsData()
+            {
+                LastSaveFileName = settings.LastSaveFileName,
+                IncrementSave = settings.IncrementSave,
+                IncrementHorse = inc,
             });
 
             return inc;

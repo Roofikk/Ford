@@ -29,8 +29,11 @@ public class OwnerPanel : Page
     private HorseUserDto _owner;
     private List<HorseUserDto> _users = new();
 
-    public string OwnerName => _ownerNameInput.text;
-    public string OwnerNumber => _ownerPhoneNumberInput.text;
+    public string OwnerName => _owner == null ? _ownerNameInput.text : $"{_owner.FirstName} {_owner.LastName}".Trim();
+    public string OwnerPhoneNumber => _owner == null ? _ownerPhoneNumberInput.text : _owner.PhoneNumber;
+    public string AccessRole => _owner == null ? ((UserRoleAccess)_accessDropdown.value).ToString() : _owner.RuleAccess;
+    public HorseUserDto Owner => _owner;
+    public ICollection<HorseUserDto> Users => _users;
 
     private void Start()
     {
@@ -43,7 +46,7 @@ public class OwnerPanel : Page
                 FirstName = Player.UserData.FirstName,
                 LastName = Player.UserData.LastName,
                 PhoneNumber = Player.UserData.PhoneNumber,
-                AccessRole = UserRoleAccess.Creator.ToString(),
+                RuleAccess = UserRoleAccess.Creator.ToString(),
                 IsOwner = true,
             });
         });
@@ -135,7 +138,7 @@ public class OwnerPanel : Page
             DisplayAccessRole(true);
         }
 
-        _accessDropdown.value = (int)Enum.Parse<UserRoleAccess>(user.AccessRole);
+        _accessDropdown.value = (int)Enum.Parse<UserRoleAccess>(user.RuleAccess);
         _removeOwnerButton.gameObject.SetActive(true);
     }
 

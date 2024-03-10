@@ -101,7 +101,7 @@ public class SearchUserPage : Page
             FirstName = _user.FirstName,
             LastName = _user.LastName,
             PhoneNumber = _user.PhoneNumber,
-            AccessRole = ((UserRoleAccess)_accessRoleDropdown.value).ToString(),
+            RuleAccess = ((UserRoleAccess)_accessRoleDropdown.value).ToString(),
             IsOwner = false
         };
 

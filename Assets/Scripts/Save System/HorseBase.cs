@@ -6,7 +6,7 @@ namespace Ford.SaveSystem
 {
     public class HorseBase
     {
-        public string HorseId { get; set; }
+        public long HorseId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime? BirthDate { get; set; }

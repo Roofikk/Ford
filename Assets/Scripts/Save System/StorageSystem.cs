@@ -1,10 +1,9 @@
-using System;
+using Ford.WebApi.Data;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Ford.SaveSystem
-
 {
     public class StorageSystem
     {
@@ -26,33 +25,46 @@ namespace Ford.SaveSystem
             }
         }
 
-        public Task GetHorses(Action<IEnumerable<HorseBase>> onRetrieve, bool force = false)
+        #region horses
+        public async Task<ICollection<HorseBase>> GetHorses(int below = 0, int above = 20, bool force = true)
         {
             if (force)
             {
-                return State.GetHorses(this, (result) =>
-                {
-                    horses = result.ToList();
-                    onRetrieve(result);
-                });
+                horses = (await State.GetHorses(this, below, above)).ToList();
+                return horses;
             }
             else
             {
                 if (horses == null)
                 {
-                    return State.GetHorses(this, (result) =>
-                    {
-                        horses = result.ToList();
-                        onRetrieve(result);
-                    });
+                    horses = (await State.GetHorses(this, above, below)).ToList();
+                    return horses;
                 }
                 else
                 {
-                    onRetrieve?.Invoke(horses);
-                    return Task.CompletedTask;
+                    return await Task.FromResult(horses);
                 }
             }
         }
+
+        public async Task<HorseBase> CreateHorse(CreationHorse horse)
+        {
+            var createdHorse = await State.CreateHorse(this, horse);
+            return createdHorse;
+        }
+
+        public async Task<HorseBase> UpdateHorse(UpdatingHorse horse)
+        {
+            var updatingHorse = await State.UpdateHorse(this, horse);
+            return updatingHorse;
+        }
+
+        public async Task<bool> DeleteHorse(long horseId)
+        {
+            bool result = await State.DeleteHorse(this, horseId);
+            return result;
+        }
+        #endregion
 
         internal void ChangeState(SaveSystemStateEnum state)
         {
@@ -68,6 +80,8 @@ namespace Ford.SaveSystem
                     break;
             }
         }
+
+
     }
 
     public enum SaveSystemStateEnum

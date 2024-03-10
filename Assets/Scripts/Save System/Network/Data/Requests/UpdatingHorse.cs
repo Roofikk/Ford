@@ -2,7 +2,7 @@ using System;
 
 namespace Ford.WebApi.Data
 {
-    public class UpdatingHorseDto
+    public class UpdatingHorse
     {
         public long HorseId { get; set; }
         public string Name { get; set; }
