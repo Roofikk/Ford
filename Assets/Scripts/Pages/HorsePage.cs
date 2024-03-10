@@ -197,27 +197,12 @@ public class HorsePage : Page
 
     public bool CheckValidData()
     {
-        int countInvalid = 0;
-        foreach (var input in _inputFields)
+        foreach (var validator in _validators)
         {
-            var validator = input.GetComponent<FieldMaskValidate>();
-            if (validator == null)
-            {
-                continue;
-            }
-
-            if (!validator.enabled)
-            {
-                continue;
-            }
-
-            if (!validator.ValidateInput(input.text))
-                countInvalid++;
+            if (!validator.ValidateInput())
+                return false;
         }
 
-        if (countInvalid > 0)
-            return false;
-        else
-            return true;
+        return true;
     }
 }

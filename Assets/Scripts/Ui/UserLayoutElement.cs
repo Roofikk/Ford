@@ -15,13 +15,13 @@ public class UserLayoutElement : MonoBehaviour
     {
         _removeButton.onClick.AddListener(() =>
         {
-            Destroy(this);
+            Destroy(gameObject);
         });
     }
 
     public HorseUserDto Initiate(HorseUserDto user, Action onRemoved)
     {
-        _fullName.text = $"{user.FirstName} {user.LastName}";
+        _fullName.text = $"{user.FirstName} {user.LastName}".Trim();
         OnRemoved += onRemoved;
         return user;
     }

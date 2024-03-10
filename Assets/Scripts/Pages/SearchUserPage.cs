@@ -80,8 +80,17 @@ public class SearchUserPage : Page
         _user = user;
         _personPanel.SetActive(true);
         _fullNameText.text = $"{user.FirstName} {user.LastName}";
-        _locationText.text = $"{user.City}, {user.Region}";
-        _phoneNumberText.text = user.PhoneNumber;
+
+        if (string.IsNullOrEmpty(user.City) && string.IsNullOrEmpty(user.Region))
+        {
+            _locationText.text = "Неизвестно";
+        }
+        else
+        {
+            _locationText.text = $"{user.City}, {user.Region}".Trim();
+        }
+
+        _phoneNumberText.text = string.IsNullOrEmpty(user.PhoneNumber) ? "Неизвестно" : user.PhoneNumber;
     }
 
     private void AddUser()

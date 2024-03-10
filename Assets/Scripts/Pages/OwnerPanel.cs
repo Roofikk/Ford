@@ -1,6 +1,7 @@
 using Ford.WebApi.Data;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,7 +27,7 @@ public class OwnerPanel : Page
     [SerializeField] private UserLayoutElement _userElementPrefab;
 
     private HorseUserDto _owner;
-    private List<HorseUserDto> _users;
+    private List<HorseUserDto> _users = new();
 
     public string OwnerName => _ownerNameInput.text;
     public string OwnerNumber => _ownerPhoneNumberInput.text;
@@ -75,6 +76,8 @@ public class OwnerPanel : Page
         _addUserButton.gameObject.SetActive(Player.IsLoggedIn);
         _removeOwnerButton.gameObject.SetActive(false);
 
+        DisplayAccessRole(false);
+
         foreach (var t in _usersGroup.GetComponentsInChildren<UserLayoutElement>())
         {
             Destroy(t.gameObject);
@@ -108,14 +111,20 @@ public class OwnerPanel : Page
 
     public void SetRealOwner(HorseUserDto user)
     {
+        if (_users.Any(u => u.Id == user.Id))
+        {
+            ToastMessage.Show("Нельзя добавить, поскольку пользователь уже находится в списке");
+            return;
+        }
+
         user.IsOwner = true;
         _owner = user;
 
         _ownerNameInput.text = $"{user.FirstName} {user.LastName}";
-        _ownerNameInput.readOnly = true;
+        _ownerNameInput.SetInteractable(false);
 
-        _ownerPhoneNumberInput.text = $"{user.PhoneNumber}";
-        _ownerPhoneNumberInput.readOnly = true;
+        _ownerPhoneNumberInput.text = string.IsNullOrEmpty(user.PhoneNumber) ? "Неизвестно" : user.PhoneNumber;
+        _ownerPhoneNumberInput.SetInteractable(false);
 
         if (_owner.Id == Player.UserData.UserId)
         {
@@ -132,22 +141,35 @@ public class OwnerPanel : Page
 
     public void RemoveOwner()
     {
-        _ownerNameInput.readOnly = false;
-        _ownerNameInput.text = string.Empty;
+        _ownerNameInput.text = "";
+        _ownerNameInput.SetInteractable(true);
 
-        _ownerPhoneNumberInput.readOnly = false;
-        _ownerPhoneNumberInput.text = string.Empty;
+        _ownerPhoneNumberInput.text = "";
+        _ownerPhoneNumberInput.SetInteractable(true);
 
-        DisplayAccessRole(true);
+        DisplayAccessRole(false);
         _removeOwnerButton.gameObject.SetActive(false);
         _owner = null;
     }
 
     private void AddUser(HorseUserDto user)
     {
-        if (_users.Contains(user))
+        if (_users.Any(u => u.Id == user.Id))
         {
             ToastMessage.Show("Пользователь уже добавлен");
+            return;
+        }
+
+        if (user.Id == Player.UserData.UserId)
+        {
+            ToastMessage.Show("Вы не можете добавить себя");
+            return;
+        }
+
+        if (_owner != null && _owner.Id == user.Id)
+        {
+            ToastMessage.Show("Пользователь уже находится на позиции хозяина");
+            return;
         }
 
         user.IsOwner = false;
