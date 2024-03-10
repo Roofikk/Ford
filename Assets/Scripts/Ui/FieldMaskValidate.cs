@@ -78,6 +78,11 @@ public abstract class FieldMaskValidate : MonoBehaviour
 
     public virtual bool ValidateInput()
     {
+        if (!enabled)
+        {
+            return true;
+        }
+
         return ValidateInput(_inputField.text);
     }
 

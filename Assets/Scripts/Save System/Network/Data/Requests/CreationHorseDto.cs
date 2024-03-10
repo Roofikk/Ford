@@ -6,6 +6,12 @@ namespace Ford.WebApi.Data
 {
     public class CreationHorse
     {
+        public CreationHorse()
+        {
+            Saves = new List<SaveInfo>();
+            Users = new List<CreationHorseUser>();
+        }
+
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime? BirthDate { get; set; }
@@ -16,10 +22,10 @@ namespace Ford.WebApi.Data
         public string OwnerName { get; set; }
         public string OwnerPhoneNumber { get; set; }
         public ICollection<SaveInfo> Saves { get; set; }
-        public ICollection<CreationHorseOwner> Users { get; set; } = new List<CreationHorseOwner>();
+        public ICollection<CreationHorseUser> Users { get; set; }
     }
 
-    public class CreationHorseOwner
+    public class CreationHorseUser
     {
         public long UserId { get; set; }
         public bool IsOwner { get; set; }

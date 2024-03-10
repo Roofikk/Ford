@@ -194,13 +194,31 @@ public class HorsePage : Page
                 user.IsOwner = false;
             }
         }
+        else if (_ownerPanel.Owner.Id == Player.UserData.UserId)
+        {
+            horse.Users.Add(new()
+            {
+                UserId = _ownerPanel.Owner.Id,
+                IsOwner = true,
+                RuleAccess = UserRoleAccess.Creator.ToString(),
+            });
+        }
+        else
+        {
+            horse.Users.Add(new()
+            {
+                UserId = _ownerPanel.Owner.Id,
+                IsOwner = true,
+                RuleAccess = _ownerPanel.AccessRole,
+            });
+        }
 
         foreach (var user in _ownerPanel.Users)
         {
             horse.Users.Add(new()
             {
                 UserId = user.Id,
-                IsOwner = user.IsOwner,
+                IsOwner = false,
                 RuleAccess = user.RuleAccess,
             });
         }

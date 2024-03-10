@@ -1,5 +1,4 @@
 using Ford.SaveSystem;
-using Ford.SaveSystem.Ver2;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -9,11 +8,18 @@ using UnityEngine.UI;
 public class LoadHorsePage : Page
 {
     [SerializeField] private ScrollRect _horsesScrollRect;
-    [SerializeField] private Button _backButton;
-    [SerializeField] private LoadSavesPage _savesPage;
-
-    [SerializeField] private HorseLoadUI _horseUiPrefab;
+    [SerializeField] private ScrollRect _savesScroll;
     [SerializeField] private ToggleGroup _toggleGroup;
+
+    [Space(10)]
+    [SerializeField] private HorseLoadElement _horseUiPrefab;
+    [SerializeField] private SaveElementUI _savePrefab;
+
+    [SerializeField] private Button _backButton;
+    [SerializeField] private Button _loadButton;
+    [SerializeField] private Button _editButton;
+    [SerializeField] private Button _removeButton;
+
 
     private void Start()
     {
@@ -30,19 +36,34 @@ public class LoadHorsePage : Page
     {
         base.Open(popUpLevel);
 
-        Storage storage = new(GameManager.Instance.Settings.PathSave);
-        List<HorseBase> horses = storage.GetHorses().ToList();
-        horses.Sort((x, y) => x.CreationDate.CompareTo(y.CreationDate));
+        PageManager.Instance.DisplayLoadingPage(true);
 
-        foreach(var horse in horses)
+        StorageSystem storage = new();
+        storage.GetHorses().RunOnMainThread((result) =>
         {
-            var horseUi = Instantiate(_horseUiPrefab.gameObject, _horsesScrollRect.content).GetComponent<HorseLoadUI>();
+            List<HorseBase> horses = result.ToList();
+            horses.Sort((x, y) => x.CreationDate.CompareTo(y.CreationDate));
 
-            UnityAction<HorseBase> onHorseClicked = new(_savesPage.Open);
-            horseUi.Initiate(horse, onHorseClicked, _toggleGroup);
-            horseUi.OnDestroyed += OnHorseRemoved;
-            _savesPage.HorseInfoPanel.HorseUpdated += horseUi.UpdateHorseInfo;
-        }
+            foreach (var horse in horses)
+            {
+                var horseElement = Instantiate(_horseUiPrefab, _horsesScrollRect.content)
+                    .Initiate(horse, null, _toggleGroup);
+
+                horseElement.OnDestroyed += OnHorseRemoved;
+            }
+
+            PageManager.Instance.DisplayLoadingPage(false);
+        });
+    }
+
+    private void ClearHorses()
+    {
+
+    }
+
+    private void ClearSaves()
+    {
+
     }
 
     public override void Close()

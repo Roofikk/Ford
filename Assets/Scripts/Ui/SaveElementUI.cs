@@ -14,16 +14,12 @@ public class SaveElementUI : MonoBehaviour
 
     [Space(10)]
     [Header("Buttons")]
-    [SerializeField] private Button _removeButton;
-    [SerializeField] private Button _editButton;
+    [SerializeField] private Button _moreInfoButton;
 
     private Toggle _toggle;
     private Image _image;
 
     private SaveData _saveData;
-
-    public Button RemoveButton { get { return _removeButton; } }
-    public Button EditButton { get { return _editButton; } }
 
     public event Action OnClicked;
     public event Action OnRemoved;
@@ -52,8 +48,7 @@ public class SaveElementUI : MonoBehaviour
     private void OnDestroy()
     {
         _toggle.group = null;
-        _removeButton.onClick.RemoveAllListeners();
-        _editButton.onClick.RemoveAllListeners();
+        _moreInfoButton.onClick.RemoveAllListeners();
     }
 
     public void UpdateInfo()

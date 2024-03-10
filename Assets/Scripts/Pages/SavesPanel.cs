@@ -31,7 +31,6 @@ public class SavesPanel : MonoBehaviour
             SaveElementUI saveObject = Instantiate(_savePrefab.gameObject, _savesScrollRect.content.transform).GetComponent<SaveElementUI>();
             saveObject.Initiate(saveData, _toggleGroup);
             saveObject.EditButton.onClick.AddListener(() => { OpenEditSavePage(saveData); });
-            saveObject.RemoveButton.onClick.AddListener(() => { PageManager.Instance.OpenWarningPage(new("Удаление", "Вы уверены, что хотите безвозвратно удалить сохранение?", saveObject.RemoveSave, null, null), 1); });
             saveObject.OnClicked += () => { SelectedHorseSave = saveData; };
             _editSavePage.HorseUpdated += saveObject.UpdateInfo;
         }
