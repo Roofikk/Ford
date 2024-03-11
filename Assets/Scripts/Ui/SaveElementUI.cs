@@ -21,9 +21,6 @@ public class SaveElementUI : MonoBehaviour
 
     private SaveData _saveData;
 
-    public event Action OnClicked;
-    public event Action OnRemoved;
-
     public void Initiate(SaveData saveData, ToggleGroup toggleGroup)
     {
         _saveData = saveData;
@@ -67,8 +64,6 @@ public class SaveElementUI : MonoBehaviour
             _image.color = _selectedColor;
         else
             _image.color = _toggle.colors.normalColor;
-
-        OnClicked?.Invoke();
     }
 
     public void RemoveSave()
@@ -78,7 +73,6 @@ public class SaveElementUI : MonoBehaviour
 
         Destroy(gameObject);
         PageManager.Instance.CloseWarningPage();
-        OnRemoved?.Invoke();
     }
 
     public void EditSave(SaveData saveData)

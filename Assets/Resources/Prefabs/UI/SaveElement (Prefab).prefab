@@ -264,13 +264,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: fdsagfsdg adsfg aswefsd ffdsagfsdg adsfg aswefsd ffdsagfsdg adsfg aswefsd
-    ffdsagfsdg adsfg aswefsd ffdsagfsdg adsfg aswefsd ffdsagfsdg adsfg aswefsd ffdsagfsdg
-    adsfg aswefsd ffdsagfsdg adsfg aswefsd ffdsagfsdg adsfg aswefsd ffdsagfsdg adsfg
-    aswefsd ffdsagfsdg adsfg aswefsd ffdsagfsdg adsfg aswefsd ffdsagfsdg adsfg aswefsd
-    ffdsagfsdg adsfg aswefsd ffdsagfsdg adsfg aswefsd ffdsagfsdg adsfg aswefsd ffdsagfsdg
-    adsfg aswefsd ffdsagfsdg adsfg aswefsd ffdsagfsdg adsfg aswefsd ffdsagfsdg adsfg
-    aswefsd ffdsagfsdg adsfg aswefsd f
+  m_text: Description text...
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: a134be86246482d4f8e4a96398d75dee, type: 2}
   m_sharedMaterial: {fileID: 4564528884308107084, guid: a134be86246482d4f8e4a96398d75dee,
@@ -668,8 +662,7 @@ MonoBehaviour:
   _dateText: {fileID: 4037429252374661924}
   _descriptionText: {fileID: 4037429252487071691}
   _selectedColor: {r: 1, g: 0.7529412, b: 0, a: 1}
-  _removeButton: {fileID: 0}
-  _moreInfoButton: {fileID: 0}
+  _moreInfoButton: {fileID: 8807478691307302611}
 --- !u!114 &2824945711521159592
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -748,7 +741,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -802,7 +795,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -20, y: -15}
+  m_AnchoredPosition: {x: -25, y: -15}
   m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 1, y: 1}
 --- !u!222 &7987370496323899705

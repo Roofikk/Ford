@@ -7,6 +7,6 @@ namespace Ford.WebApi.Data
         public string LastName { get; set; }
         public string PhoneNumber { get; set; }
         public bool IsOwner { get; set; }
-        public string RuleAccess { get; set; }
+        public string AccessRole { get; set; }
     }
 }

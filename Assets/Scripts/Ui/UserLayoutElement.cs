@@ -19,11 +19,16 @@ public class UserLayoutElement : MonoBehaviour
         });
     }
 
-    public HorseUserDto Initiate(HorseUserDto user, Action onRemoved)
+    public UserLayoutElement Initiate(HorseUserDto user, Action onRemoved)
     {
         _fullName.text = $"{user.FirstName} {user.LastName}".Trim();
         OnRemoved += onRemoved;
-        return user;
+        return this;
+    }
+
+    public void DisplayRemoveButton(bool enabled)
+    {
+        _removeButton.gameObject.SetActive(enabled);
     }
 
     private void OnDestroy()

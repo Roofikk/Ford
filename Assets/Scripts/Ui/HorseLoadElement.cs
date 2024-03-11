@@ -1,10 +1,8 @@
 using Ford.SaveSystem;
-using Ford.SaveSystem.Ver2;
 using System;
 using System.Linq;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Toggle))]
@@ -26,7 +24,7 @@ public class HorseLoadElement : MonoBehaviour
 
     public event Action OnDestroyed;
 
-    public HorseLoadElement Initiate(HorseBase horse, UnityAction<HorseBase> onClick, ToggleGroup group)
+    public HorseLoadElement Initiate(HorseBase horse, Action onClick, Action onMoreButtonClicked, ToggleGroup group)
     {
         _horseData = horse;
         _horseNameText.text = horse.Name;
@@ -85,7 +83,6 @@ public class HorseLoadElement : MonoBehaviour
                 if (value)
                 {
                     _image.color = _selectingColor;
-                    onClick?.Invoke(_horseData);
                 }
                 else
                 {
@@ -94,7 +91,7 @@ public class HorseLoadElement : MonoBehaviour
             });
         }
 
-        _moreButton.onClick.AddListener(OpenWarningDeletePage);
+        _moreButton.onClick.AddListener(() => { onMoreButtonClicked?.Invoke(); });
         return this;
     }
 
@@ -103,24 +100,6 @@ public class HorseLoadElement : MonoBehaviour
         _horseNameText.text = _horseData.Name;
         _ownerFullNameText.text = _horseData.OwnerName;
         _locationText.text = _horseData.City;
-    }
-
-    private void OpenWarningDeletePage()
-    {
-        PageManager.Instance.OpenWarningPage(new WarningData(
-            "”даление", 
-            "¬ы действительно хотите безвозвратно удалить данную лошадь и все ее сохранени€?", 
-            OpenHorseInfo, null, null), 4);
-    }
-
-    private void OpenHorseInfo()
-    {
-        Storage storage = new(GameManager.Instance.Settings.PathSave);
-        storage.DeleteHorse(_horseData.HorseId);
-
-        Destroy(gameObject);
-
-        PageManager.Instance.CloseWarningPage();
     }
 
     private void OnDestroy()

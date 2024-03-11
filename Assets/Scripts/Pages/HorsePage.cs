@@ -42,9 +42,11 @@ public class HorsePage : Page
     private List<FieldMaskValidate> _validators;
     public event Action<HorseBase> OnApply;
 
+    private HorseBase _horseBase;
+
     private void Start()
     {
-        _inputFields = transform.GetComponentsInChildren<TMP_InputField>().ToList();
+        _inputFields ??= transform.GetComponentsInChildren<TMP_InputField>().ToList();
         _validators = new();
 
         foreach (var field in _inputFields)
@@ -69,40 +71,41 @@ public class HorsePage : Page
     public override void Open<T>(T horseData, int popUpLevel)
     {
         base.Open(horseData, popUpLevel);
-        PageManager.Instance.OpenPage(_ownerPanel);
 
-        if (horseData is not HorseBase data)
+        if (horseData is not HorsePageParam param)
         {
-            Debug.LogError($"Need {nameof(HorseBase)} param");
+            Debug.LogError($"Need {typeof(HorsePageParam)} param");
             return;
         }
 
-        //Field inputs
-        _headerText.text = $"Изменение данных о {data.Name}";
-        _horseNameInputField.text = data.Name;
-        _sexText.text = data.Sex;
-        _birthdayInputFiled.text = data.BirthDate?.ToString("dd.MM.yyyy");
-        _descriptionInputField.text = data.Description;
-        _countryInputFiled.text = data.Country;
-        _cityInputFiled.text = data.City;
-        _regionInputFiled.text = data.Region;
-
-        var owner = data.Users.SingleOrDefault(o => o.IsOwner);
-
-        if (owner != null)
+        _horseBase = param.Horse;
+        switch (param.HorsePageMode)
         {
-            _ownerPanel.SetRealOwner(owner);
+            case HorsePageMode.Read:
+                PageManager.Instance.OpenPage(_ownerPanel, new OwnerPanelParam(OwnerPanelMode.Read, param.Horse.Users.ToList()), popUpLevel + 1);
+                OpenReadMode();
+                break;
+            case HorsePageMode.Write:
+                PageManager.Instance.OpenPage(_ownerPanel, new OwnerPanelParam(OwnerPanelMode.Write, param.Horse.Users.ToList()), popUpLevel + 1);
+                OpenWriteMode();
+                break;
         }
 
-        _applyButtonText.text = "Применить";
-        _applyButton.onClick.AddListener(EditHorse);
-        _cancelButton.onClick.AddListener(Close);
+        //Field inputs
+        _headerText.text = _horseBase.Name;
+        _horseNameInputField.text = param.Horse.Name;
+        _sexText.text = param.Horse.Sex;
+        _birthdayInputFiled.text = param.Horse.BirthDate?.ToString("dd.MM.yyyy");
+        _descriptionInputField.text = param.Horse.Description;
+        _countryInputFiled.text = param.Horse.Country;
+        _cityInputFiled.text = param.Horse.City;
+        _regionInputFiled.text = param.Horse.Region;
     }
 
     public override void Open(int popUpLevel = 0)
     {
         base.Open(popUpLevel);
-        PageManager.Instance.OpenPage(_ownerPanel);
+        PageManager.Instance.OpenPage(_ownerPanel, popUpLevel);
 
         _headerText.text = "Новый проект";
 
@@ -130,6 +133,32 @@ public class HorsePage : Page
 
         _applyButton.onClick.RemoveAllListeners();
         _cancelButton.onClick.RemoveAllListeners();
+    }
+
+    private void OpenReadMode()
+    {
+        _inputFields ??= GetComponentsInChildren<TMP_InputField>().ToList();
+        foreach (var field in _inputFields)
+        {
+            field.SetInteractable(false);
+        }
+
+        _applyButtonText.text = "Изменить";
+        _applyButton.onClick.AddListener(EditHorse);
+        _cancelButton.onClick.AddListener(Close);
+    }
+
+    private void OpenWriteMode()
+    {
+        _inputFields ??= GetComponentsInChildren<TMP_InputField>().ToList();
+        foreach (var field in _inputFields)
+        {
+            field.SetInteractable(true);
+        }
+
+        _applyButtonText.text = "Сохранить";
+        _applyButton.onClick.AddListener(EditHorse);
+        _cancelButton.onClick.AddListener(Close);
     }
 
     private void EditHorse()
@@ -219,7 +248,7 @@ public class HorsePage : Page
             {
                 UserId = user.Id,
                 IsOwner = false,
-                RuleAccess = user.RuleAccess,
+                RuleAccess = user.AccessRole,
             });
         }
 

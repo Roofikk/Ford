@@ -30,8 +30,6 @@ public class SavesPanel : MonoBehaviour
         {
             SaveElementUI saveObject = Instantiate(_savePrefab.gameObject, _savesScrollRect.content.transform).GetComponent<SaveElementUI>();
             saveObject.Initiate(saveData, _toggleGroup);
-            saveObject.EditButton.onClick.AddListener(() => { OpenEditSavePage(saveData); });
-            saveObject.OnClicked += () => { SelectedHorseSave = saveData; };
             _editSavePage.HorseUpdated += saveObject.UpdateInfo;
         }
     }

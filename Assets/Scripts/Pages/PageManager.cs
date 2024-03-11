@@ -52,7 +52,11 @@ public class PageManager : MonoBehaviour
 
     public void OpenPage<T>(Page page, T param, int popUpLevel = 0)
     {
+        if (popUpLevel == 0)
+            CurrentPage?.Close();
+
         page.Open(param, popUpLevel);
+        CurrentPage = page;
     }
 
     public void OpenWarningPage(WarningData data, int popUpLevel = 1)

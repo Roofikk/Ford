@@ -31,7 +31,7 @@ public class OwnerPanel : Page
 
     public string OwnerName => _owner == null ? _ownerNameInput.text : $"{_owner.FirstName} {_owner.LastName}".Trim();
     public string OwnerPhoneNumber => _owner == null ? _ownerPhoneNumberInput.text : _owner.PhoneNumber;
-    public string AccessRole => _owner == null ? ((UserRoleAccess)_accessDropdown.value).ToString() : _owner.RuleAccess;
+    public string AccessRole => _owner == null ? ((UserRoleAccess)_accessDropdown.value).ToString() : _owner.AccessRole;
     public HorseUserDto Owner => _owner;
     public ICollection<HorseUserDto> Users => _users;
 
@@ -46,7 +46,7 @@ public class OwnerPanel : Page
                 FirstName = Player.UserData.FirstName,
                 LastName = Player.UserData.LastName,
                 PhoneNumber = Player.UserData.PhoneNumber,
-                RuleAccess = UserRoleAccess.Creator.ToString(),
+                AccessRole = UserRoleAccess.Creator.ToString(),
                 IsOwner = true,
             });
         });
@@ -58,7 +58,7 @@ public class OwnerPanel : Page
         _addUserButton.onClick.AddListener(() =>
         {
             PageManager.Instance.OpenPage(_searchPage, 2);
-            _searchPage.OnAddButtonClicked += AddUser;
+            _searchPage.OnAddButtonClicked += (user) => AddUser(user);
         });
     }
 
@@ -87,6 +87,43 @@ public class OwnerPanel : Page
         }
     }
 
+    public override void Open<T>(T param, int popUpLevel = 0)
+    {
+        base.Open(param, popUpLevel);
+
+        if (param is not OwnerPanelParam ownerParam)
+        {
+            Debug.LogError($"Need {typeof(OwnerPanelParam)} param");
+            return;
+        }
+
+        HorseUserDto owner = ownerParam.Users.SingleOrDefault(u => u.IsOwner);
+
+        switch (ownerParam.Mode)
+        {
+            case OwnerPanelMode.Read:
+                SetRealOwner(owner);
+
+                foreach (var user in ownerParam.Users)
+                {
+                    AddUser(user, false, false);
+                }
+
+                OpenReadMode();
+                break;
+            case OwnerPanelMode.Write:
+                SetRealOwner(owner);
+
+                foreach (var user in ownerParam.Users)
+                {
+                    AddUser(user, true, false);
+                }
+
+                OpenWriteMode();
+                break;
+        }
+    }
+
     public override void Close()
     {
         base.Close();
@@ -98,6 +135,26 @@ public class OwnerPanel : Page
         {
             Destroy(t.gameObject);
         }
+    }
+
+    private void OpenReadMode()
+    {
+        _addYourselfButton.gameObject.SetActive(false);
+        _searchUserButton.gameObject.SetActive(false);
+        _removeOwnerButton.gameObject.SetActive(false);
+        _addUserButton.gameObject.SetActive(false);
+
+        _accessDropdown.interactable = false;
+    }
+
+    private void OpenWriteMode()
+    {
+        _addYourselfButton.gameObject.SetActive(true);
+        _searchUserButton.gameObject.SetActive(true);
+        _removeOwnerButton.gameObject.SetActive(true);
+        _addUserButton.gameObject.SetActive(true);
+
+        _accessDropdown.interactable = true;
     }
 
     public void RefreshData()
@@ -138,7 +195,7 @@ public class OwnerPanel : Page
             DisplayAccessRole(true);
         }
 
-        _accessDropdown.value = (int)Enum.Parse<UserRoleAccess>(user.RuleAccess);
+        _accessDropdown.value = (int)Enum.Parse<UserRoleAccess>(user.AccessRole);
         _removeOwnerButton.gameObject.SetActive(true);
     }
 
@@ -155,28 +212,39 @@ public class OwnerPanel : Page
         _owner = null;
     }
 
-    private void AddUser(HorseUserDto user)
+    private void AddUser(HorseUserDto user, bool displayRemove = true, bool displayMessage = true)
     {
         if (_users.Any(u => u.Id == user.Id))
         {
-            ToastMessage.Show("Пользователь уже добавлен");
+            if (displayMessage)
+            {
+                ToastMessage.Show("Пользователь уже добавлен");
+            }
             return;
         }
 
         if (user.Id == Player.UserData.UserId)
         {
-            ToastMessage.Show("Вы не можете добавить себя");
+            if (displayMessage)
+            {
+                ToastMessage.Show("Вы не можете добавить себя");
+            }
             return;
         }
 
         if (_owner != null && _owner.Id == user.Id)
         {
-            ToastMessage.Show("Пользователь уже находится на позиции хозяина");
+            if (displayMessage)
+            {
+                ToastMessage.Show("Пользователь уже находится на позиции хозяина");
+            }
             return;
         }
 
         user.IsOwner = false;
-        Instantiate(_userElementPrefab, _usersGroup).Initiate(user, () => { OnUserRemoved(user); });
+        Instantiate(_userElementPrefab, _usersGroup)
+            .Initiate(user, () => { OnUserRemoved(user); })
+            .DisplayRemoveButton(displayRemove);
         _users.Add(user);
     }
 
