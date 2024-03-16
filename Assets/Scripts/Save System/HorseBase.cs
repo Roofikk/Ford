@@ -20,5 +20,34 @@ namespace Ford.SaveSystem
         public DateTime LastUpdate { get; set; }
         public ICollection<HorseUserDto> Users { get; set; }
         public ICollection<SaveData> Saves { get; set; }
+
+        public HorseBase(HorseBase horse)
+        {
+            HorseId = horse.HorseId;
+            Name = horse.Name;
+            Description = horse.Description;
+            BirthDate = horse.BirthDate;
+            Sex = horse.Sex;
+            City = horse.City;
+            Region = horse.Region;
+            Country = horse.Country;
+            OwnerName = horse.OwnerName;
+            OwnerPhoneNumber = horse.OwnerPhoneNumber;
+            CreationDate = horse.CreationDate;
+            LastUpdate = horse.LastUpdate;
+            Users = horse.Users;
+            Saves = horse.Saves;
+        }
+
+        public HorseBase()
+        {
+        }
+    }
+
+    public enum HorseSex
+    {
+        None,
+        Male,
+        Female
     }
 }

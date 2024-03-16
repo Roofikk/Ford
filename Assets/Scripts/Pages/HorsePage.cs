@@ -4,7 +4,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using Ford.SaveSystem.Ver2;
 using Ford.SaveSystem.Ver2.Dto;
 using Ford.SaveSystem;
 using System.Linq;
@@ -17,7 +16,7 @@ public class HorsePage : Page
 
     [Header("Input fields")]
     [SerializeField] private TMP_InputField _horseNameInputField;
-    [SerializeField] private TextMeshProUGUI _sexText;
+    [SerializeField] private TMP_Dropdown _sexDropdown;
     [SerializeField] private TMP_InputField _birthdayInputFiled;
     [SerializeField] private TMP_InputField _descriptionInputField;
     [SerializeField] private TMP_InputField _countryInputFiled;
@@ -27,9 +26,9 @@ public class HorsePage : Page
 
     [Space(10)]
     [Header("Buttons")]
+    [SerializeField] private Button _closeButton;
     [SerializeField] private Button _applyButton;
-    [SerializeField] private TextMeshProUGUI _applyButtonText;
-    [SerializeField] private Button _cancelButton;
+    [SerializeField] private Button _declineButton;
 
     [Space(10)]
     [SerializeField] private LoadScenePage _loadScenePage;
@@ -40,9 +39,10 @@ public class HorsePage : Page
 
     private List<TMP_InputField> _inputFields;
     private List<FieldMaskValidate> _validators;
-    public event Action<HorseBase> OnApply;
-
     private HorseBase _horseBase;
+
+    public event Action<HorseBase> OnDeleted;
+    public event Action<HorseBase> OnApply;
 
     private void Start()
     {
@@ -63,6 +63,17 @@ public class HorsePage : Page
         _applyButton.onClick.RemoveAllListeners();
     }
 
+    public override void Open(int popUpLevel = 0)
+    {
+        base.Open(popUpLevel);
+
+        if (_horseBase == null)
+        {
+            PageManager.Instance.OpenPage(_ownerPanel, popUpLevel);
+            SetNormalMode();
+        }
+    }
+
     /// <summary>
     /// Open page with field inputs. This methods for update horse save, not create horse
     /// </summary>
@@ -70,8 +81,6 @@ public class HorsePage : Page
     /// <param name="data"></param>
     public override void Open<T>(T horseData, int popUpLevel)
     {
-        base.Open(horseData, popUpLevel);
-
         if (horseData is not HorsePageParam param)
         {
             Debug.LogError($"Need {typeof(HorsePageParam)} param");
@@ -82,42 +91,39 @@ public class HorsePage : Page
         switch (param.HorsePageMode)
         {
             case HorsePageMode.Read:
-                PageManager.Instance.OpenPage(_ownerPanel, new OwnerPanelParam(OwnerPanelMode.Read, param.Horse.Users.ToList()), popUpLevel + 1);
-                OpenReadMode();
+                SetReadMode();
+                PageManager.Instance.OpenPage(_ownerPanel, 
+                    new OwnerPanelParam(OwnerPanelMode.Read, param.Horse.Users.ToList()), popUpLevel + 1);
                 break;
             case HorsePageMode.Write:
-                PageManager.Instance.OpenPage(_ownerPanel, new OwnerPanelParam(OwnerPanelMode.Write, param.Horse.Users.ToList()), popUpLevel + 1);
-                OpenWriteMode();
+                SetWriteMode();
+                PageManager.Instance.OpenPage(_ownerPanel, 
+                    new OwnerPanelParam(OwnerPanelMode.Write, param.Horse.Users.ToList()), popUpLevel + 1);
                 break;
         }
+
+        _closeButton.onClick.AddListener(() =>
+        {
+            PageManager.Instance.ClosePage(this);
+        });
 
         //Field inputs
         _headerText.text = _horseBase.Name;
         _horseNameInputField.text = param.Horse.Name;
-        _sexText.text = param.Horse.Sex;
+        _sexDropdown.value = (int)Enum.Parse<HorseSex>(param.Horse.Sex);
         _birthdayInputFiled.text = param.Horse.BirthDate?.ToString("dd.MM.yyyy");
         _descriptionInputField.text = param.Horse.Description;
         _countryInputFiled.text = param.Horse.Country;
         _cityInputFiled.text = param.Horse.City;
         _regionInputFiled.text = param.Horse.Region;
-    }
 
-    public override void Open(int popUpLevel = 0)
-    {
-        base.Open(popUpLevel);
-        PageManager.Instance.OpenPage(_ownerPanel, popUpLevel);
-
-        _headerText.text = "Новый проект";
-
-        _applyButtonText.text = "Начать";
-        _applyButton.onClick.AddListener(StartProject);
-        _cancelButton.onClick.AddListener(Close);
-        _cancelButton.onClick.AddListener(() => { PageManager.Instance.OpenPage(PageManager.Instance.StartPage); });
+        base.Open(horseData, popUpLevel);
     }
 
     public override void Close()
     {
         base.Close();
+        _horseBase = null;
         PageManager.Instance.ClosePage(_ownerPanel);
 
         foreach (var input in _inputFields)
@@ -132,23 +138,11 @@ public class HorsePage : Page
         }
 
         _applyButton.onClick.RemoveAllListeners();
-        _cancelButton.onClick.RemoveAllListeners();
+        _declineButton.onClick.RemoveAllListeners();
+        _closeButton.onClick.RemoveAllListeners();
     }
 
-    private void OpenReadMode()
-    {
-        _inputFields ??= GetComponentsInChildren<TMP_InputField>().ToList();
-        foreach (var field in _inputFields)
-        {
-            field.SetInteractable(false);
-        }
-
-        _applyButtonText.text = "Изменить";
-        _applyButton.onClick.AddListener(EditHorse);
-        _cancelButton.onClick.AddListener(Close);
-    }
-
-    private void OpenWriteMode()
+    private void SetNormalMode()
     {
         _inputFields ??= GetComponentsInChildren<TMP_InputField>().ToList();
         foreach (var field in _inputFields)
@@ -156,9 +150,62 @@ public class HorsePage : Page
             field.SetInteractable(true);
         }
 
-        _applyButtonText.text = "Сохранить";
+        _headerText.text = "Новый проект";
+        _sexDropdown.interactable = true;
+
+        _applyButton.GetComponentInChildren<TextMeshProUGUI>().text = "Начать";
+        _applyButton.onClick.AddListener(StartProject);
+
+        _declineButton.GetComponentInChildren<TextMeshProUGUI>().text = "Назад";
+        _declineButton.onClick.AddListener(Close);
+        _declineButton.onClick.AddListener(() => { PageManager.Instance.OpenPage(PageManager.Instance.StartPage); });
+        _closeButton.onClick.AddListener(() => { PageManager.Instance.OpenPage(PageManager.Instance.StartPage); });
+    }
+
+    private void SetReadMode()
+    {
+        _inputFields ??= GetComponentsInChildren<TMP_InputField>().ToList();
+        foreach (var field in _inputFields)
+        {
+            field.SetInteractable(false);
+        }
+
+        _sexDropdown.interactable = false;
+
+        _applyButton.GetComponentInChildren<TextMeshProUGUI>().text = "Изменить";
+        var copy = new HorseBase(_horseBase);
+
+        _applyButton.onClick.AddListener(() =>
+        {
+            PageManager.Instance.ClosePage(this);
+            PageManager.Instance.OpenPage(this, new HorsePageParam(HorsePageMode.Write, copy), 2);
+        });
+
+        _declineButton.GetComponentInChildren<TextMeshProUGUI>().text = "Удалить";
+        _declineButton.onClick.AddListener(Close);
+    }
+
+    private void SetWriteMode()
+    {
+        _inputFields ??= GetComponentsInChildren<TMP_InputField>().ToList();
+        foreach (var field in _inputFields)
+        {
+            field.SetInteractable(true);
+        }
+
+        _sexDropdown.interactable = true;
+
+        _applyButton.GetComponentInChildren<TextMeshProUGUI>().text = "Сохранить";
         _applyButton.onClick.AddListener(EditHorse);
-        _cancelButton.onClick.AddListener(Close);
+
+        var copy = new HorseBase(_horseBase);
+
+        _declineButton.GetComponentInChildren<TextMeshProUGUI>().text = "Отмена";
+        _declineButton.onClick.AddListener(() =>
+        {
+            PageManager.Instance.ClosePage(this);
+            PageManager.Instance.OpenPage(this, new HorsePageParam(HorsePageMode.Read, copy), 2);
+        });
     }
 
     private void EditHorse()
@@ -171,7 +218,7 @@ public class HorsePage : Page
             Name = _horseNameInputField.text,
             Description = _descriptionInputField.text,
             BirthDate = _birthdayInputFiled.GetComponent<InputFieldDateValidator>().Date,
-            Sex = _sexText.text,
+            Sex = ((HorseSex)_sexDropdown.value).ToString(),
             Country = _countryInputFiled.text,
             City = _cityInputFiled.text,
             Region = _regionInputFiled.text,
@@ -205,7 +252,7 @@ public class HorsePage : Page
         CreationHorse horse = new()
         {
             Name = _horseNameInputField.text,
-            Sex = _sexText.text,
+            Sex = ((HorseSex)_sexDropdown.value).ToString(),
             BirthDate = _birthdayInputFiled.GetComponent<InputFieldDateValidator>().Date,
             Description = _descriptionInputField.text,
             Country = _countryInputFiled.text,
@@ -276,6 +323,26 @@ public class HorsePage : Page
             {
                 PageManager.Instance.DisplayLoadingPage(false);
             };
+        });
+    }
+
+    private void DeleteHorse()
+    {
+        PageManager.Instance.DisplayLoadingPage(true, 6);
+        StorageSystem storage = new();
+
+        storage.DeleteHorse(_horseBase.HorseId).RunOnMainThread((result) =>
+        {
+            if (result)
+            {
+                OnDeleted?.Invoke(_horseBase);
+            }
+            else
+            {
+                OnDeleted?.Invoke(null);
+            }
+
+            PageManager.Instance.DisplayLoadingPage(false);
         });
     }
 

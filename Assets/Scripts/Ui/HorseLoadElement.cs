@@ -83,6 +83,7 @@ public class HorseLoadElement : MonoBehaviour
                 if (value)
                 {
                     _image.color = _selectingColor;
+                    onClick?.Invoke();
                 }
                 else
                 {

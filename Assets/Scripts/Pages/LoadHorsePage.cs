@@ -44,7 +44,7 @@ public class LoadHorsePage : Page
     {
         base.Open(popUpLevel);
 
-        PageManager.Instance.DisplayLoadingPage(true);
+        PageManager.Instance.DisplayLoadingPage(true, 2);
 
         StorageSystem storage = new();
         storage.GetHorses().RunOnMainThread((result) =>
@@ -73,7 +73,10 @@ public class LoadHorsePage : Page
 
     private void ClearSaves()
     {
-
+        foreach (Transform t in _savesScroll.content.transform)
+        {
+            Destroy(t.gameObject);
+        }
     }
 
     private void FillHorseList(List<HorseBase> horses)
@@ -86,13 +89,22 @@ public class LoadHorsePage : Page
                 .Initiate(horse,
                     () => { FillSaveList(horse); },
                     () => { OpenHorseInfoPage(horse); },
-                    _saveToggleGroup);
+                    _horseToggleGroup);
         }
+
+        _emptyHorseListText.gameObject.SetActive(horses.Count == 0);
     }
 
     private void FillSaveList(HorseBase horse)
     {
+        ClearSaves();
+        foreach (var save in horse.Saves)
+        {
+            Instantiate(_savePrefab, _savesScroll.content)
+                .Initiate(save, _saveToggleGroup);
+        }
 
+        _emptySaveListText.gameObject.SetActive(horse.Saves.Count == 0);
     }
 
     public void OpenHorseInfoPage(HorseBase horse)

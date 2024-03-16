@@ -35,6 +35,8 @@ public class OwnerPanel : Page
     public HorseUserDto Owner => _owner;
     public ICollection<HorseUserDto> Users => _users;
 
+    public OwnerPanelMode Mode { get; private set; }
+
     private void Start()
     {
         _removeOwnerButton.onClick.AddListener(RemoveOwner);
@@ -79,6 +81,8 @@ public class OwnerPanel : Page
         _addUserButton.gameObject.SetActive(Player.IsLoggedIn);
         _removeOwnerButton.gameObject.SetActive(false);
 
+        Mode = OwnerPanelMode.Write;
+
         DisplayAccessRole(false);
 
         foreach (var t in _usersGroup.GetComponentsInChildren<UserLayoutElement>())
@@ -97,29 +101,29 @@ public class OwnerPanel : Page
             return;
         }
 
+        _users = new();
         HorseUserDto owner = ownerParam.Users.SingleOrDefault(u => u.IsOwner);
+        Mode = ownerParam.Mode;
 
-        switch (ownerParam.Mode)
+        switch (Mode)
         {
             case OwnerPanelMode.Read:
+                OpenReadMode();
                 SetRealOwner(owner);
 
                 foreach (var user in ownerParam.Users)
                 {
                     AddUser(user, false, false);
                 }
-
-                OpenReadMode();
                 break;
             case OwnerPanelMode.Write:
+                OpenWriteMode();
                 SetRealOwner(owner);
 
                 foreach (var user in ownerParam.Users)
                 {
                     AddUser(user, true, false);
                 }
-
-                OpenWriteMode();
                 break;
         }
     }
@@ -130,6 +134,7 @@ public class OwnerPanel : Page
 
         RemoveOwner();
         _accessDropdown.value = 0;
+        Mode = OwnerPanelMode.Write;
 
         foreach (var t in _usersGroup.GetComponentsInChildren<UserLayoutElement>())
         {
@@ -196,7 +201,10 @@ public class OwnerPanel : Page
         }
 
         _accessDropdown.value = (int)Enum.Parse<UserRoleAccess>(user.AccessRole);
-        _removeOwnerButton.gameObject.SetActive(true);
+        if (Mode != OwnerPanelMode.Read)
+        {
+            _removeOwnerButton.gameObject.SetActive(true);
+        }
     }
 
     public void RemoveOwner()

@@ -1,3 +1,4 @@
+using Ford.SaveSystem;
 using Ford.SaveSystem.Ver2.Data;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ public class Skeleton : MonoBehaviour
 
     public IReadOnlyCollection<GroupBoneObjects> GroupBones => _groupBones.AsReadOnly();
     public List<Bone> SelectingBones { get; protected set; }
-    public HorseData Data { get; private set; }
+    public HorseBase Data { get; private set; }
 
     private enum State
     {
@@ -42,7 +43,7 @@ public class Skeleton : MonoBehaviour
 
         InitiateBone();
 
-        Data = SceneParameters.GetParam<HorseData>();
+        Data = SceneParameters.GetParam<HorseBase>();
 
         if (Data == null)
             Debug.LogError("Информация о лошади отсутствует. HorseData is null");
