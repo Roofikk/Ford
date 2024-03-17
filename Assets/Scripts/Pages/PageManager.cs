@@ -20,7 +20,7 @@ public class PageManager : MonoBehaviour
     {
         StartProjectObject.OnProjectStarted += OpenStartPage;
 
-        if (StartProjectObject.ProjectStarted)
+        if (StartProjectObject.ProjectStarted && StartPage != null)
         {
             OpenStartPage();
         }

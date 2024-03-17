@@ -4,7 +4,6 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Ford.SaveSystem.Ver2.Dto;
 using Ford.SaveSystem;
 
 public class SavePanel : Page
@@ -64,13 +63,8 @@ public class SavePanel : Page
     {
         base.Close();
 
-        SaveInfo = null;
-
-        _applyButton.onClick.RemoveAllListeners();
         _declineButton.onClick.RemoveAllListeners();
-
-        _headerInputField.text = "";
-        _descriptionInputField.text = "";
+        _applyButton.onClick.RemoveAllListeners();
     }
 
     private void OpenMode(PageMode mode, ISaveInfo saveInfo, int popUpLevel)
@@ -155,7 +149,6 @@ public class SavePanel : Page
         _dateInputField.text = saveData.Date.ToString("dd.MM.yyyy");
     }
 
-    // дописать апдейт сохранения
     private void EditSave()
     {
         if (!ValidateInput())
@@ -192,8 +185,7 @@ public class SavePanel : Page
         });
     }
 
-    // дописать сохранение
-    public void Save()
+    private void Save()
     {
         if (!ValidateInput())
         {

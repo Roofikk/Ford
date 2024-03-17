@@ -14,12 +14,11 @@ public class StartProjectObject : MonoBehaviour
 
     void Start()
     {
-        // Show loading
-        _loadingPage.Open(5);
-        FordApiClient.SetHost(_projectSettings.HostWebApi);
-
         if (!ProjectStarted)
         {
+            _loadingPage.Open(5);
+            FordApiClient.SetHost(_projectSettings.HostWebApi);
+
             Player.Authorize(onAuthorizeFinished: () =>
             {
                 _playerAuthorizeFinished = true;

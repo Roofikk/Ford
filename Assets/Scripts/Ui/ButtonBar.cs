@@ -1,8 +1,11 @@
+using Ford.SaveSystem;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ButtonBar : MonoBehaviour
 {
+    [SerializeField] private Skeleton _skeleton;
     [SerializeField] private Button _exitProject;
     [SerializeField] private Button _settingPageOpen;
     [SerializeField] private Button _savePageOpen;
@@ -42,11 +45,18 @@ public class ButtonBar : MonoBehaviour
 
     private void OnSettingPageOpenClicked()
     {
-        PageManager.Instance.OpenPage(_settingsPage, 1);
+        PageManager.Instance.OpenPage(_settingsPage, 2);
     }
 
     private void OnSaveButtonClicked()
     {
-        PageManager.Instance.OpenPage(_savePage, 1);
+        FullSaveInfo save = new()
+        {
+            HorseId = _skeleton.Data.HorseId,
+            Date = DateTime.Now,
+        };
+
+        save.Bones = _skeleton.GetBonesForSave();
+        PageManager.Instance.OpenPage(_savePage, new SavePanelParam(PageMode.Write, save), 2);
     }
 }

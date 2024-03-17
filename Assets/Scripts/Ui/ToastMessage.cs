@@ -91,7 +91,7 @@ public class ToastMessage : MonoBehaviour
         }
         else
         {
-            toastObject = Instantiate(toastPrefab, GameObject.Find("ToastCanvas").transform);
+            toastObject = Instantiate(toastPrefab, GameObject.Find("UI (Canvas)").transform);
         }
 
         ToastMessage toast = toastObject.GetComponent<ToastMessage>();

@@ -1,5 +1,6 @@
 using Ford.SaveSystem;
 using Ford.SaveSystem.Ver2.Data;
+using Ford.WebApi.Data;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -192,9 +193,9 @@ public class Skeleton : MonoBehaviour
         }
     }
 
-    public List<Ford.SaveSystem.Ver2.Data.BoneData> GetBonesForSave()
+    public List<BoneSave> GetBonesForSave()
     {
-        List<Ford.SaveSystem.Ver2.Data.BoneData> bones = new();
+        List<BoneSave> bones = new();
 
         foreach (var group in _groupBones)
         {
@@ -204,9 +205,19 @@ public class Skeleton : MonoBehaviour
                 {
                     bones.Add(new()
                     {
-                        Id = bone.BoneData.Id,
-                        Position = new(bone.transform.position.x, bone.transform.position.y, bone.transform.position.z),
-                        Rotation = new(bone.transform.rotation.eulerAngles.x, bone.transform.rotation.eulerAngles.y, bone.transform.rotation.eulerAngles.z)
+                        BoneId = bone.BoneData.Id,
+                        Position = new()
+                        {
+                            x = bone.transform.position.x,
+                            y = bone.transform.position.y,
+                            z = bone.transform.position.z
+                        },
+                        Rotation = new()
+                        {
+                            x = bone.transform.rotation.eulerAngles.x,
+                            y = bone.transform.rotation.eulerAngles.y,
+                            z = bone.transform.rotation.eulerAngles.z
+                        }
                     });
                 }
             }
