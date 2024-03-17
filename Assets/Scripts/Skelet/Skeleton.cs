@@ -135,7 +135,7 @@ public class Skeleton : MonoBehaviour
                 if (save.Bones == null)
                     return;
 
-                var findingBone = save.Bones.First((b) => b.Id == bone.BoneData.Id);
+                var findingBone = save.Bones.First((b) => b.BoneId == bone.BoneData.Id);
 
                 if (findingBone != null)
                 {

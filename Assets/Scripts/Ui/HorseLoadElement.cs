@@ -22,9 +22,43 @@ public class HorseLoadElement : MonoBehaviour
     private Toggle _toggle;
     private HorseBase _horseData;
 
-    public event Action OnDestroyed;
+    public HorseBase HorseData => _horseData;
 
     public HorseLoadElement Initiate(HorseBase horse, Action onClick, Action onMoreButtonClicked, ToggleGroup group)
+    {
+        _horseData = horse;
+
+        UpdateHorseInfo(horse);
+
+        if (_image == null)
+        {
+            _image = GetComponent<Image>();
+        }
+
+        if (_toggle == null)
+        {
+            _toggle = GetComponent<Toggle>();
+            _toggle.group = group;
+
+            _toggle.onValueChanged.AddListener((value) =>
+            {
+                if (value)
+                {
+                    _image.color = _selectingColor;
+                    onClick?.Invoke();
+                }
+                else
+                {
+                    _image.color = _normalColor;
+                }
+            });
+        }
+
+        _moreButton.onClick.AddListener(() => { onMoreButtonClicked?.Invoke(); });
+        return this;
+    }
+
+    public void UpdateHorseInfo(HorseBase horse)
     {
         _horseData = horse;
         _horseNameText.text = horse.Name;
@@ -67,44 +101,5 @@ public class HorseLoadElement : MonoBehaviour
         {
             _locationText.text = "Неизвестно";
         }
-
-        if (_image == null)
-        {
-            _image = GetComponent<Image>();
-        }
-
-        if (_toggle == null)
-        {
-            _toggle = GetComponent<Toggle>();
-            _toggle.group = group;
-
-            _toggle.onValueChanged.AddListener((value) =>
-            {
-                if (value)
-                {
-                    _image.color = _selectingColor;
-                    onClick?.Invoke();
-                }
-                else
-                {
-                    _image.color = _normalColor;
-                }
-            });
-        }
-
-        _moreButton.onClick.AddListener(() => { onMoreButtonClicked?.Invoke(); });
-        return this;
-    }
-
-    public void UpdateHorseInfo()
-    {
-        _horseNameText.text = _horseData.Name;
-        _ownerFullNameText.text = _horseData.OwnerName;
-        _locationText.text = _horseData.City;
-    }
-
-    private void OnDestroy()
-    {
-        OnDestroyed?.Invoke();
     }
 }

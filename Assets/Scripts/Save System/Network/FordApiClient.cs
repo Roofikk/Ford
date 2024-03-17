@@ -254,10 +254,10 @@ namespace Ford.WebApi
         #endregion
 
         #region Saves
-        public async Task<ResponseResult<IEnumerable<SaveInfo>>> GetSavesAsync(string accessToken, long horseId)
+        public async Task<ResponseResult<ICollection<SaveInfo>>> GetSavesAsync(string accessToken, long horseId, int below = 0, int amount = 20)
         {
-            Uri uri = new Uri(_hostUri, $"{_savesUri}?horseId={horseId}");
-            var result = await GetRequest<IEnumerable<SaveInfo>>(uri, accessToken);
+            Uri uri = new Uri(_hostUri, $"{_savesUri}?horseId={horseId}&below={below}&amount={amount}");
+            var result = await GetRequest<ICollection<SaveInfo>>(uri, accessToken);
             return result;
         }
 
@@ -268,9 +268,9 @@ namespace Ford.WebApi
             return result;
         }
 
-        public async Task<ResponseResult<SaveInfo>> CreateSaveAsync(string accessToken, long horseId, FullSaveInfo fullSave)
+        public async Task<ResponseResult<SaveInfo>> CreateSaveAsync(string accessToken, FullSaveInfo fullSave)
         {
-            Uri uri = new Uri(_hostUri, $"{_savesUri}&horseId={horseId}");
+            Uri uri = new Uri(_hostUri, $"{_savesUri}");
             var result = await PostRequest<SaveInfo>(uri, fullSave, accessToken);
             return result;
         }

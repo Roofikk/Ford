@@ -3,18 +3,22 @@ using System.Collections.Generic;
 
 public class OwnerPanelParam
 {
-    public OwnerPanelMode Mode { get; }
+    public PageMode Mode { get; }
     public List<HorseUserDto> Users { get; }
+    public string OwnerName { get; }
+    public string OwnerPhoneNumber { get; }
 
-    public OwnerPanelParam(OwnerPanelMode mode, List<HorseUserDto> users)
+    public OwnerPanelParam(PageMode mode, List<HorseUserDto> users)
     {
         Mode = mode;
         Users = users;
     }
-}
 
-public enum OwnerPanelMode
-{
-    Read,
-    Write
+    public OwnerPanelParam(PageMode mode, List<HorseUserDto> users, string ownerName, string ownerPhoneNumber)
+    {
+        Mode = mode;
+        Users = users;
+        OwnerName = ownerName;
+        OwnerPhoneNumber = ownerPhoneNumber;
+    }
 }

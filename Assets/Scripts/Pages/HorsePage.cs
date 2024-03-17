@@ -42,7 +42,7 @@ public class HorsePage : Page
     private HorseBase _horseBase;
 
     public event Action<HorseBase> OnDeleted;
-    public event Action<HorseBase> OnApply;
+    public event Action<HorseBase> OnHorseInfoUpdated;
 
     private void Start()
     {
@@ -90,15 +90,17 @@ public class HorsePage : Page
         _horseBase = param.Horse;
         switch (param.HorsePageMode)
         {
-            case HorsePageMode.Read:
+            case PageMode.Read:
                 SetReadMode();
-                PageManager.Instance.OpenPage(_ownerPanel, 
-                    new OwnerPanelParam(OwnerPanelMode.Read, param.Horse.Users.ToList()), popUpLevel + 1);
+                PageManager.Instance.OpenPage(_ownerPanel,
+                    new OwnerPanelParam(PageMode.Read, param.Horse.Users.ToList(), 
+                        param.Horse.OwnerName, param.Horse.OwnerPhoneNumber), popUpLevel + 1);
                 break;
-            case HorsePageMode.Write:
+            case PageMode.Write:
                 SetWriteMode();
                 PageManager.Instance.OpenPage(_ownerPanel, 
-                    new OwnerPanelParam(OwnerPanelMode.Write, param.Horse.Users.ToList()), popUpLevel + 1);
+                    new OwnerPanelParam(PageMode.Write, param.Horse.Users.ToList(), 
+                        param.Horse.OwnerName, param.Horse.OwnerPhoneNumber), popUpLevel + 1);
                 break;
         }
 
@@ -178,7 +180,7 @@ public class HorsePage : Page
         _applyButton.onClick.AddListener(() =>
         {
             PageManager.Instance.ClosePage(this);
-            PageManager.Instance.OpenPage(this, new HorsePageParam(HorsePageMode.Write, copy), 2);
+            PageManager.Instance.OpenPage(this, new HorsePageParam(PageMode.Write, copy), 2);
         });
 
         _declineButton.GetComponentInChildren<TextMeshProUGUI>().text = "Удалить";
@@ -204,7 +206,7 @@ public class HorsePage : Page
         _declineButton.onClick.AddListener(() =>
         {
             PageManager.Instance.ClosePage(this);
-            PageManager.Instance.OpenPage(this, new HorsePageParam(HorsePageMode.Read, copy), 2);
+            PageManager.Instance.OpenPage(this, new HorsePageParam(PageMode.Read, copy), 2);
         });
     }
 
@@ -213,8 +215,9 @@ public class HorsePage : Page
         if (!CheckValidData())
             return;
 
-        CreationHorseData horse = new()
+        UpdatingHorse horse = new()
         {
+            HorseId = _horseBase.HorseId,
             Name = _horseNameInputField.text,
             Description = _descriptionInputField.text,
             BirthDate = _birthdayInputFiled.GetComponent<InputFieldDateValidator>().Date,
@@ -226,14 +229,24 @@ public class HorsePage : Page
             OwnerPhoneNumber = _ownerPanel.OwnerPhoneNumber,
         };
 
-        //Storage storage = new(GameManager.Instance.Settings.PathSave);
-        //var horseData = storage.UpdateHorse(horse);
+        PageManager.Instance.DisplayLoadingPage(true, 4);
+        StorageSystem storage = new();
+        storage.UpdateHorse(horse).RunOnMainThread(result =>
+        {
+            if (result == null)
+            {
+                ToastMessage.Show("Произошла ошибка при сохранении");
+            }
+            else
+            {
+                ToastMessage.Show("Изменения приняты");
+            }
 
-        //OnApply?.Invoke(horseData);
-        Close();
-
-        ToastMessage toast = Instantiate(_toastMessagePrefab.gameObject, transform.parent).GetComponent<ToastMessage>();
-        toast.Show("Изменения приняты");
+            PageManager.Instance.DisplayLoadingPage(false);
+            PageManager.Instance.ClosePage(this);
+            OnHorseInfoUpdated?.Invoke(result);
+            OnHorseInfoUpdated = null;
+        });
     }
 
     private void StartProject()
@@ -304,6 +317,8 @@ public class HorsePage : Page
             Header = "Начальное сохранение",
             Description = "Это начальное сохранение, оно всегда создается при создании нового проекта",
             Date = DateTime.Now,
+            CreationDate = DateTime.Now,
+            LastUpdate = DateTime.Now,
         });
 
         PageManager.Instance.DisplayLoadingPage(true, 4);
@@ -312,7 +327,7 @@ public class HorsePage : Page
         {
             var horse = result;
 
-            if (result == null)
+            if (horse == null)
             {
                 throw new Exception("Все пошло по пизде");
             }

@@ -1,15 +1,10 @@
-﻿using System;
+﻿using Ford.WebApi.Data;
 using System.Collections.Generic;
 
-namespace Ford.WebApi.Data
+namespace Ford.SaveSystem
 {
-    public class FullSaveInfo : ISaveInfo
+    public class FullSaveInfo : SaveInfo
     {
-        public long SaveId { get; set; }
-        public long HorseId { get; set; }
-        public string Header { get; set; }
-        public string Description { get; set; }
-        public DateTime Date { get; set; }
-        public IEnumerable<BoneSave> Bones { get; set; }
+        public ICollection<BoneSave> Bones { get; set; }
     }
 }

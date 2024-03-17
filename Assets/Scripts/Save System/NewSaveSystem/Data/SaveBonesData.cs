@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using Ford.WebApi.Data;
+using System.Collections.Generic;
 
 namespace Ford.SaveSystem.Ver2.Data
 {
     public class SaveBonesData
     {
         public long SaveId { get; set; }
-        public ICollection<BoneData> Bones { get; set; } = null!;
+        public ICollection<BoneSave> Bones { get; set; } = null!;
     }
 }

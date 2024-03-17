@@ -1,10 +1,11 @@
+using Ford.SaveSystem.Ver2;
 using Ford.WebApi.Data;
 using System;
 using System.Collections.Generic;
 
 namespace Ford.SaveSystem
 {
-    public class HorseBase
+    public class HorseBase : IStorageAction
     {
         public long HorseId { get; set; }
         public string Name { get; set; }
@@ -19,7 +20,7 @@ namespace Ford.SaveSystem
         public DateTime CreationDate { get; set; }
         public DateTime LastUpdate { get; set; }
         public ICollection<HorseUserDto> Users { get; set; }
-        public ICollection<SaveData> Saves { get; set; }
+        public ICollection<SaveInfo> Saves { get; set; }
 
         public HorseBase(HorseBase horse)
         {

@@ -19,12 +19,13 @@ namespace Ford.SaveSystem.Ver2
 
         private readonly string _horsesFileName = "horses.json";
         private readonly string _storageSettingsFileName = "storageSettings.json";
-        private readonly string _storageStackPath = "storageStack.json";
 
         private readonly string ACCESS_TOKEN_KEY = "ACCESS_TOKEN_KEY";
         private readonly string REFRESH_TOKEN_KEY = "REFRESH_TOKEN_KEY";
 
         private List<HorseBase> _horses;
+
+        public static StorageHistory History { get; private set; }
 
         public Storage()
         {
@@ -36,6 +37,8 @@ namespace Ford.SaveSystem.Ver2
             {
                 Directory.CreateDirectory(_savesPath);
             }
+
+            History ??= new(_storagePath);
         }
 
         public Storage(string storagePath)
@@ -85,7 +88,7 @@ namespace Ford.SaveSystem.Ver2
             return _horses;
         }
 
-        public HorseBase GetHorse(long id)
+        public HorseBase GetHorse(long horseId)
         {
             var horses = GetHorses();
 
@@ -94,7 +97,7 @@ namespace Ford.SaveSystem.Ver2
                 return null;
             }
 
-            var findHorse = horses.FirstOrDefault(h => h.HorseId == id);
+            var findHorse = horses.FirstOrDefault(h => h.HorseId == horseId);
             return findHorse;
         }
 
@@ -117,7 +120,7 @@ namespace Ford.SaveSystem.Ver2
                 Country = horseData.Country,
                 CreationDate = DateTime.Now,
                 LastUpdate = DateTime.Now,
-                Saves = new List<SaveData>(),
+                Saves = new List<SaveInfo>(),
             };
 
             if (!string.IsNullOrEmpty(horseData.OwnerName))
@@ -128,6 +131,8 @@ namespace Ford.SaveSystem.Ver2
 
             horses.Add(addHorse);
             RewriteHorseFile(horses);
+            History.PushHistory(new(ActionType.CreateHorse, addHorse));
+
             return addHorse;
         }
 
@@ -159,6 +164,8 @@ namespace Ford.SaveSystem.Ver2
             //
 
             RewriteHorseFile(horses);
+            History.PushHistory(new(ActionType.UpdateHorse, existHorse));
+
             return existHorse;
         }
 
@@ -173,7 +180,7 @@ namespace Ford.SaveSystem.Ver2
             }
 
             var findHorse = horses.FirstOrDefault(h => h.HorseId == id);
-            var query = findHorse.Saves.GroupBy(s => s.SaveFileName).Select(q => new { FileName = q.Key, Ids = q.Select(id => id.Id)});
+            var query = findHorse.Saves.GroupBy(s => s.SaveFileName).Select(q => new { FileName = q.Key, Ids = q.Select(id => id.SaveId)});
 
             foreach (var path in query)
             {
@@ -188,11 +195,38 @@ namespace Ford.SaveSystem.Ver2
             }
 
             RewriteHorseFile(horses);
+            History.PushHistory(new(ActionType.DeleteHorse, new HorseBase() { HorseId = id }));
+
             return true;
         }
         #endregion
 
         #region Save CRUD
+        public ICollection<SaveInfo> GetSaves(long horseId, int below = 0, int amount = 20)
+        {
+            var horse = GetHorse(horseId);
+            return horse.Saves
+                .Skip(below)
+                .Take(amount)
+                .ToList();
+        }
+
+        public FullSaveInfo GetFullSave(long horseId, long saveId)
+        {
+            var savesInfo = GetHorse(horseId).Saves;
+            var saveInfo = savesInfo.SingleOrDefault(s => s.SaveId == saveId);
+
+            if (saveInfo == null)
+            {
+                return null;
+            }
+
+            var saveBones = GetSave(saveInfo.SaveFileName, saveId);
+            FullSaveInfo fullSaveInfo = (FullSaveInfo)saveInfo;
+            fullSaveInfo.Bones = saveBones.Bones;
+            return fullSaveInfo;
+        }
+
         public ICollection<SaveBonesData> GetSaves(string fileName)
         {
             string savePath = Path.Combine(_savesPath, fileName);
@@ -217,24 +251,7 @@ namespace Ford.SaveSystem.Ver2
             return saves.FirstOrDefault(s => s.SaveId == saveId);
         }
 
-        public SaveBonesData GetSave(long saveId)
-        {
-            SaveData saveData = GetSaveInfo(saveId);
-            return GetSave(saveData.SaveFileName, saveId);
-        }
-
-        public SaveData GetSaveInfo(long saveId)
-        {
-            SaveData save = null;
-
-            save = GetHorses()
-                .SelectMany(h => h.Saves)
-                .FirstOrDefault(p => p.Id == saveId);
-
-            return save;
-        }
-
-        public SaveData CreateSave(long horseId, CreateSaveDto saveData)
+        public SaveInfo CreateSave(FullSaveInfo saveData)
         {
             var horses = GetHorses();
 
@@ -243,7 +260,7 @@ namespace Ford.SaveSystem.Ver2
                 return null;
             }
 
-            HorseBase existingHorse = horses.FirstOrDefault(h => h.HorseId == horseId);
+            HorseBase existingHorse = horses.FirstOrDefault(h => h.HorseId == saveData.HorseId);
 
             if (existingHorse is null)
             {
@@ -251,12 +268,12 @@ namespace Ford.SaveSystem.Ver2
             }
 
             string fileName = GetSaveFileName();
-            existingHorse.Saves ??= new Collection<SaveData>();
+            existingHorse.Saves ??= new Collection<SaveInfo>();
 
             long saveId = IncrementSaveId();
-            SaveData save = new()
+            SaveInfo save = new()
             {
-                Id = saveId,
+                SaveId = saveId,
                 Header = saveData.Header,
                 Description = saveData.Description,
                 Date = saveData.Date,
@@ -287,10 +304,12 @@ namespace Ford.SaveSystem.Ver2
             }
 
             RewriteSaveBonesFile(pathSave, saves);
+            History.PushHistory(new(ActionType.CreateSave, save));
+
             return save;
         }
 
-        public SaveData UpdateSave(UpdateSaveDto saveData)
+        public SaveInfo UpdateSave(SaveInfo saveData)
         {
             var horses = GetHorses();
 
@@ -299,7 +318,7 @@ namespace Ford.SaveSystem.Ver2
                 return null;
             }
 
-            var save = horses.SelectMany(h => h.Saves).FirstOrDefault(s => s.Id == saveData.Id);
+            var save = horses.SelectMany(h => h.Saves).FirstOrDefault(s => s.SaveId == saveData.SaveId);
 
             if (save is null)
             {
@@ -312,6 +331,7 @@ namespace Ford.SaveSystem.Ver2
             save.LastUpdate = DateTime.Now;
 
             RewriteHorseFile(horses);
+            History.PushHistory(new(ActionType.UpdateSave, save));
             return save;
         }
 
@@ -324,8 +344,8 @@ namespace Ford.SaveSystem.Ver2
                 return false;
             }
 
-            var savesInfo = horses.FirstOrDefault(h => h.Saves.Any(s => s.Id == saveId)).Saves;
-            var saveInfo = savesInfo.FirstOrDefault(s => s.Id == saveId);
+            var savesInfo = horses.FirstOrDefault(h => h.Saves.Any(s => s.SaveId == saveId)).Saves;
+            var saveInfo = savesInfo.FirstOrDefault(s => s.SaveId == saveId);
             var saves = GetSaves(saveInfo.SaveFileName);
 
             if (saves is null)
@@ -340,6 +360,7 @@ namespace Ford.SaveSystem.Ver2
 
             savesInfo!.Remove(saveInfo);
             RewriteHorseFile(horses);
+            History.PushHistory(new(ActionType.DeleteSave, new SaveInfo() { SaveId = saveId }));
 
             return true;
         }

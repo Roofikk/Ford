@@ -12,5 +12,7 @@ namespace Ford.WebApi.Data
         public string City { get; set; }
         public string Region { get; set; }
         public string Country { get; set; }
+        public string OwnerName { get; set; }
+        public string OwnerPhoneNumber { get; set; }
     }
 }

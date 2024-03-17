@@ -149,4 +149,33 @@ public static class FordApiClientExtension
         var response = await func(result.Content.Token, param1, param2);
         return response;
     }
+
+    public static async Task<ResponseResult<TResult>> RefreshTokenAndReply<TParam1, TParam2, TParam3, TResult>(this FordApiClient client,
+        string token, Func<string, TParam1, TParam2, TParam3, Task<ResponseResult<TResult>>> func, TParam1 param1, TParam2 param2, TParam3 param3)
+        where TResult : class
+    {
+        var storage = new Storage();
+        var refreshToken = storage.GetRefreshToken();
+
+        TokenDto tokenDto = new()
+        {
+            Token = token,
+            RefreshToken = refreshToken,
+        };
+
+        var result = await client.RefreshTokenAsync(tokenDto);
+
+        if (result.Content == null)
+        {
+            return new ResponseResult<TResult>(null, result.StatusCode, result.Errors);
+        }
+
+        storage.SaveAccessToken(result.Content.Token);
+        storage.SaveRefreshToken(result.Content.RefreshToken);
+
+        Debug.Log("Token has been refreshed");
+
+        var response = await func(result.Content.Token, param1, param2, param3);
+        return response;
+    }
 }

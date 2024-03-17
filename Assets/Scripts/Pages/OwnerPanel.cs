@@ -35,7 +35,7 @@ public class OwnerPanel : Page
     public HorseUserDto Owner => _owner;
     public ICollection<HorseUserDto> Users => _users;
 
-    public OwnerPanelMode Mode { get; private set; }
+    public PageMode Mode { get; private set; }
 
     private void Start()
     {
@@ -54,12 +54,12 @@ public class OwnerPanel : Page
         });
         _searchUserButton.onClick.AddListener(() =>
         {
-            PageManager.Instance.OpenPage(_searchPage, 2);
+            PageManager.Instance.OpenPage(_searchPage, 4);
             _searchPage.OnAddButtonClicked += SetRealOwner;
         });
         _addUserButton.onClick.AddListener(() =>
         {
-            PageManager.Instance.OpenPage(_searchPage, 2);
+            PageManager.Instance.OpenPage(_searchPage, 4);
             _searchPage.OnAddButtonClicked += (user) => AddUser(user);
         });
     }
@@ -81,7 +81,7 @@ public class OwnerPanel : Page
         _addUserButton.gameObject.SetActive(Player.IsLoggedIn);
         _removeOwnerButton.gameObject.SetActive(false);
 
-        Mode = OwnerPanelMode.Write;
+        Mode = PageMode.Write;
 
         DisplayAccessRole(false);
 
@@ -107,18 +107,32 @@ public class OwnerPanel : Page
 
         switch (Mode)
         {
-            case OwnerPanelMode.Read:
+            case PageMode.Read:
                 OpenReadMode();
-                SetRealOwner(owner);
+                if (owner != null)
+                {
+                    SetRealOwner(owner);
+                }
+                else
+                {
+                    SetCustomOwner(ownerParam.OwnerName, OwnerPhoneNumber);
+                }
 
                 foreach (var user in ownerParam.Users)
                 {
                     AddUser(user, false, false);
                 }
                 break;
-            case OwnerPanelMode.Write:
+            case PageMode.Write:
                 OpenWriteMode();
-                SetRealOwner(owner);
+                if (owner != null)
+                {
+                    SetRealOwner(owner);
+                }
+                else
+                {
+                    SetCustomOwner(ownerParam.OwnerName, OwnerPhoneNumber);
+                }
 
                 foreach (var user in ownerParam.Users)
                 {
@@ -134,7 +148,7 @@ public class OwnerPanel : Page
 
         RemoveOwner();
         _accessDropdown.value = 0;
-        Mode = OwnerPanelMode.Write;
+        Mode = PageMode.Write;
 
         foreach (var t in _usersGroup.GetComponentsInChildren<UserLayoutElement>())
         {
@@ -201,10 +215,18 @@ public class OwnerPanel : Page
         }
 
         _accessDropdown.value = (int)Enum.Parse<UserRoleAccess>(user.AccessRole);
-        if (Mode != OwnerPanelMode.Read)
+        if (Mode != PageMode.Read)
         {
             _removeOwnerButton.gameObject.SetActive(true);
         }
+    }
+
+    public void SetCustomOwner(string ownerName, string ownerPhoneNumber)
+    {
+        _ownerNameInput.text = ownerName;
+        _ownerPhoneNumberInput.text = ownerPhoneNumber;
+
+        DisplayAccessRole(false);
     }
 
     public void RemoveOwner()

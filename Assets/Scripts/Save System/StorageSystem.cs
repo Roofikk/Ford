@@ -66,6 +66,38 @@ namespace Ford.SaveSystem
         }
         #endregion
 
+        #region Save
+        public async Task<ICollection<SaveInfo>> GetSaves(long horseId, int below = 0, int amount = 20)
+        {
+            var result = await State.GetSaves(this, horseId, below, amount);
+            return result;
+        }
+
+        public async Task<FullSaveInfo> GetSave(long horseId, long saveId)
+        {
+            var result = await State.GetFullSave(this, horseId, saveId);
+            return result;
+        }
+
+        public async Task<SaveInfo> CreateSave(FullSaveInfo save)
+        {
+            var result = await State.CreateSave(this, save);
+            return result;
+        }
+
+        public async Task<SaveInfo> UpdateSave(SaveInfo save)
+        {
+            var result = await State.UpdateSave(this, save);
+            return result;
+        }
+
+        public async Task<bool> DeleteSave(long saveId)
+        {
+            var result = await State.DeleteSave(this, saveId);
+            return result;
+        }
+        #endregion
+
         internal void ChangeState(SaveSystemStateEnum state)
         {
             switch (state)
@@ -80,8 +112,6 @@ namespace Ford.SaveSystem
                     break;
             }
         }
-
-
     }
 
     public enum SaveSystemStateEnum

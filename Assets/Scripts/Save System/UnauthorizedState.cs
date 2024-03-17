@@ -3,6 +3,7 @@ using Ford.WebApi;
 using Ford.WebApi.Data;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UnityEngine.UIElements;
 
 namespace Ford.SaveSystem
 {
@@ -37,6 +38,41 @@ namespace Ford.SaveSystem
         {
             Storage store = new();
             Task<bool> task = Task.Factory.StartNew(() => { return store.DeleteHorse(horseId); });
+            return Task.FromResult(task.Result);
+        }
+
+        public override Task<ICollection<SaveInfo>> GetSaves(StorageSystem storage, long horseId, int below = 0, int amount = 20)
+        {
+            Storage store = new();
+            Task<ICollection<SaveInfo>> task = Task.Factory.StartNew(() => { return store.GetSaves(horseId, below, amount); });
+            return Task.FromResult(task.Result);
+        }
+
+        public override Task<FullSaveInfo> GetFullSave(StorageSystem storage, long horseId, long saveId)
+        {
+            Storage store = new();
+            Task<FullSaveInfo> task = Task.Factory.StartNew(() => { return store.GetFullSave(horseId, saveId); });
+            return Task.FromResult(task.Result);
+        }
+
+        public override Task<SaveInfo> CreateSave(StorageSystem storage, FullSaveInfo save)
+        {
+            Storage store = new();
+            Task<SaveInfo> task = Task.Factory.StartNew(() => { return store.CreateSave(save); });
+            return Task.FromResult(task.Result);
+        }
+
+        public override Task<SaveInfo> UpdateSave(StorageSystem storage, SaveInfo save)
+        {
+            Storage store = new();
+            Task<SaveInfo> task = Task.Factory.StartNew(() => { return store.UpdateSave(save); });
+            return Task.FromResult(task.Result);
+        }
+
+        public override Task<bool> DeleteSave(StorageSystem storage, long saveId)
+        {
+            Storage store = new();
+            Task<bool> task = Task.Factory.StartNew(() => { return store.DeleteSave(saveId); });
             return Task.FromResult(task.Result);
         }
 

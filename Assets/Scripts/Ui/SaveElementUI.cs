@@ -19,11 +19,11 @@ public class SaveElementUI : MonoBehaviour
     private Toggle _toggle;
     private Image _image;
 
-    private SaveData _saveData;
+    public SaveInfo SaveData { get; private set; }
 
-    public void Initiate(SaveData saveData, ToggleGroup toggleGroup)
+    public SaveElementUI Initiate(SaveInfo saveData, ToggleGroup toggleGroup, Action onClick, Action onMoreButtonClick)
     {
-        _saveData = saveData;
+        SaveData = saveData;
 
         _nameText.text = saveData.Header;
         _dateText.text = saveData.Date.ToString("d");
@@ -32,7 +32,11 @@ public class SaveElementUI : MonoBehaviour
         if (_toggle == null)
         {
             _toggle = GetComponent<Toggle>();
-            _toggle.onValueChanged.AddListener(SelectSave);
+            _toggle.onValueChanged.AddListener(value =>
+            {
+                SelectSave(value);
+                onClick?.Invoke();
+            });
             _toggle.group = toggleGroup;
         }
 
@@ -40,6 +44,13 @@ public class SaveElementUI : MonoBehaviour
         {
             _image = GetComponent<Image>();
         }
+
+        _moreInfoButton.onClick.AddListener(() =>
+        {
+            onMoreButtonClick?.Invoke();
+        });
+
+        return this;
     }
 
     private void OnDestroy()
@@ -48,11 +59,13 @@ public class SaveElementUI : MonoBehaviour
         _moreInfoButton.onClick.RemoveAllListeners();
     }
 
-    public void UpdateInfo()
+    public void UpdateInfo(SaveInfo save)
     {
-        _nameText.text = _saveData.Header;
-        _dateText.text = _saveData.Date.ToString("d");
-        _descriptionText.text = _saveData.Description;
+        SaveData = save;
+
+        _nameText.text = SaveData.Header;
+        _dateText.text = SaveData.Date.ToString("d");
+        _descriptionText.text = SaveData.Description;
     }
 
     private void SelectSave(bool value)
@@ -69,18 +82,9 @@ public class SaveElementUI : MonoBehaviour
     public void RemoveSave()
     {
         Storage storage = new(GameManager.Instance.Settings.PathSave);
-        storage.DeleteSave(_saveData.Id);
+        storage.DeleteSave(SaveData.SaveId);
 
         Destroy(gameObject);
         PageManager.Instance.CloseWarningPage();
-    }
-
-    public void EditSave(SaveData saveData)
-    {
-        _saveData = saveData;
-
-        _nameText.text = saveData.Header;
-        _descriptionText.text = saveData.Description;
-        _dateText.text = saveData.Date.ToString("d");
     }
 }

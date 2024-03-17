@@ -11,5 +11,10 @@ namespace Ford.SaveSystem
         public abstract Task<HorseBase> CreateHorse(StorageSystem storage, CreationHorse horse);
         public abstract Task<HorseBase> UpdateHorse(StorageSystem storage, UpdatingHorse horse);
         public abstract Task<bool> DeleteHorse(StorageSystem storage, long horseId);
+        public abstract Task<ICollection<SaveInfo>> GetSaves(StorageSystem storage, long horseId, int below = 0, int amount = 20);
+        public abstract Task<FullSaveInfo> GetFullSave(StorageSystem storage, long horseId, long saveId);
+        public abstract Task<SaveInfo> CreateSave(StorageSystem storage, FullSaveInfo save);
+        public abstract Task<SaveInfo> UpdateSave(StorageSystem storage, SaveInfo save);
+        public abstract Task<bool> DeleteSave(StorageSystem storage, long saveId);
     }
 }
