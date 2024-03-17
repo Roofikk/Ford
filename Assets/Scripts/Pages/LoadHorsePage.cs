@@ -152,18 +152,21 @@ public class LoadHorsePage : Page
 
     public void DeleteSaveLoadElement(long saveId)
     {
-
+        Destroy(_saveInfoDict[saveId].gameObject);
+        _saveInfoDict.Remove(saveId);
     }
 
     private void OpenHorseInfoPage(long horseId)
     {
         PageManager.Instance.OpenPage(_horseInfoPage, new HorsePageParam(PageMode.Read, _horseInfoDict[horseId].HorseData), 2);
         _horseInfoPage.OnHorseInfoUpdated += UpdateHorseLoadElenets;
+        _horseInfoPage.OnDeleted += DeleteHorseLoadElement;
     }
 
     private void OpenSaveInfoPage(long saveId)
     {
         PageManager.Instance.OpenPage(_saveInfoPage, new SavePanelParam(PageMode.Read, _saveInfoDict[saveId].SaveData), 2);
         ((SavePanel)_saveInfoPage).OnSaveUpdated += UpdateSaveLoadElement;
+        ((SavePanel)_saveInfoPage).OnSaveDeleted += DeleteSaveLoadElement;
     }
 }

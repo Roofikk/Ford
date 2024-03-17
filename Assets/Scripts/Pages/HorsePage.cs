@@ -41,7 +41,7 @@ public class HorsePage : Page
     private List<FieldMaskValidate> _validators;
     private HorseBase _horseBase;
 
-    public event Action<HorseBase> OnDeleted;
+    public event Action<long> OnDeleted;
     public event Action<HorseBase> OnHorseInfoUpdated;
 
     private void Start()
@@ -107,6 +107,9 @@ public class HorsePage : Page
         _closeButton.onClick.AddListener(() =>
         {
             PageManager.Instance.ClosePage(this);
+
+            OnHorseInfoUpdated = null;
+            OnDeleted = null;
         });
 
         //Field inputs
@@ -184,7 +187,13 @@ public class HorsePage : Page
         });
 
         _declineButton.GetComponentInChildren<TextMeshProUGUI>().text = "Удалить";
-        _declineButton.onClick.AddListener(Close);
+        _declineButton.onClick.AddListener(() =>
+        {
+            PageManager.Instance.OpenWarningPage(new(
+                "Удалить лошадь?",
+                "Вы уверены, что хотите удалить лошадь?\nВернуть ее не будет возможности!",
+                DeleteHorse), 4);
+        });
     }
 
     private void SetWriteMode()
@@ -244,8 +253,11 @@ public class HorsePage : Page
 
             PageManager.Instance.DisplayLoadingPage(false);
             PageManager.Instance.ClosePage(this);
+
             OnHorseInfoUpdated?.Invoke(result);
+
             OnHorseInfoUpdated = null;
+            OnDeleted = null;
         });
     }
 
@@ -350,14 +362,18 @@ public class HorsePage : Page
         {
             if (result)
             {
-                OnDeleted?.Invoke(_horseBase);
+                ToastMessage.Show("Удаление завершено");
+                OnDeleted?.Invoke(_horseBase.HorseId);
             }
             else
             {
-                OnDeleted?.Invoke(null);
+                ToastMessage.Show("Произошла ошибка при удалении");
             }
 
             PageManager.Instance.DisplayLoadingPage(false);
+
+            OnHorseInfoUpdated = null;
+            OnDeleted = null;
         });
     }
 

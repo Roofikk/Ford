@@ -38,6 +38,8 @@ public class SavePanel : Page
         _closeButton.onClick.AddListener(() =>
         {
             PageManager.Instance.ClosePage(this);
+            OnSaveDeleted = null;
+            OnSaveUpdated = null;
         });
     }
 
@@ -94,7 +96,14 @@ public class SavePanel : Page
                 _declineButton.GetComponentInChildren<TextMeshProUGUI>().text = "Удалить";
                 _declineButton.onClick.AddListener(() =>
                 {
-                    DeleteSave();
+                    PageManager.Instance.OpenWarningPage(new(
+                        "Удалить сохранение?",
+                        "Вы уверены, что хотите удалить сохранение?\nОбратно вернуть его не будет возможности",
+                        () =>
+                        {
+                            DeleteSave();
+                            PageManager.Instance.CloseWarningPage();
+                        }), 4);
                 });
                 break;
             case PageMode.Write:
@@ -181,7 +190,9 @@ public class SavePanel : Page
 
             PageManager.Instance.ClosePage(this);
             OnSaveUpdated?.Invoke(result);
+
             OnSaveUpdated = null;
+            OnSaveDeleted = null;
         });
     }
 
@@ -211,7 +222,6 @@ public class SavePanel : Page
         });
     }
 
-    // дописать удаление сохранения
     private void DeleteSave()
     {
         PageManager.Instance.DisplayLoadingPage(true, 6);
@@ -221,6 +231,7 @@ public class SavePanel : Page
             if (result)
             {
                 ToastMessage.Show("Сохранение успешно удалено");
+                OnSaveDeleted?.Invoke(SaveInfo.SaveId);
             }
             else
             {
@@ -228,6 +239,9 @@ public class SavePanel : Page
             }
 
             PageManager.Instance.DisplayLoadingPage(false);
+
+            OnSaveDeleted = null;
+            OnSaveUpdated = null;
         });
     }
 
