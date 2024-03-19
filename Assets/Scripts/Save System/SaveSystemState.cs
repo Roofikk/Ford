@@ -6,7 +6,8 @@ namespace Ford.SaveSystem
 {
     public abstract class SaveSystemState
     {
-        public abstract Task<ICollection<HorseBase>> GetHorses(StorageSystem storage, int below = 0, int above = 20);
+        public abstract Task<ICollection<HorseBase>> GetHorses(StorageSystem storage, int below = 0, int amount = 20, 
+            string orderByDate = "desc", string orderByName = "false");
         public abstract Task<HorseBase> CreateHorse(StorageSystem storage, CreationHorse horse);
         public abstract Task<HorseBase> UpdateHorse(StorageSystem storage, UpdatingHorse horse);
         public abstract Task<bool> DeleteHorse(StorageSystem storage, long horseId);

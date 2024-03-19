@@ -192,7 +192,12 @@ public class HorsePage : Page
             PageManager.Instance.OpenWarningPage(new(
                 "Удалить лошадь?",
                 "Вы уверены, что хотите удалить лошадь?\nВернуть ее не будет возможности!",
-                DeleteHorse), 4);
+                () =>
+                {
+                    DeleteHorse();
+                    PageManager.Instance.ClosePage(this);
+                    PageManager.Instance.CloseWarningPage();
+                }), 4);
         });
     }
 
@@ -355,15 +360,16 @@ public class HorsePage : Page
 
     private void DeleteHorse()
     {
-        PageManager.Instance.DisplayLoadingPage(true, 6);
+        PageManager.Instance.DisplayLoadingPage(true, 8);
         StorageSystem storage = new();
+        var horseId = _horseBase.HorseId;
 
         storage.DeleteHorse(_horseBase.HorseId).RunOnMainThread((result) =>
         {
             if (result)
             {
                 ToastMessage.Show("Удаление завершено");
-                OnDeleted?.Invoke(_horseBase.HorseId);
+                OnDeleted?.Invoke(horseId);
             }
             else
             {

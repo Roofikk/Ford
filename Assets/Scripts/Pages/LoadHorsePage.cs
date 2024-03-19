@@ -1,19 +1,21 @@
 using Ford.SaveSystem;
+using Ford.SaveSystem.Ver2.Data;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class LoadHorsePage : Page
 {
-    [SerializeField] private ScrollRect _horsesScrollRect;
+    [SerializeField] private CustomScrollRect _horsesScrollRect;
     [SerializeField] private TextMeshProUGUI _emptyHorseListText;
     [SerializeField] private HorseLoadElement _horseUiPrefab;
     [SerializeField] private ToggleGroup _horseToggleGroup;
 
     [Space(10)]
-    [SerializeField] private ScrollRect _savesScroll;
+    [SerializeField] private CustomScrollRect _savesScroll;
     [SerializeField] private TextMeshProUGUI _emptySaveListText;
     [SerializeField] private SaveElementUI _savePrefab;
     [SerializeField] private ToggleGroup _saveToggleGroup;
@@ -88,7 +90,6 @@ public class LoadHorsePage : Page
     private void FillHorseList(List<HorseBase> horses)
     {
         ClearHorses();
-        horses.Sort((x, y) => x.CreationDate.CompareTo(y.CreationDate));
 
         foreach (var horse in horses)
         {
@@ -100,6 +101,7 @@ public class LoadHorsePage : Page
             _horseInfoDict.Add(horse.HorseId, horseElement);
         }
 
+        _horsesScrollRect.SetLoadIcon();
         _emptyHorseListText.gameObject.SetActive(horses.Count == 0);
     }
 
@@ -107,7 +109,6 @@ public class LoadHorsePage : Page
     {
         ClearSaves();
         var saves = horse.Saves.ToList();
-        saves.Sort((x, y) => x.CreationDate.CompareTo(y.CreationDate));
 
         foreach (var save in saves)
         {
@@ -119,6 +120,21 @@ public class LoadHorsePage : Page
             _saveInfoDict.Add(save.SaveId, saveElement);
         }
 
+        _loadButton.onClick.RemoveAllListeners();
+        _editButton.onClick.RemoveAllListeners();
+
+        _loadButton.onClick.AddListener(() =>
+        {
+            var saveInfo = _saveToggleGroup.GetFirstActiveToggle().GetComponent<SaveElementUI>().SaveData;
+            var horseInfo = _horseToggleGroup.GetFirstActiveToggle().GetComponent<HorseLoadElement>().HorseData;
+
+            LoadSave(horseInfo, saveInfo);
+        });
+        _editButton.onClick.AddListener(() =>
+        {
+            OpenSaveInfoPage(_saveToggleGroup.GetFirstActiveToggle().GetComponent<SaveElementUI>().SaveData.SaveId);
+        });
+
         _emptySaveListText.gameObject.SetActive(saves.Count == 0);
     }
 
@@ -126,7 +142,15 @@ public class LoadHorsePage : Page
     {
         _loadButton.interactable = enable;
         _editButton.interactable = enable;
-        _deleteButton.interactable = enable;
+
+        if (_saveInfoDict.Count > 1)
+        {
+            _deleteButton.interactable = enable;
+        }
+        else
+        {
+            _deleteButton.interactable = false;
+        }
     }
     
     public void UpdateHorseLoadElenets(HorseBase horse)
@@ -165,8 +189,38 @@ public class LoadHorsePage : Page
 
     private void OpenSaveInfoPage(long saveId)
     {
-        PageManager.Instance.OpenPage(_saveInfoPage, new SavePanelParam(PageMode.Read, _saveInfoDict[saveId].SaveData), 2);
+        PageManager.Instance.OpenPage(_saveInfoPage, new SavePanelParam(PageMode.Read, 
+            _saveInfoDict[saveId].SaveData, _saveInfoDict.Count > 1), 2);
         ((SavePanel)_saveInfoPage).OnSaveUpdated += UpdateSaveLoadElement;
         ((SavePanel)_saveInfoPage).OnSaveDeleted += DeleteSaveLoadElement;
+    }
+
+    private void LoadSave(HorseBase horseInfo, ISaveInfo saveInfo)
+    {
+        PageManager.Instance.DisplayLoadingPage(true, 4);
+        StorageSystem storage = new();
+        storage.GetSave(saveInfo.HorseId, saveInfo.SaveId)
+            .RunOnMainThread((result) =>
+            {
+                if (result == null)
+                {
+                    ToastMessage.Show("Не удалость загрузить сохранение");
+                    PageManager.Instance.DisplayLoadingPage(false);
+                    return;
+                }
+
+                SceneParameters.AddParam(horseInfo);
+                SceneParameters.AddParam(new SaveBonesData()
+                {
+                    SaveId = saveInfo.HorseId,
+                    Bones = result.Bones,
+                });
+
+                AsyncOperation loadingScene = SceneManager.LoadSceneAsync(1);
+                loadingScene.completed += (res) =>
+                {
+                    PageManager.Instance.DisplayLoadingPage(false);
+                };
+            });
     }
 }

@@ -8,7 +8,8 @@ namespace Ford.SaveSystem
 {
     public class UnauthorizedState : SaveSystemState
     {
-        public override async Task<ICollection<HorseBase>> GetHorses(StorageSystem storage, int below = 0, int above = 20)
+        public override async Task<ICollection<HorseBase>> GetHorses(StorageSystem storage, int below = 0, int above = 20,
+            string orderByDate = "desc", string orderByName = "false")
         {
             Storage store = new();
             Task<ICollection<HorseBase>> task = Task.Run(store.GetHorses);

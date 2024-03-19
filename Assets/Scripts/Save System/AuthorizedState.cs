@@ -10,18 +10,24 @@ namespace Ford.SaveSystem
 {
     public class AuthorizedState : SaveSystemState
     {
-        public override async Task<ICollection<HorseBase>> GetHorses(StorageSystem storage, int below = 0, int above = 20)
+        public override async Task<ICollection<HorseBase>> GetHorses(StorageSystem storage, int below = 0, int amount = 20,
+            string orderByDate = "desc", string orderByName = "false")
         {
-            FordApiClient client = new FordApiClient();
+            FordApiClient client = new();
             var accessToken = GetAccessToken();
 
             var result = await client.GetHorsesAsync(accessToken);
-            var newResult = await RefreshTokenAndRetrieveResult(result, accessToken, client.GetHorsesAsync, below, above);
+            var newResult = await RefreshTokenAndRetrieveResult(result, accessToken, client.GetHorsesAsync, below, amount, orderByDate, orderByName);
 
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {
                 storage.ChangeState(SaveSystemStateEnum.Unauthorized);
                 return await storage.GetHorses();
+            }
+
+            if (newResult.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return null;
             }
 
             return newResult.Content;
@@ -39,6 +45,11 @@ namespace Ford.SaveSystem
             {
                 storage.ChangeState(SaveSystemStateEnum.Unauthorized);
                 return await storage.CreateHorse(horse);
+            }
+
+            if (newResult.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return null;
             }
 
             return newResult.Content;
@@ -69,6 +80,11 @@ namespace Ford.SaveSystem
                 });
             }
 
+            if (newResult.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return null;
+            }
+
             return newResult.Content;
         }
 
@@ -83,6 +99,11 @@ namespace Ford.SaveSystem
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {
                 storage.ChangeState(SaveSystemStateEnum.Unauthorized);
+                return false;
+            }
+
+            if (newResult.StatusCode == HttpStatusCode.BadRequest)
+            {
                 return false;
             }
 
@@ -103,6 +124,11 @@ namespace Ford.SaveSystem
                 return await storage.GetSaves(horseId, below, amount);
             }
 
+            if (newResult.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return null;
+            }
+
             return newResult.Content;
         }
 
@@ -118,6 +144,11 @@ namespace Ford.SaveSystem
             {
                 storage.ChangeState(SaveSystemStateEnum.Unauthorized);
                 return await storage.GetSave(horseId, saveId);
+            }
+
+            if (newResult.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return null;
             }
 
             return newResult.Content;
@@ -137,6 +168,11 @@ namespace Ford.SaveSystem
                 return await storage.CreateSave(save);
             }
 
+            if (newResult.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return null;
+            }
+
             return newResult.Content;
         }
 
@@ -154,6 +190,11 @@ namespace Ford.SaveSystem
                 return await storage.CreateSave((FullSaveInfo)save);
             }
 
+            if (newResult.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return null;
+            }
+
             return newResult.Content;
         }
 
@@ -168,6 +209,11 @@ namespace Ford.SaveSystem
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {
                 storage.ChangeState(SaveSystemStateEnum.Unauthorized);
+                return false;
+            }
+
+            if (newResult.StatusCode == HttpStatusCode.BadRequest)
+            {
                 return false;
             }
 
@@ -253,6 +299,19 @@ namespace Ford.SaveSystem
 
             FordApiClient client = new();
             return await client.RefreshTokenAndReply(accessToken, repeat, param1, param2, param3);
+        }
+        private async Task<ResponseResult<TResult>> RefreshTokenAndRetrieveResult<TParam1, TParam2, TParam3, TParam4, TResult>(
+            ResponseResult<TResult> result, string accessToken, Func<string, TParam1, TParam2, TParam3, TParam4, Task<ResponseResult<TResult>>> repeat, 
+            TParam1 param1, TParam2 param2, TParam3 param3, TParam4 param4)
+            where TResult : class
+        {
+            if (result.StatusCode != HttpStatusCode.Unauthorized)
+            {
+                return await Task.FromResult(result);
+            }
+
+            FordApiClient client = new();
+            return await client.RefreshTokenAndReply(accessToken, repeat, param1, param2, param3, param4);
         }
     }
 }

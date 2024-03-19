@@ -53,12 +53,7 @@ public class SavePanel : Page
         }
 
         SaveInfo = saveParam.SaveInfo;
-        OpenMode(saveParam.Mode, saveParam.SaveInfo, popUpLevel);
-    }
-
-    public override void Open(int popUpLevel = 0)
-    {
-        base.Open(popUpLevel);
+        OpenMode(saveParam.Mode, saveParam.SaveInfo, saveParam.CanDelete, popUpLevel);
     }
 
     public override void Close()
@@ -69,10 +64,11 @@ public class SavePanel : Page
         _applyButton.onClick.RemoveAllListeners();
     }
 
-    private void OpenMode(PageMode mode, ISaveInfo saveInfo, int popUpLevel)
+    private void OpenMode(PageMode mode, ISaveInfo saveInfo, bool canDelete, int popUpLevel)
     {
         _inputFields ??= GetComponentsInChildren<TMP_InputField>(true).ToList();
         FillData(saveInfo);
+        _declineButton.interactable = true;
 
         switch (mode)
         {
@@ -90,9 +86,10 @@ public class SavePanel : Page
                 _applyButton.onClick.AddListener(() =>
                 {
                     PageManager.Instance.ClosePage(this);
-                    PageManager.Instance.OpenPage(this, new SavePanelParam(PageMode.Write, saveInfo), popUpLevel);
+                    PageManager.Instance.OpenPage(this, new SavePanelParam(PageMode.Write, saveInfo, canDelete), popUpLevel);
                 });
 
+                _declineButton.interactable = canDelete;
                 _declineButton.GetComponentInChildren<TextMeshProUGUI>().text = "Удалить";
                 _declineButton.onClick.AddListener(() =>
                 {
@@ -102,6 +99,7 @@ public class SavePanel : Page
                         () =>
                         {
                             DeleteSave();
+                            PageManager.Instance.ClosePage(this);
                             PageManager.Instance.CloseWarningPage();
                         }), 4);
                 });
@@ -139,7 +137,7 @@ public class SavePanel : Page
                     _declineButton.onClick.AddListener(() =>
                     {
                         PageManager.Instance.ClosePage(this);
-                        PageManager.Instance.OpenPage(this, new SavePanelParam(PageMode.Read, saveInfo), popUpLevel);
+                        PageManager.Instance.OpenPage(this, new SavePanelParam(PageMode.Read, saveInfo, canDelete), popUpLevel);
                     });
                 }
                 break;
@@ -217,21 +215,31 @@ public class SavePanel : Page
         StorageSystem storage = new();
         storage.CreateSave(save).RunOnMainThread(result =>
         {
-            ToastMessage.Show("Сохранение завершено");
+            if (result == null)
+            {
+                ToastMessage.Show("Произошла ошибка при сохранении");
+            }
+            else
+            {
+                ToastMessage.Show("Сохранение завершено");
+            }
+
             PageManager.Instance.ClosePage(this);
         });
     }
 
     private void DeleteSave()
     {
-        PageManager.Instance.DisplayLoadingPage(true, 6);
+        PageManager.Instance.DisplayLoadingPage(true, 8);
         StorageSystem storage = new();
+        var saveId = SaveInfo.SaveId;
+
         storage.DeleteSave(SaveInfo.SaveId).RunOnMainThread(result =>
         {
             if (result)
             {
                 ToastMessage.Show("Сохранение успешно удалено");
-                OnSaveDeleted?.Invoke(SaveInfo.SaveId);
+                OnSaveDeleted?.Invoke(saveId);
             }
             else
             {
@@ -265,25 +273,27 @@ public class SavePanel : Page
 public class SavePanelParam
 {
     public PageMode Mode { get; }
-    public ISaveInfo SaveInfo { get; set; }
-    public event Action OnSaveUpdated;
-    public event Action OnSaveDeleted;
+    public ISaveInfo SaveInfo { get; }
+    public bool CanDelete { get; }
 
-    public SavePanelParam(PageMode mode, ISaveInfo saveInfo)
+    public SavePanelParam(PageMode mode, ISaveInfo saveInfo, bool canDelete)
     {
         Mode = mode;
         SaveInfo = saveInfo;
+        CanDelete = canDelete;
     }
 
-    public SavePanelParam(PageMode mode, SaveInfo saveData)
+    public SavePanelParam(PageMode mode, SaveInfo saveData, bool canDelete)
     {
         Mode = mode;
         SaveInfo = saveData;
+        CanDelete = canDelete;
     }
 
-    public SavePanelParam(PageMode mode, FullSaveInfo saveInfo)
+    public SavePanelParam(PageMode mode, FullSaveInfo saveInfo, bool canDelete)
     {
         Mode = mode;
         SaveInfo = saveInfo;
+        CanDelete = canDelete;
     }
 }
