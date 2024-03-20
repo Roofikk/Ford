@@ -17,6 +17,7 @@ namespace Ford.SaveSystem
         public string Country { get; set; }
         public string OwnerName { get; set; }
         public string OwnerPhoneNumber { get; set; }
+        public HorseUserDto Self { get; set; }
         public DateTime CreationDate { get; set; }
         public DateTime LastUpdate { get; set; }
         public ICollection<HorseUserDto> Users { get; set; }
@@ -36,6 +37,7 @@ namespace Ford.SaveSystem
             OwnerPhoneNumber = horse.OwnerPhoneNumber;
             CreationDate = horse.CreationDate;
             LastUpdate = horse.LastUpdate;
+            Self = horse.Self;
             Users = horse.Users;
             Saves = horse.Saves;
         }

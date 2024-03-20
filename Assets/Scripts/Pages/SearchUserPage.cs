@@ -97,7 +97,7 @@ public class SearchUserPage : Page
     {
         HorseUserDto user = new()
         {
-            Id = _user.UserId,
+            UserId = _user.UserId,
             FirstName = _user.FirstName,
             LastName = _user.LastName,
             PhoneNumber = _user.PhoneNumber,

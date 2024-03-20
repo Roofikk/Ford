@@ -18,8 +18,6 @@ public class LoadIcon : MonoBehaviour
     private bool _freeRotation;
     private float _elapsed = 0f;
     private float _direction = 1f;
-    private float _below = 0f;
-    private float _above = 1f;
 
     public float MinHeight => _layoutElement.minHeight;
     public event Action OnIconFilled;
@@ -46,16 +44,12 @@ public class LoadIcon : MonoBehaviour
         {
             if (_loadImage.fillAmount >= 1)
             {
-                _below = 1f;
-                _above = 0f;
                 _direction = -1f;
                 _loadImage.fillClockwise = false;
             }
 
             if (_loadImage.fillAmount <= 0)
             {
-                _below = 0f;
-                _above = 1f;
                 _direction = 1f;
                 _loadImage.fillClockwise = true;
             }

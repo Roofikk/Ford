@@ -44,7 +44,7 @@ public class OwnerPanel : Page
         {
             SetRealOwner(new()
             {
-                Id = Player.UserData.UserId,
+                UserId = Player.UserData.UserId,
                 FirstName = Player.UserData.FirstName,
                 LastName = Player.UserData.LastName,
                 PhoneNumber = Player.UserData.PhoneNumber,
@@ -190,7 +190,7 @@ public class OwnerPanel : Page
 
     public void SetRealOwner(HorseUserDto user)
     {
-        if (_users.Any(u => u.Id == user.Id))
+        if (_users.Any(u => u.UserId == user.UserId))
         {
             ToastMessage.Show("Нельзя добавить, поскольку пользователь уже находится в списке");
             return;
@@ -205,7 +205,7 @@ public class OwnerPanel : Page
         _ownerPhoneNumberInput.text = string.IsNullOrEmpty(user.PhoneNumber) ? "Неизвестно" : user.PhoneNumber;
         _ownerPhoneNumberInput.SetInteractable(false);
 
-        if (_owner.Id == Player.UserData.UserId)
+        if (_owner.UserId == Player.UserData.UserId)
         {
             DisplayAccessRole(false);
         }
@@ -244,7 +244,7 @@ public class OwnerPanel : Page
 
     private void AddUser(HorseUserDto user, bool displayRemove = true, bool displayMessage = true)
     {
-        if (_users.Any(u => u.Id == user.Id))
+        if (_users.Any(u => u.UserId == user.UserId))
         {
             if (displayMessage)
             {
@@ -253,7 +253,7 @@ public class OwnerPanel : Page
             return;
         }
 
-        if (user.Id == Player.UserData.UserId)
+        if (user.UserId == Player.UserData.UserId)
         {
             if (displayMessage)
             {
@@ -262,7 +262,7 @@ public class OwnerPanel : Page
             return;
         }
 
-        if (_owner != null && _owner.Id == user.Id)
+        if (_owner != null && _owner.UserId == user.UserId)
         {
             if (displayMessage)
             {

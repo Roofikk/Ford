@@ -22,6 +22,7 @@ public class LoadHorsePage : Page
 
     [Space(10)]
     [SerializeField] private Button _closeButton;
+    [SerializeField] private Button _refreshButton;
     [SerializeField] private Button _loadButton;
     [SerializeField] private Button _editButton;
     [SerializeField] private Button _deleteButton;
@@ -33,6 +34,9 @@ public class LoadHorsePage : Page
     private Dictionary<long, HorseLoadElement> _horseInfoDict = new();
     private Dictionary<long, SaveElementUI> _saveInfoDict = new();
 
+    private int _below = 0;
+    private int _amount = 20;
+
     private void Start()
     {
         _closeButton.onClick.AddListener(Close);
@@ -42,70 +46,139 @@ public class LoadHorsePage : Page
     private void OnDestroy()
     {
         _closeButton.onClick.RemoveListener(Close);
+        _horsesScrollRect.OnUploadFocused -= () => { GetNextHorses(false); };
+        _horsesScrollRect.OnRefreshFocused -= RefreshHorsePage;
     }
 
     public override void Open(int popUpLevel = 0)
     {
         base.Open(popUpLevel);
 
-        PageManager.Instance.DisplayLoadingPage(true, 2);
+        _below = 0;
         ActivateButtons(false);
-
-        StorageSystem storage = new();
-        storage.GetHorses().RunOnMainThread((result) =>
-        {
-            List<HorseBase> horses = result.ToList();
-            FillHorseList(horses);
-
-            PageManager.Instance.DisplayLoadingPage(false);
-        });
+        ClearHorses();
+        GetNextHorses();
+        _horsesScrollRect.OnUploadFocused += () => { GetNextHorses(false); } ;
+        _horsesScrollRect.OnRefreshFocused += RefreshHorsePage;
     }
 
     public override void Close()
     {
         base.Close();
+
+        ActivateButtons(false);
         ClearHorses();
         ClearSaves();
-        ActivateButtons(false);
+        _horsesScrollRect.OnUploadFocused -= () => { GetNextHorses(false); };
+        _horsesScrollRect.OnRefreshFocused -= RefreshHorsePage;
+    }
+
+    private void RefreshHorsePage()
+    {
+        GetNextHorses(true);
     }
 
     private void ClearHorses()
     {
-        _horseInfoDict.Clear();
-        foreach (Transform t in _horsesScrollRect.content.transform)
+        foreach (var pair in _horseInfoDict)
         {
-            Destroy(t.gameObject);
+            Destroy(pair.Value.gameObject);
         }
+
+        _horseInfoDict.Clear();
     }
 
     private void ClearSaves()
     {
-        _saveInfoDict.Clear();
-        foreach (Transform t in _savesScroll.content.transform)
+        foreach (var pair in _saveInfoDict)
         {
-            Destroy(t.gameObject);
+            Destroy(pair.Value.gameObject);
         }
+
+        ActivateButtons(false);
+        _saveInfoDict.Clear();
     }
 
     private void FillHorseList(List<HorseBase> horses)
     {
-        ClearHorses();
-
         foreach (var horse in horses)
         {
             var horseElement = Instantiate(_horseUiPrefab, _horsesScrollRect.content)
                 .Initiate(horse,
-                    () => { FillSaveList(horse); },
+                    () => { GetNextSaves(horse); },
                     () => { OpenHorseInfoPage(horse.HorseId); },
                     _horseToggleGroup);
             _horseInfoDict.Add(horse.HorseId, horseElement);
         }
 
-        _horsesScrollRect.SetLoadIcon();
         _emptyHorseListText.gameObject.SetActive(horses.Count == 0);
     }
 
-    private void FillSaveList(HorseBase horse)
+    private void GetNextHorses(bool isRefresh = false)
+    {
+        _refreshButton.onClick.RemoveAllListeners();
+
+        if (isRefresh)
+        {
+            _below = 0;
+            _horsesScrollRect.OnRefreshFocused -= RefreshHorsePage;
+        }
+
+        if (_below == 0)
+        {
+            _horsesScrollRect.SetLoadIcon();
+        }
+
+        StorageSystem storage = new();
+        _horsesScrollRect.ActivatePagination(false);
+        _horsesScrollRect.LockScroll(true);
+        storage.GetHorses(_below, _amount).RunOnMainThread((result) =>
+        {
+            _refreshButton.onClick.AddListener(RefreshHorsePage);
+            if (isRefresh)
+            {
+                ClearHorses();
+                _horsesScrollRect.OnRefreshFocused += RefreshHorsePage;
+            }
+
+            _horsesScrollRect.LockScroll(false);
+            _horsesScrollRect.DisableRefreshElement();
+
+            if (result.Count > 0)
+            {
+                List<HorseBase> horses = result.ToList();
+                FillHorseList(horses);
+
+                if (isRefresh)
+                {
+                    StartCoroutine(SetAllToggleOff(_horseToggleGroup));
+                    ClearSaves();
+                }
+            }
+
+            if (result.Count != _amount)
+            {
+                _horsesScrollRect.OnUploadFocused -= () => { GetNextHorses(false); } ;
+                _horsesScrollRect.ActivatePagination(false);
+            }
+            else
+            {
+                _horsesScrollRect.ActivatePagination(true);
+            }
+        });
+
+        _below += _amount;
+    }
+
+    private System.Collections.IEnumerator SetAllToggleOff(ToggleGroup toggleGroup)
+    {
+        toggleGroup.allowSwitchOff = true;
+        yield return new WaitForEndOfFrame();
+        toggleGroup.SetAllTogglesOff();
+        toggleGroup.allowSwitchOff = false;
+    }
+
+    private void GetNextSaves(HorseBase horse)
     {
         ClearSaves();
         var saves = horse.Saves.ToList();

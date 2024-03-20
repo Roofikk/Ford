@@ -141,7 +141,7 @@ namespace Ford.WebApi
         /// </summary>
         /// <param name="accessToken"></param>
         /// <returns></returns>
-        public async Task<ResponseResult<ICollection<HorseBase>>> GetHorsesAsync(string accessToken, int below = 0, int amount = 20,
+        public async Task<ResponseResult<ICollection<HorseBase>>> GetHorsesAsync(string accessToken, int below, int amount,
             string orderByDate = "desc", string orderByName = "false")
         {
             Uri uri = new(_hostUri, $"{_horsesUri}?below={below}&amount={amount}&orderByDate={orderByDate}&orderByName={orderByName}");

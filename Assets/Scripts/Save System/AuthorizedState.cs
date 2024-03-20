@@ -16,7 +16,7 @@ namespace Ford.SaveSystem
             FordApiClient client = new();
             var accessToken = GetAccessToken();
 
-            var result = await client.GetHorsesAsync(accessToken);
+            var result = await client.GetHorsesAsync(accessToken, below, amount, orderByDate, orderByName);
             var newResult = await RefreshTokenAndRetrieveResult(result, accessToken, client.GetHorsesAsync, below, amount, orderByDate, orderByName);
 
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)

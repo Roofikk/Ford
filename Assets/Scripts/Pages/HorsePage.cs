@@ -300,11 +300,11 @@ public class HorsePage : Page
                 user.IsOwner = false;
             }
         }
-        else if (_ownerPanel.Owner.Id == Player.UserData.UserId)
+        else if (_ownerPanel.Owner.UserId == Player.UserData.UserId)
         {
             horse.Users.Add(new()
             {
-                UserId = _ownerPanel.Owner.Id,
+                UserId = _ownerPanel.Owner.UserId,
                 IsOwner = true,
                 RuleAccess = UserRoleAccess.Creator.ToString(),
             });
@@ -313,7 +313,7 @@ public class HorsePage : Page
         {
             horse.Users.Add(new()
             {
-                UserId = _ownerPanel.Owner.Id,
+                UserId = _ownerPanel.Owner.UserId,
                 IsOwner = true,
                 RuleAccess = _ownerPanel.AccessRole,
             });
@@ -323,7 +323,7 @@ public class HorsePage : Page
         {
             horse.Users.Add(new()
             {
-                UserId = user.Id,
+                UserId = user.UserId,
                 IsOwner = false,
                 RuleAccess = user.AccessRole,
             });
