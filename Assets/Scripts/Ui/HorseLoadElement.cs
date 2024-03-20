@@ -1,4 +1,5 @@
 using Ford.SaveSystem;
+using Ford.WebApi.Data;
 using System;
 using System.Linq;
 using TMPro;
@@ -63,7 +64,15 @@ public class HorseLoadElement : MonoBehaviour
         _horseData = horse;
         _horseNameText.text = horse.Name;
 
-        var owner = horse.Users.SingleOrDefault(u => u.IsOwner);
+        HorseUserDto owner = null;
+        if (horse.Self.IsOwner)
+        {
+            owner = horse.Self;
+        }
+        else
+        {
+            owner = horse.Users.SingleOrDefault(u => u.IsOwner);
+        }
 
         if (owner != null)
         {

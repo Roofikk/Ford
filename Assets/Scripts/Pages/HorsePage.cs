@@ -93,13 +93,13 @@ public class HorsePage : Page
             case PageMode.Read:
                 SetReadMode();
                 PageManager.Instance.OpenPage(_ownerPanel,
-                    new OwnerPanelParam(PageMode.Read, param.Horse.Users.ToList(), 
+                    new OwnerPanelParam(PageMode.Read, _horseBase.Self, param.Horse.Users.ToList(), 
                         param.Horse.OwnerName, param.Horse.OwnerPhoneNumber), popUpLevel + 1);
                 break;
             case PageMode.Write:
                 SetWriteMode();
                 PageManager.Instance.OpenPage(_ownerPanel, 
-                    new OwnerPanelParam(PageMode.Write, param.Horse.Users.ToList(), 
+                    new OwnerPanelParam(PageMode.Write, _horseBase.Self, param.Horse.Users.ToList(), 
                         param.Horse.OwnerName, param.Horse.OwnerPhoneNumber), popUpLevel + 1);
                 break;
         }
@@ -243,6 +243,36 @@ public class HorsePage : Page
             OwnerPhoneNumber = _ownerPanel.OwnerPhoneNumber,
         };
 
+        foreach (var user in _ownerPanel.Users)
+        {
+            horse.Users.Add(new()
+            {
+                UserId = user.UserId,
+                AccessRole = user.AccessRole,
+                IsOwner = user.IsOwner,
+            });
+        }
+
+        if (_ownerPanel.Owner != null)
+        {
+            horse.Users.Add(new()
+            {
+                UserId = _ownerPanel.Owner.UserId,
+                AccessRole = _ownerPanel.Owner.AccessRole,
+                IsOwner = true,
+            });
+        }
+
+        if (!horse.Users.Any(u => u.UserId == _horseBase.Self.UserId))
+        {
+            horse.Users.Add(new()
+            {
+                UserId = _horseBase.Self.UserId,
+                AccessRole = _horseBase.Self.AccessRole,
+                IsOwner = _horseBase.Self.IsOwner,
+            });
+        }
+
         PageManager.Instance.DisplayLoadingPage(true, 4);
         StorageSystem storage = new();
         storage.UpdateHorse(horse).RunOnMainThread(result =>
@@ -306,7 +336,7 @@ public class HorsePage : Page
             {
                 UserId = _ownerPanel.Owner.UserId,
                 IsOwner = true,
-                RuleAccess = UserRoleAccess.Creator.ToString(),
+                AccessRole = UserRoleAccess.Creator.ToString(),
             });
         }
         else
@@ -315,7 +345,7 @@ public class HorsePage : Page
             {
                 UserId = _ownerPanel.Owner.UserId,
                 IsOwner = true,
-                RuleAccess = _ownerPanel.AccessRole,
+                AccessRole = _ownerPanel.AccessRole,
             });
         }
 
@@ -325,7 +355,7 @@ public class HorsePage : Page
             {
                 UserId = user.UserId,
                 IsOwner = false,
-                RuleAccess = user.AccessRole,
+                AccessRole = user.AccessRole,
             });
         }
 

@@ -102,7 +102,17 @@ public class OwnerPanel : Page
         }
 
         _users = new();
-        HorseUserDto owner = ownerParam.Users.SingleOrDefault(u => u.IsOwner);
+        HorseUserDto owner = null;
+
+        if (ownerParam.Self.IsOwner)
+        {
+            owner = ownerParam.Self;
+        }
+        else
+        {
+            owner = ownerParam.Users.SingleOrDefault(u => u.IsOwner);
+        }
+
         Mode = ownerParam.Mode;
 
         switch (Mode)

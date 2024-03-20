@@ -29,7 +29,7 @@ namespace Ford.WebApi.Data
     {
         public long UserId { get; set; }
         public bool IsOwner { get; set; }
-        public string RuleAccess { get; set; }
+        public string AccessRole { get; set; }
     }
 
     public enum UserRoleAccess
