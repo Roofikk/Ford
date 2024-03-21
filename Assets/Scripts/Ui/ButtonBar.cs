@@ -57,6 +57,7 @@ public class ButtonBar : MonoBehaviour
         };
 
         save.Bones = _skeleton.GetBonesForSave();
-        PageManager.Instance.OpenPage(_savePage, new SavePanelParam(PageMode.Write, save, false), 2);
+        var self = _skeleton.Data.Self;
+        PageManager.Instance.OpenPage(_savePage, new SavePanelParam(PageMode.Write, save, false, self), 2);
     }
 }

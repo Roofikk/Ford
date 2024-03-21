@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Ford.SaveSystem;
+using Ford.WebApi.Data;
 
 public class SavePanel : Page
 {
@@ -53,7 +54,7 @@ public class SavePanel : Page
         }
 
         SaveInfo = saveParam.SaveInfo;
-        OpenMode(saveParam.Mode, saveParam.SaveInfo, saveParam.CanDelete, popUpLevel);
+        OpenMode(saveParam, popUpLevel);
     }
 
     public override void Close()
@@ -64,13 +65,13 @@ public class SavePanel : Page
         _applyButton.onClick.RemoveAllListeners();
     }
 
-    private void OpenMode(PageMode mode, ISaveInfo saveInfo, bool canDelete, int popUpLevel)
+    private void OpenMode(SavePanelParam param, int popUpLevel)
     {
         _inputFields ??= GetComponentsInChildren<TMP_InputField>(true).ToList();
-        FillData(saveInfo);
+        FillData(param.SaveInfo);
         _declineButton.interactable = true;
 
-        switch (mode)
+        switch (param.Mode)
         {
             case PageMode.Read:
                 foreach (var input in _inputFields)
@@ -79,17 +80,16 @@ public class SavePanel : Page
                 }
 
                 _additionalPanel.gameObject.SetActive(true);
-                _creationDateField.text = saveInfo.CreationDate.ToString("dd.MM.yyyy HH:mm");
-                _lastUpdateField.text = saveInfo.LastUpdate.ToString("dd.MM.yyyy HH:mm");
+                _creationDateField.text = param.SaveInfo.CreationDate.ToString("dd.MM.yyyy HH:mm");
+                _lastUpdateField.text = param.SaveInfo.LastUpdate.ToString("dd.MM.yyyy HH:mm");
 
                 _applyButton.GetComponentInChildren<TextMeshProUGUI>().text = "Изменить";
                 _applyButton.onClick.AddListener(() =>
                 {
                     PageManager.Instance.ClosePage(this);
-                    PageManager.Instance.OpenPage(this, new SavePanelParam(PageMode.Write, saveInfo, canDelete), popUpLevel);
+                    PageManager.Instance.OpenPage(this, new SavePanelParam(PageMode.Write, param.SaveInfo, param.CanDelete, param.Self), popUpLevel);
                 });
 
-                _declineButton.interactable = canDelete;
                 _declineButton.GetComponentInChildren<TextMeshProUGUI>().text = "Удалить";
                 _declineButton.onClick.AddListener(() =>
                 {
@@ -103,6 +103,19 @@ public class SavePanel : Page
                             PageManager.Instance.CloseWarningPage();
                         }), 4);
                 });
+
+                if (Enum.Parse<UserAccessRole>(param.Self.AccessRole) > UserAccessRole.Read)
+                {
+                    _applyButton.interactable = true;
+                    _declineButton.interactable = true;
+
+                    _declineButton.interactable = param.CanDelete;
+                }
+                else
+                {
+                    _applyButton.interactable = false;
+                    _declineButton.interactable = false;
+                }
                 break;
             case PageMode.Write:
                 foreach (var input in _inputFields)
@@ -115,7 +128,7 @@ public class SavePanel : Page
                 _applyButton.GetComponentInChildren<TextMeshProUGUI>().text = "Сохранить";
                 _declineButton.GetComponentInChildren<TextMeshProUGUI>().text = "Отмена";
 
-                if (saveInfo is FullSaveInfo fullSaveInfo)
+                if (param.SaveInfo is FullSaveInfo fullSaveInfo)
                 {
                     _applyButton.onClick.AddListener(() =>
                     {
@@ -137,8 +150,17 @@ public class SavePanel : Page
                     _declineButton.onClick.AddListener(() =>
                     {
                         PageManager.Instance.ClosePage(this);
-                        PageManager.Instance.OpenPage(this, new SavePanelParam(PageMode.Read, saveInfo, canDelete), popUpLevel);
+                        PageManager.Instance.OpenPage(this, new SavePanelParam(PageMode.Read, param.SaveInfo, param.CanDelete, param.Self), popUpLevel);
                     });
+                }
+
+                if (Enum.Parse<UserAccessRole>(param.Self.AccessRole) > UserAccessRole.Read)
+                {
+                    _applyButton.interactable = true;
+                }
+                else
+                {
+                    _applyButton.interactable = false;
                 }
                 break;
         }
@@ -275,25 +297,13 @@ public class SavePanelParam
     public PageMode Mode { get; }
     public ISaveInfo SaveInfo { get; }
     public bool CanDelete { get; }
+    public HorseUserDto Self { get; }
 
-    public SavePanelParam(PageMode mode, ISaveInfo saveInfo, bool canDelete)
+    public SavePanelParam(PageMode mode, ISaveInfo saveInfo, bool canDelete, HorseUserDto self)
     {
         Mode = mode;
         SaveInfo = saveInfo;
         CanDelete = canDelete;
-    }
-
-    public SavePanelParam(PageMode mode, SaveInfo saveData, bool canDelete)
-    {
-        Mode = mode;
-        SaveInfo = saveData;
-        CanDelete = canDelete;
-    }
-
-    public SavePanelParam(PageMode mode, FullSaveInfo saveInfo, bool canDelete)
-    {
-        Mode = mode;
-        SaveInfo = saveInfo;
-        CanDelete = canDelete;
+        Self = self;
     }
 }

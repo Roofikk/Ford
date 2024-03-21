@@ -22,7 +22,7 @@ public class HorsePage : Page
     [SerializeField] private TMP_InputField _countryInputFiled;
     [SerializeField] private TMP_InputField _cityInputFiled;
     [SerializeField] private TMP_InputField _regionInputFiled;
-    [SerializeField] private OwnerPanel _ownerPanel;
+    [SerializeField] private OwnerPanel _usersPanel;
 
     [Space(10)]
     [Header("Buttons")]
@@ -69,7 +69,7 @@ public class HorsePage : Page
 
         if (_horseBase == null)
         {
-            PageManager.Instance.OpenPage(_ownerPanel, popUpLevel);
+            PageManager.Instance.OpenPage(_usersPanel, popUpLevel);
             SetNormalMode();
         }
     }
@@ -92,17 +92,16 @@ public class HorsePage : Page
         {
             case PageMode.Read:
                 SetReadMode();
-                PageManager.Instance.OpenPage(_ownerPanel,
-                    new OwnerPanelParam(PageMode.Read, _horseBase.Self, param.Horse.Users.ToList(), 
-                        param.Horse.OwnerName, param.Horse.OwnerPhoneNumber), popUpLevel + 1);
                 break;
             case PageMode.Write:
                 SetWriteMode();
-                PageManager.Instance.OpenPage(_ownerPanel, 
-                    new OwnerPanelParam(PageMode.Write, _horseBase.Self, param.Horse.Users.ToList(), 
-                        param.Horse.OwnerName, param.Horse.OwnerPhoneNumber), popUpLevel + 1);
                 break;
+
         }
+
+        PageManager.Instance.OpenPage(_usersPanel,
+            new OwnerPanelParam(param.HorsePageMode, _horseBase.Self, param.Horse.Users.ToList(),
+            param.Horse.OwnerName, param.Horse.OwnerPhoneNumber), popUpLevel + 1);
 
         _closeButton.onClick.AddListener(() =>
         {
@@ -129,7 +128,7 @@ public class HorsePage : Page
     {
         base.Close();
         _horseBase = null;
-        PageManager.Instance.ClosePage(_ownerPanel);
+        PageManager.Instance.ClosePage(_usersPanel);
 
         foreach (var input in _inputFields)
         {
@@ -176,7 +175,6 @@ public class HorsePage : Page
         }
 
         _sexDropdown.interactable = false;
-
         _applyButton.GetComponentInChildren<TextMeshProUGUI>().text = "Изменить";
         var copy = new HorseBase(_horseBase);
 
@@ -186,12 +184,33 @@ public class HorsePage : Page
             PageManager.Instance.OpenPage(this, new HorsePageParam(PageMode.Write, copy), 2);
         });
 
+        if (Enum.Parse<UserAccessRole>(_horseBase.Self.AccessRole) > UserAccessRole.Read)
+        {
+            _applyButton.interactable = true;
+        }
+        else
+        {
+            _applyButton.interactable = false;
+        }
+
+        var accessRole = Enum.Parse<UserAccessRole>(_horseBase.Self.AccessRole);
+
         _declineButton.GetComponentInChildren<TextMeshProUGUI>().text = "Удалить";
         _declineButton.onClick.AddListener(() =>
         {
+            string message = "";
+            if (accessRole == UserAccessRole.Creator)
+            {
+                message = "Вы уверены, что хотите удалить лошадь?\nВсе добавленные пользователи также прекратят взаимодействие с ней";
+            }
+            else
+            {
+                message = "Вы уверены, что хотите прекратить отслеживание данной лошади?";
+            }
+
             PageManager.Instance.OpenWarningPage(new(
                 "Удалить лошадь?",
-                "Вы уверены, что хотите удалить лошадь?\nВернуть ее не будет возможности!",
+                message,
                 () =>
                 {
                     DeleteHorse();
@@ -199,6 +218,15 @@ public class HorsePage : Page
                     PageManager.Instance.CloseWarningPage();
                 }), 4);
         });
+
+        if (accessRole > UserAccessRole.Read)
+        {
+            _applyButton.interactable = true;
+        }
+        else
+        {
+            _applyButton.interactable = false;
+        }
     }
 
     private void SetWriteMode()
@@ -239,11 +267,11 @@ public class HorsePage : Page
             Country = _countryInputFiled.text,
             City = _cityInputFiled.text,
             Region = _regionInputFiled.text,
-            OwnerName = _ownerPanel.OwnerName,
-            OwnerPhoneNumber = _ownerPanel.OwnerPhoneNumber,
+            OwnerName = _usersPanel.OwnerName,
+            OwnerPhoneNumber = _usersPanel.OwnerPhoneNumber,
         };
 
-        foreach (var user in _ownerPanel.Users)
+        foreach (var user in _usersPanel.Users)
         {
             horse.Users.Add(new()
             {
@@ -253,25 +281,25 @@ public class HorsePage : Page
             });
         }
 
-        if (_ownerPanel.Owner != null)
+        if (_usersPanel.Owner != null)
         {
             horse.Users.Add(new()
             {
-                UserId = _ownerPanel.Owner.UserId,
-                AccessRole = _ownerPanel.Owner.AccessRole,
+                UserId = _usersPanel.Owner.UserId,
+                AccessRole = _usersPanel.OwnerAccessRole,
                 IsOwner = true,
             });
         }
 
-        if (!horse.Users.Any(u => u.UserId == _horseBase.Self.UserId))
-        {
-            horse.Users.Add(new()
-            {
-                UserId = _horseBase.Self.UserId,
-                AccessRole = _horseBase.Self.AccessRole,
-                IsOwner = _horseBase.Self.IsOwner,
-            });
-        }
+        //if (!horse.Users.Any(u => u.UserId == _horseBase.Self.UserId))
+        //{
+        //    horse.Users.Add(new()
+        //    {
+        //        UserId = _horseBase.Self.UserId,
+        //        AccessRole = _horseBase.Self.AccessRole,
+        //        IsOwner = false,
+        //    });
+        //}
 
         PageManager.Instance.DisplayLoadingPage(true, 4);
         StorageSystem storage = new();
@@ -320,36 +348,36 @@ public class HorsePage : Page
             Region = _regionInputFiled.text,
         };
 
-        if (_ownerPanel.Owner == null)
+        if (_usersPanel.Owner == null)
         {
-            horse.OwnerName = _ownerPanel.OwnerName;
-            horse.OwnerPhoneNumber = _ownerPanel.OwnerPhoneNumber;
+            horse.OwnerName = _usersPanel.OwnerName;
+            horse.OwnerPhoneNumber = _usersPanel.OwnerPhoneNumber;
 
-            foreach (var user in _ownerPanel.Users)
+            foreach (var user in _usersPanel.Users)
             {
                 user.IsOwner = false;
             }
         }
-        else if (_ownerPanel.Owner.UserId == Player.UserData.UserId)
+        else if (_usersPanel.Owner.UserId == Player.UserData.UserId)
         {
             horse.Users.Add(new()
             {
-                UserId = _ownerPanel.Owner.UserId,
+                UserId = _usersPanel.Owner.UserId,
                 IsOwner = true,
-                AccessRole = UserRoleAccess.Creator.ToString(),
+                AccessRole = UserAccessRole.Creator.ToString(),
             });
         }
         else
         {
             horse.Users.Add(new()
             {
-                UserId = _ownerPanel.Owner.UserId,
+                UserId = _usersPanel.Owner.UserId,
                 IsOwner = true,
-                AccessRole = _ownerPanel.AccessRole,
+                AccessRole = _usersPanel.OwnerAccessRole,
             });
         }
 
-        foreach (var user in _ownerPanel.Users)
+        foreach (var user in _usersPanel.Users)
         {
             horse.Users.Add(new()
             {

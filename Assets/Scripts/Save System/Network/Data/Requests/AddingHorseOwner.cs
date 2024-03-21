@@ -4,7 +4,7 @@ namespace Ford.WebApi.Data
     {
         public long UserId { get; set; }
         public long HorseId { get; set; }
-        public UserRoleAccess OwnerAccessRole { get; set; }
+        public UserAccessRole OwnerAccessRole { get; set; }
     }
 
     internal class AddingHorseOwnerDto

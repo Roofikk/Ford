@@ -28,10 +28,12 @@ public class OwnerPanel : Page
 
     private HorseUserDto _owner;
     private List<HorseUserDto> _users = new();
+    private HorseUserDto _self;
+    private UserAccessRole SelfAccessRole => Enum.Parse<UserAccessRole>(_self.AccessRole);
 
     public string OwnerName => _owner == null ? _ownerNameInput.text : $"{_owner.FirstName} {_owner.LastName}".Trim();
     public string OwnerPhoneNumber => _owner == null ? _ownerPhoneNumberInput.text : _owner.PhoneNumber;
-    public string AccessRole => _owner == null ? ((UserRoleAccess)_accessDropdown.value).ToString() : _owner.AccessRole;
+    public string OwnerAccessRole => ((UserAccessRole)_accessDropdown.value).ToString();
     public HorseUserDto Owner => _owner;
     public ICollection<HorseUserDto> Users => _users;
 
@@ -48,7 +50,7 @@ public class OwnerPanel : Page
                 FirstName = Player.UserData.FirstName,
                 LastName = Player.UserData.LastName,
                 PhoneNumber = Player.UserData.PhoneNumber,
-                AccessRole = UserRoleAccess.Creator.ToString(),
+                AccessRole = UserAccessRole.Creator.ToString(),
                 IsOwner = true,
             });
         });
@@ -83,7 +85,7 @@ public class OwnerPanel : Page
 
         Mode = PageMode.Write;
 
-        DisplayAccessRole(false);
+        DisplayAccessRoleDropdown(false);
 
         foreach (var t in _usersGroup.GetComponentsInChildren<UserLayoutElement>())
         {
@@ -103,6 +105,7 @@ public class OwnerPanel : Page
 
         _users = new();
         HorseUserDto owner = null;
+        _self = ownerParam.Self;
 
         if (ownerParam.Self.IsOwner)
         {
@@ -125,7 +128,7 @@ public class OwnerPanel : Page
                 }
                 else
                 {
-                    SetCustomOwner(ownerParam.OwnerName, OwnerPhoneNumber);
+                    SetCustomOwner(ownerParam.OwnerName, ownerParam.OwnerPhoneNumber);
                 }
 
                 foreach (var user in ownerParam.Users)
@@ -141,12 +144,12 @@ public class OwnerPanel : Page
                 }
                 else
                 {
-                    SetCustomOwner(ownerParam.OwnerName, OwnerPhoneNumber);
+                    SetCustomOwner(ownerParam.OwnerName, ownerParam.OwnerPhoneNumber);
                 }
 
                 foreach (var user in ownerParam.Users)
                 {
-                    AddUser(user, true, false);
+                    AddUser(user, SelfAccessRole > UserAccessRole.Write, false);
                 }
                 break;
         }
@@ -178,12 +181,13 @@ public class OwnerPanel : Page
 
     private void OpenWriteMode()
     {
-        _addYourselfButton.gameObject.SetActive(true);
-        _searchUserButton.gameObject.SetActive(true);
-        _removeOwnerButton.gameObject.SetActive(true);
-        _addUserButton.gameObject.SetActive(true);
+        _addYourselfButton.gameObject.SetActive(SelfAccessRole > UserAccessRole.Write);
+        _searchUserButton.gameObject.SetActive(SelfAccessRole > UserAccessRole.Write);
+        _removeOwnerButton.gameObject.SetActive(SelfAccessRole > UserAccessRole.Write);
+        _addUserButton.gameObject.SetActive(SelfAccessRole > UserAccessRole.Write);
 
-        _accessDropdown.interactable = true;
+
+        _accessDropdown.interactable = SelfAccessRole > UserAccessRole.Write;
     }
 
     public void RefreshData()
@@ -217,17 +221,17 @@ public class OwnerPanel : Page
 
         if (_owner.UserId == Player.UserData.UserId)
         {
-            DisplayAccessRole(false);
+            DisplayAccessRoleDropdown(false);
         }
         else
         {
-            DisplayAccessRole(true);
+            DisplayAccessRoleDropdown(true);
         }
 
-        _accessDropdown.value = (int)Enum.Parse<UserRoleAccess>(user.AccessRole);
+        _accessDropdown.value = (int)Enum.Parse<UserAccessRole>(user.AccessRole);
         if (Mode != PageMode.Read)
         {
-            _removeOwnerButton.gameObject.SetActive(true);
+            _removeOwnerButton.gameObject.SetActive(SelfAccessRole > UserAccessRole.Write);
         }
     }
 
@@ -236,7 +240,7 @@ public class OwnerPanel : Page
         _ownerNameInput.text = ownerName;
         _ownerPhoneNumberInput.text = ownerPhoneNumber;
 
-        DisplayAccessRole(false);
+        DisplayAccessRoleDropdown(false);
     }
 
     public void RemoveOwner()
@@ -247,7 +251,7 @@ public class OwnerPanel : Page
         _ownerPhoneNumberInput.text = "";
         _ownerPhoneNumberInput.SetInteractable(true);
 
-        DisplayAccessRole(false);
+        DisplayAccessRoleDropdown(false);
         _removeOwnerButton.gameObject.SetActive(false);
         _owner = null;
     }
@@ -301,7 +305,7 @@ public class OwnerPanel : Page
         return _owner;
     }
 
-    private void DisplayAccessRole(bool enabled)
+    private void DisplayAccessRoleDropdown(bool enabled)
     {
         _accessRoleObject.SetActive(enabled);
         _accessDropdown.gameObject.SetActive(enabled);

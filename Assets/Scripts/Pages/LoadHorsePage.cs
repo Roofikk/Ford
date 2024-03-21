@@ -1,5 +1,7 @@
 using Ford.SaveSystem;
 using Ford.SaveSystem.Ver2.Data;
+using Ford.WebApi.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -185,9 +187,10 @@ public class LoadHorsePage : Page
 
         foreach (var save in saves)
         {
+            var self = _horseInfoDict[save.HorseId].HorseData.Self;
             var saveElement = Instantiate(_savePrefab, _savesScroll.content)
                 .Initiate(save, _saveToggleGroup,
-                () => { ActivateButtons(true); },
+                () => { ActivateButtons(true, Enum.Parse<UserAccessRole>(self.AccessRole)); },
                 () => { OpenSaveInfoPage(save.SaveId); });
 
             _saveInfoDict.Add(save.SaveId, saveElement);
@@ -211,7 +214,7 @@ public class LoadHorsePage : Page
         _emptySaveListText.gameObject.SetActive(saves.Count == 0);
     }
 
-    private void ActivateButtons(bool enable)
+    private void ActivateButtons(bool enable, UserAccessRole userAccessRole = UserAccessRole.Read)
     {
         _loadButton.interactable = enable;
         _editButton.interactable = enable;
@@ -222,6 +225,12 @@ public class LoadHorsePage : Page
         }
         else
         {
+            _deleteButton.interactable = false;
+        }
+
+        if (userAccessRole == UserAccessRole.Read)
+        {
+            _editButton.interactable = false;
             _deleteButton.interactable = false;
         }
     }
@@ -262,8 +271,9 @@ public class LoadHorsePage : Page
 
     private void OpenSaveInfoPage(long saveId)
     {
+        var saveInfo = _saveInfoDict[saveId].SaveData;
         PageManager.Instance.OpenPage(_saveInfoPage, new SavePanelParam(PageMode.Read, 
-            _saveInfoDict[saveId].SaveData, _saveInfoDict.Count > 1), 2);
+            saveInfo, _saveInfoDict.Count > 1, _horseInfoDict[saveInfo.HorseId].HorseData.Self), 2);
         ((SavePanel)_saveInfoPage).OnSaveUpdated += UpdateSaveLoadElement;
         ((SavePanel)_saveInfoPage).OnSaveDeleted += DeleteSaveLoadElement;
     }

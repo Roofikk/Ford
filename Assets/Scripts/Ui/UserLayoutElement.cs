@@ -15,6 +15,7 @@ public class UserLayoutElement : MonoBehaviour
     {
         _removeButton.onClick.AddListener(() =>
         {
+            OnRemoved?.Invoke();
             Destroy(gameObject);
         });
     }
@@ -29,11 +30,5 @@ public class UserLayoutElement : MonoBehaviour
     public void DisplayRemoveButton(bool enabled)
     {
         _removeButton.gameObject.SetActive(enabled);
-    }
-
-    private void OnDestroy()
-    {
-        OnRemoved?.Invoke();
-        OnRemoved = null;
     }
 }

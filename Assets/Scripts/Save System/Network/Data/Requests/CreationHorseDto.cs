@@ -32,7 +32,7 @@ namespace Ford.WebApi.Data
         public string AccessRole { get; set; }
     }
 
-    public enum UserRoleAccess
+    public enum UserAccessRole
     {
         Read,
         Write,
