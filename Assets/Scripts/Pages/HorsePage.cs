@@ -291,16 +291,6 @@ public class HorsePage : Page
             });
         }
 
-        //if (!horse.Users.Any(u => u.UserId == _horseBase.Self.UserId))
-        //{
-        //    horse.Users.Add(new()
-        //    {
-        //        UserId = _horseBase.Self.UserId,
-        //        AccessRole = _horseBase.Self.AccessRole,
-        //        IsOwner = false,
-        //    });
-        //}
-
         PageManager.Instance.DisplayLoadingPage(true, 4);
         StorageSystem storage = new();
         storage.UpdateHorse(horse).RunOnMainThread(result =>

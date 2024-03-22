@@ -331,7 +331,11 @@ namespace Ford.WebApi
         {
             string json = JsonConvert.SerializeObject(transferObject);
             StringContent content = new(json, Encoding.UTF8, "application/json");
-            HttpClient client = new();
+
+            HttpClientHandler handler = new();
+            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
+            HttpClient client = new(handler: handler, disposeHandler: true);
 
             HttpRequestMessage request = new(HttpMethod.Post, uri)
             {

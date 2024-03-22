@@ -38182,7 +38182,7 @@ MonoBehaviour:
   _countryInputFiled: {fileID: 1393793085}
   _cityInputFiled: {fileID: 764152798}
   _regionInputFiled: {fileID: 1279033551}
-  _ownerPanel: {fileID: 1521205912}
+  _usersPanel: {fileID: 1521205912}
   _closeButton: {fileID: 682417671}
   _applyButton: {fileID: 1976061574}
   _declineButton: {fileID: 226900554}
