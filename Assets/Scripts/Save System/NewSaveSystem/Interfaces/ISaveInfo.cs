@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 
 namespace Ford.SaveSystem
 {
@@ -8,6 +9,7 @@ namespace Ford.SaveSystem
         public long HorseId { get; set; }
         public string Header { get; set; }
         public string Description { get; set; }
+        [JsonConverter(typeof(DateConverter))]
         public DateTime Date { get; set; }
         public DateTime CreationDate { get; set; }
         public DateTime LastUpdate { get; set; }

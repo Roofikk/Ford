@@ -25,7 +25,6 @@ namespace Ford.WebApi
 
         private readonly string _horsesUri = "api/horses";
         private readonly string _updateHorseOwnersUri = "api/horseOwners";
-        private readonly string _addHorseOwnersUri = "api/horseOwners/add-owner";
         private readonly string _changeOwnerRoleUri = "api/horseOwners/change-owner-role";
 
         private readonly string _savesUri = "api/saves";
@@ -329,13 +328,11 @@ namespace Ford.WebApi
 
         private async Task<ResponseResult<T>> PostRequest<T>(Uri uri, object transferObject, string accessToken = "") where T : class
         {
-            string json = JsonConvert.SerializeObject(transferObject);
+            string json = JsonConvert.SerializeObject(transferObject, Formatting.Indented);
+            var jsonSettings = new JsonSerializerSettings();
             StringContent content = new(json, Encoding.UTF8, "application/json");
 
-            HttpClientHandler handler = new();
-            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-
-            HttpClient client = new(handler: handler, disposeHandler: true);
+            HttpClient client = new();
 
             HttpRequestMessage request = new(HttpMethod.Post, uri)
             {

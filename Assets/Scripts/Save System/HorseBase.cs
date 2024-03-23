@@ -1,5 +1,6 @@
 using Ford.SaveSystem.Ver2;
 using Ford.WebApi.Data;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
@@ -10,6 +11,7 @@ namespace Ford.SaveSystem
         public long HorseId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+        [JsonConverter(typeof(DateConverter))]
         public DateTime? BirthDate { get; set; }
         public string Sex { get; set; }
         public string City { get; set; }

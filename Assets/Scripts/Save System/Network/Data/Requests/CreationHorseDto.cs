@@ -1,4 +1,5 @@
 using Ford.SaveSystem;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
@@ -6,14 +7,9 @@ namespace Ford.WebApi.Data
 {
     public class CreationHorse
     {
-        public CreationHorse()
-        {
-            Saves = new List<SaveInfo>();
-            Users = new List<CreationHorseUser>();
-        }
-
         public string Name { get; set; }
         public string Description { get; set; }
+        [JsonConverter(typeof(DateConverter))]
         public DateTime? BirthDate { get; set; }
         public string Sex { get; set; }
         public string City { get; set; }
@@ -21,8 +17,8 @@ namespace Ford.WebApi.Data
         public string Country { get; set; }
         public string OwnerName { get; set; }
         public string OwnerPhoneNumber { get; set; }
-        public ICollection<SaveInfo> Saves { get; set; }
-        public ICollection<CreationHorseUser> Users { get; set; }
+        public ICollection<SaveInfo> Saves { get; set; } = new List<SaveInfo>();
+        public ICollection<CreationHorseUser> Users { get; set; } = new List<CreationHorseUser>();
     }
 
     public class CreationHorseUser

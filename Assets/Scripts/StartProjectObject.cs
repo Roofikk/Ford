@@ -1,11 +1,13 @@
 using Ford.WebApi;
+using Newtonsoft.Json;
 using System;
+using System.IO;
 using UnityEngine;
 
 public class StartProjectObject : MonoBehaviour
 {
     [SerializeField] private Page _loadingPage;
-    [SerializeField] private ProjectSettings _projectSettings;
+    [SerializeField] private string _hostJsonFilePath;
 
     public static event Action OnProjectStarted;
     public static bool ProjectStarted { get; private set; } = false;
@@ -17,7 +19,12 @@ public class StartProjectObject : MonoBehaviour
         if (!ProjectStarted)
         {
             _loadingPage.Open(5);
-            FordApiClient.SetHost(_projectSettings.HostWebApi);
+
+            StreamReader sr = new StreamReader(_hostJsonFilePath);
+            string json = sr.ReadToEnd();
+            var host = JsonConvert.DeserializeObject<Host>(json);
+
+            FordApiClient.SetHost(host.HostConnection);
 
             Player.Authorize(onAuthorizeFinished: () =>
             {
