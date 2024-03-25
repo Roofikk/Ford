@@ -56,7 +56,11 @@ public class ButtonBar : MonoBehaviour
             Date = DateTime.Now,
         };
 
-        save.Bones = _skeleton.GetBonesForSave();
+        foreach (var item in _skeleton.GetBonesForSave())
+        {
+            save.Bones.Add(item);
+        }
+
         var self = _skeleton.Data.Self;
         PageManager.Instance.OpenPage(_savePage, new SavePanelParam(PageMode.Write, save, false, self), 2);
     }

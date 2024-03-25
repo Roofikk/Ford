@@ -4,20 +4,34 @@ using Ford.WebApi.Data;
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Security;
 using System.Threading.Tasks;
 
 namespace Ford.SaveSystem
 {
     public class AuthorizedState : SaveSystemState
     {
+        public FordApiClient ApiClient { get; set; }
+        private readonly SecureString _accessToken;
+        public StorageHistory History { get; private set; }
+
+        public AuthorizedState()
+        {
+            ApiClient = new();
+            _accessToken = new SecureString();
+
+            string accessToken = new Storage().GetAccessToken();
+            foreach (var c in accessToken)
+            {
+                _accessToken.AppendChar(c);
+            }
+        }
+
         public override async Task<ICollection<HorseBase>> GetHorses(StorageSystem storage, int below = 0, int amount = 20,
             string orderByDate = "desc", string orderByName = "false")
         {
-            FordApiClient client = new();
-            var accessToken = GetAccessToken();
-
-            var result = await client.GetHorsesAsync(accessToken, below, amount, orderByDate, orderByName);
-            var newResult = await RefreshTokenAndRetrieveResult(result, accessToken, client.GetHorsesAsync, below, amount, orderByDate, orderByName);
+            var result = await ApiClient.GetHorsesAsync(_accessToken.ToString(), below, amount, orderByDate, orderByName);
+            var newResult = await RefreshTokenAndRetrieveResult(result, _accessToken.ToString(), ApiClient.GetHorsesAsync, below, amount, orderByDate, orderByName);
 
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {
@@ -31,6 +45,16 @@ namespace Ford.SaveSystem
             }
 
             return newResult.Content;
+        }
+
+        public override async Task<bool> Initiate(StorageSystem storage, SaveSystemState fromState)
+        {
+            if (fromState is UnauthorizedState unauthorizedState)
+            {
+                History = unauthorizedState.History;
+            }
+
+            return true;
         }
 
         public override async Task<HorseBase> CreateHorse(StorageSystem storage, CreationHorse horse)
@@ -218,6 +242,12 @@ namespace Ford.SaveSystem
             }
 
             return true;
+        }
+
+        public override async Task<bool> TryChangeState(StorageSystem storage)
+        {
+            storage.ChangeState(SaveSystemStateEnum.Unauthorized);
+            return await Task.FromResult(true);
         }
 
         private string GetAccessToken()

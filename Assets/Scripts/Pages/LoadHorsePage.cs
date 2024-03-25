@@ -293,11 +293,18 @@ public class LoadHorsePage : Page
                 }
 
                 SceneParameters.AddParam(horseInfo);
-                SceneParameters.AddParam(new SaveBonesData()
+
+                var saveBonesData = new SaveBonesData()
                 {
-                    SaveId = saveInfo.HorseId,
-                    Bones = result.Bones,
-                });
+                    SaveId = saveInfo.SaveId,
+                };
+
+                foreach (var bone in result.Bones)
+                {
+                    saveBonesData.Bones.Add(bone);
+                }
+
+                SceneParameters.AddParam(saveBonesData);
 
                 AsyncOperation loadingScene = SceneManager.LoadSceneAsync(1);
                 loadingScene.completed += (res) =>

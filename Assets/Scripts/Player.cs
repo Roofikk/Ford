@@ -11,6 +11,7 @@ public class Player : MonoBehaviour
     private static AccountDto _userData = null;
     public static AccountDto UserData => _userData;
     public static bool IsLoggedIn { get; private set; }
+    public static bool Connected { get; private set; }
     public static event Action OnChangedAuthState;
 
     public static Player Instance { get; private set; }

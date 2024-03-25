@@ -1,5 +1,4 @@
 using Ford.SaveSystem.Ver2;
-using Newtonsoft.Json;
 using System;
 
 namespace Ford.SaveSystem
@@ -18,6 +17,7 @@ namespace Ford.SaveSystem
         public SaveInfo(SaveInfo saveData)
         {
             SaveId = saveData.SaveId;
+            HorseId = saveData.HorseId;
             Header = saveData.Header;
             Description = saveData.Description;
             CreationDate = saveData.CreationDate;

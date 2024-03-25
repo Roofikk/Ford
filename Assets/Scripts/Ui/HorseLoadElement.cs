@@ -65,13 +65,17 @@ public class HorseLoadElement : MonoBehaviour
         _horseNameText.text = horse.Name;
 
         HorseUserDto owner = null;
-        if (horse.Self.IsOwner)
+
+        if (horse.Self != null)
         {
-            owner = horse.Self;
-        }
-        else
-        {
-            owner = horse.Users.SingleOrDefault(u => u.IsOwner);
+            if (horse.Self.IsOwner)
+            {
+                owner = horse.Self;
+            }
+            else
+            {
+                owner = horse.Users.SingleOrDefault(u => u.IsOwner);
+            }
         }
 
         if (owner != null)

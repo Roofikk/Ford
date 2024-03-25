@@ -231,8 +231,12 @@ public class SavePanel : Page
             CreationDate = DateTime.UtcNow,
             LastUpdate = DateTime.UtcNow,
             HorseId = SaveInfo.HorseId,
-            Bones = ((FullSaveInfo)SaveInfo).Bones,
         };
+
+        foreach (var bone in ((FullSaveInfo)SaveInfo).Bones)
+        {
+            save.Bones.Add(bone);
+        }
 
         StorageSystem storage = new();
         storage.CreateSave(save).RunOnMainThread(result =>

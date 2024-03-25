@@ -17,11 +17,12 @@ namespace Ford.SaveSystem.Ver2
 
             if (!File.Exists(_pathSaveHistory))
             {
-                File.Create(_pathSaveHistory);
+                var stream = File.Create(_pathSaveHistory);
+                stream.Close();
             }
             else
             {
-                using StreamReader sr = new(_pathSaveHistory);
+                StreamReader sr = new(_pathSaveHistory);
                 string json = sr.ReadToEnd();
                 if (!string.IsNullOrEmpty(json))
                 {
@@ -32,6 +33,7 @@ namespace Ford.SaveSystem.Ver2
                         History.Add(action);
                     }
                 }
+                sr.Close();
             }
         }
 

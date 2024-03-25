@@ -1,10 +1,21 @@
-﻿using Ford.WebApi.Data;
+﻿using Ford.SaveSystem.Ver2;
+using Ford.WebApi.Data;
 using System.Collections.Generic;
 
 namespace Ford.SaveSystem
 {
-    public class FullSaveInfo : SaveInfo
+    public class FullSaveInfo : SaveInfo, IStorageAction
     {
-        public ICollection<BoneSave> Bones { get; set; }
+        public ICollection<BoneSave> Bones { get; }
+
+        public FullSaveInfo()
+        {
+            Bones = new List<BoneSave>();
+        }
+
+        public FullSaveInfo(SaveInfo saveInfo) : base(saveInfo)
+        {
+            Bones = new List<BoneSave>();
+        }
     }
 }

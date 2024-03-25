@@ -1,3 +1,4 @@
+using Ford.SaveSystem;
 using Ford.WebApi;
 using Newtonsoft.Json;
 using System;
@@ -41,6 +42,15 @@ public class StartProjectObject : MonoBehaviour
             ProjectStarted = true;
             _loadingPage.Close();
             OnProjectStarted?.Invoke();
+
+            if (Player.IsLoggedIn)
+            {
+                StorageSystem.Initiate(SaveSystemStateEnum.Autorized);
+            }
+            else
+            {
+                StorageSystem.Initiate(SaveSystemStateEnum.Unauthorized);
+            }
         }
     }
 }

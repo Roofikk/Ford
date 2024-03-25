@@ -1,4 +1,5 @@
 using Ford.SaveSystem;
+using Ford.SaveSystem.Ver2;
 using Ford.WebApi.Data;
 using Newtonsoft.Json;
 using System;
@@ -32,6 +33,13 @@ namespace Ford.WebApi
         public static void SetHost(string host)
         {
             _hostUri = new Uri(host);
+        }
+
+        public async Task<ResponseResult> PushHistory(StorageHistory history)
+        {
+            Uri uri = new(_hostUri, _savesUri);
+            var result = await PostRequest(uri, history.History);
+            return result;
         }
 
         #region User
@@ -360,6 +368,50 @@ namespace Ford.WebApi
             catch (HttpRequestException ex)
             {
                 return new ResponseResult<T>(null, HttpStatusCode.InternalServerError, new List<ResponseError>()
+                {
+                    new()
+                    {
+                        Title = "ConnectionFailure",
+                        Message = "Check your connection or repeat the request later"
+                    }
+                });
+            }
+        }
+
+        private async Task<ResponseResult> PostRequest(Uri uri, object transferObject, string accessToken = "")
+        {
+            string json = JsonConvert.SerializeObject(transferObject, Formatting.Indented);
+            var jsonSettings = new JsonSerializerSettings();
+            StringContent content = new(json, Encoding.UTF8, "application/json");
+
+            HttpClient client = new();
+
+            HttpRequestMessage request = new(HttpMethod.Post, uri)
+            {
+                Content = content
+            };
+
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            }
+
+            try
+            {
+                var response = await client.SendAsync(request);
+                string responseText = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var retrieveHorse = JsonConvert.DeserializeObject(responseText);
+                    return new ResponseResult();
+                }
+
+                return ReturnBadResponse(responseText, response.StatusCode);
+            }
+            catch (HttpRequestException ex)
+            {
+                return new ResponseResult(HttpStatusCode.InternalServerError, new List<ResponseError>()
                 {
                     new()
                     {

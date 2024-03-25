@@ -1,27 +1,46 @@
 using Ford.WebApi.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UnityEditorInternal;
 
 namespace Ford.SaveSystem
 {
     public class StorageSystem
     {
-        private List<HorseBase> horses;
+        private List<HorseBase> _horses;
+
         public SaveSystemStateEnum CurrentState { get; set; }
-        private SaveSystemState State { get; set; }
+        private static SaveSystemState PrevState { get; set; }
+        private static SaveSystemState State { get; set; }
+        internal IReadOnlyCollection<HorseBase> Horses => _horses;
 
         public StorageSystem()
         {
-            if (Player.IsLoggedIn)
+            switch (State)
             {
-                CurrentState = SaveSystemStateEnum.Autorized;
-                State = new AuthorizedState();
+                case UnauthorizedState:
+                    CurrentState = SaveSystemStateEnum.Unauthorized;
+                    break;
+                case AuthorizedState:
+                    CurrentState = SaveSystemStateEnum.Autorized;
+                    break;
+                default:
+                    throw new Exception("State has been not initiated");
             }
-            else
+        }
+
+        public static void Initiate(SaveSystemStateEnum state)
+        {
+            switch (state)
             {
-                CurrentState = SaveSystemStateEnum.Unauthorized;
-                State = new UnauthorizedState();
+                case SaveSystemStateEnum.Unauthorized:
+                    State = new UnauthorizedState();
+                    break;
+                case SaveSystemStateEnum.Autorized:
+                    State = new AuthorizedState();
+                    break;
             }
         }
 
@@ -30,21 +49,14 @@ namespace Ford.SaveSystem
         {
             if (force)
             {
-                horses = (await State.GetHorses(this, below, above)).ToList();
-                return horses;
+                _horses = (await State.GetHorses(this, below, above)).ToList();
             }
             else
             {
-                if (horses == null)
-                {
-                    horses = (await State.GetHorses(this, above, below)).ToList();
-                    return horses;
-                }
-                else
-                {
-                    return await Task.FromResult(horses);
-                }
+                _horses ??= (await State.GetHorses(this, above, below)).ToList();
             }
+
+            return _horses;
         }
 
         public async Task<HorseBase> CreateHorse(CreationHorse horse)
@@ -98,19 +110,27 @@ namespace Ford.SaveSystem
         }
         #endregion
 
-        internal void ChangeState(SaveSystemStateEnum state)
+        protected internal void ChangeState(SaveSystemStateEnum state)
         {
             switch (state)
             {
                 case SaveSystemStateEnum.Autorized:
+                    PrevState = State;
                     CurrentState = SaveSystemStateEnum.Autorized;
                     State = new AuthorizedState();
                     break;
                 case SaveSystemStateEnum.Unauthorized:
+                    PrevState = State;
                     CurrentState = SaveSystemStateEnum.Unauthorized;
                     State = new UnauthorizedState();
+                    ApplyTransition().Wait();
                     break;
             }
+        }
+
+        public async Task ApplyTransition()
+        {
+            await State.Initiate(this, PrevState);
         }
     }
 
