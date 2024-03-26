@@ -49,9 +49,9 @@ public class Player : MonoBehaviour
 
     public static void Authorize(TokenDto tokens, Action onAuthorizeFinished = null)
     {
-        Storage storage = new();
-        storage.SaveAccessToken(tokens.Token);
-        storage.SaveRefreshToken(tokens.RefreshToken);
+        TokenStorage storage = new();
+        storage.SetNewAccessToken(tokens.Token);
+        storage.SetNewRefreshToken(tokens.RefreshToken);
 
         Authorize(tokens.Token, onAuthorizeFinished);
     }
@@ -62,8 +62,8 @@ public class Player : MonoBehaviour
 
         if (string.IsNullOrEmpty(accessToken))
         {
-            Storage storage = new Storage();
-            accessToken = storage.GetAccessToken();
+            TokenStorage storage = new();
+            accessToken = storage.GetAccessToken().ToString();
         }
 
         if (!string.IsNullOrEmpty(accessToken))
@@ -118,9 +118,9 @@ public class Player : MonoBehaviour
         _userData = null;
         IsLoggedIn = false;
 
-        Storage storage = new();
-        storage.ClearAccessToken();
-        storage.ClearRefreshToken();
+        TokenStorage storage = new();
+        storage.SetNewAccessToken("");
+        storage.SetNewRefreshToken("");
 
         OnChangedAuthState?.Invoke();
     }

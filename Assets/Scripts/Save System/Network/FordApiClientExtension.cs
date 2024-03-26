@@ -10,13 +10,13 @@ public static class FordApiClientExtension
     public static async Task<ResponseResult> RefreshTokenAndReply(this FordApiClient client,
         string token, Func<string, Task<ResponseResult>> func)
     {
-        var storage = new Storage();
-        var refreshToken = storage.GetRefreshToken();
+        TokenStorage tokenStorage = new();
+        var refreshToken = tokenStorage.GetRefreshToken();
 
         TokenDto tokenDto = new()
         {
             Token = token,
-            RefreshToken = refreshToken,
+            RefreshToken = refreshToken.ToString(),
         };
 
         var result = await client.RefreshTokenAsync(tokenDto);
@@ -26,8 +26,8 @@ public static class FordApiClientExtension
             return new ResponseResult(result.StatusCode, result.Errors);
         }
 
-        storage.SaveAccessToken(result.Content.Token);
-        storage.SaveRefreshToken(result.Content.RefreshToken);
+        tokenStorage.SetNewAccessToken(result.Content.Token);
+        tokenStorage.SetNewRefreshToken(result.Content.RefreshToken);
 
         Debug.Log("Token has been refreshed");
 
@@ -39,13 +39,13 @@ public static class FordApiClientExtension
         string token, Func<string, Task<ResponseResult<T>>> func)
         where T : class
     {
-        var storage = new Storage();
-        var refreshToken = storage.GetRefreshToken();
+        TokenStorage tokenStorage = new();
+        var refreshToken = tokenStorage.GetRefreshToken();
 
         TokenDto tokenDto = new()
         {
             Token = token,
-            RefreshToken = refreshToken,
+            RefreshToken = refreshToken.ToString(),
         };
 
         var result = await client.RefreshTokenAsync(tokenDto);
@@ -55,8 +55,8 @@ public static class FordApiClientExtension
             return new ResponseResult<T>(null, result.StatusCode, result.Errors);
         }
 
-        storage.SaveAccessToken(result.Content.Token);
-        storage.SaveRefreshToken(result.Content.RefreshToken);
+        tokenStorage.SetNewAccessToken(result.Content.Token);
+        tokenStorage.SetNewRefreshToken(result.Content.RefreshToken);
 
         Debug.Log("Token has been refreshed");
 
@@ -67,13 +67,13 @@ public static class FordApiClientExtension
     public static async Task<ResponseResult> RefreshTokenAndReply<TParam>(this FordApiClient client,
         string token, Func<string, TParam, Task<ResponseResult>> func, TParam param1)
     {
-        var storage = new Storage();
-        var refreshToken = storage.GetRefreshToken();
+        TokenStorage tokenStorage = new();
+        var refreshToken = tokenStorage.GetRefreshToken();
 
         TokenDto tokenDto = new()
         {
             Token = token,
-            RefreshToken = refreshToken,
+            RefreshToken = refreshToken.ToString(),
         };
 
         var result = await client.RefreshTokenAsync(tokenDto);
@@ -83,8 +83,8 @@ public static class FordApiClientExtension
             return new ResponseResult(result.StatusCode, result.Errors);
         }
 
-        storage.SaveAccessToken(result.Content.Token);
-        storage.SaveRefreshToken(result.Content.RefreshToken);
+        tokenStorage.SetNewAccessToken(result.Content.Token);
+        tokenStorage.SetNewRefreshToken(result.Content.RefreshToken);
 
         Debug.Log("Token has been refreshed");
 
@@ -96,13 +96,13 @@ public static class FordApiClientExtension
         string token, Func<string, TParam, Task<ResponseResult<TResult>>> func, TParam param1)
         where TResult : class
     {
-        var storage = new Storage();
-        var refreshToken = storage.GetRefreshToken();
+        TokenStorage tokenStorage = new();
+        var refreshToken = tokenStorage.GetRefreshToken();
 
         TokenDto tokenDto = new()
         {
             Token = token,
-            RefreshToken = refreshToken,
+            RefreshToken = refreshToken.ToString(),
         };
 
         var result = await client.RefreshTokenAsync(tokenDto);
@@ -112,8 +112,8 @@ public static class FordApiClientExtension
             return new ResponseResult<TResult>(null, result.StatusCode, result.Errors);
         }
 
-        storage.SaveAccessToken(result.Content.Token);
-        storage.SaveRefreshToken(result.Content.RefreshToken);
+        tokenStorage.SetNewAccessToken(result.Content.Token);
+        tokenStorage.SetNewRefreshToken(result.Content.RefreshToken);
 
         Debug.Log("Token has been refreshed");
 
@@ -125,13 +125,13 @@ public static class FordApiClientExtension
         string token, Func<string, TParam1, TParam2, Task<ResponseResult<TResult>>> func, TParam1 param1, TParam2 param2)
         where TResult : class
     {
-        var storage = new Storage();
-        var refreshToken = storage.GetRefreshToken();
+        TokenStorage tokenStorage = new();
+        var refreshToken = tokenStorage.GetRefreshToken();
 
         TokenDto tokenDto = new()
         {
             Token = token,
-            RefreshToken = refreshToken,
+            RefreshToken = refreshToken.ToString(),
         };
 
         var result = await client.RefreshTokenAsync(tokenDto);
@@ -141,8 +141,8 @@ public static class FordApiClientExtension
             return new ResponseResult<TResult>(null, result.StatusCode, result.Errors);
         }
 
-        storage.SaveAccessToken(result.Content.Token);
-        storage.SaveRefreshToken(result.Content.RefreshToken);
+        tokenStorage.SetNewAccessToken(result.Content.Token);
+        tokenStorage.SetNewRefreshToken(result.Content.RefreshToken);
 
         Debug.Log("Token has been refreshed");
 
@@ -154,13 +154,13 @@ public static class FordApiClientExtension
         string token, Func<string, TParam1, TParam2, TParam3, Task<ResponseResult<TResult>>> func, TParam1 param1, TParam2 param2, TParam3 param3)
         where TResult : class
     {
-        var storage = new Storage();
-        var refreshToken = storage.GetRefreshToken();
+        TokenStorage tokenStorage = new();
+        var refreshToken = tokenStorage.GetRefreshToken();
 
         TokenDto tokenDto = new()
         {
             Token = token,
-            RefreshToken = refreshToken,
+            RefreshToken = refreshToken.ToString(),
         };
 
         var result = await client.RefreshTokenAsync(tokenDto);
@@ -170,8 +170,8 @@ public static class FordApiClientExtension
             return new ResponseResult<TResult>(null, result.StatusCode, result.Errors);
         }
 
-        storage.SaveAccessToken(result.Content.Token);
-        storage.SaveRefreshToken(result.Content.RefreshToken);
+        tokenStorage.SetNewAccessToken(result.Content.Token);
+        tokenStorage.SetNewRefreshToken(result.Content.RefreshToken);
 
         Debug.Log("Token has been refreshed");
 
@@ -184,13 +184,13 @@ public static class FordApiClientExtension
         TParam1 param1, TParam2 param2, TParam3 param3, TParam4 param4)
         where TResult : class
     {
-        var storage = new Storage();
-        var refreshToken = storage.GetRefreshToken();
+        TokenStorage tokenStorage = new();
+        var refreshToken = tokenStorage.GetRefreshToken();
 
         TokenDto tokenDto = new()
         {
             Token = token,
-            RefreshToken = refreshToken,
+            RefreshToken = refreshToken.ToString(),
         };
 
         var result = await client.RefreshTokenAsync(tokenDto);
@@ -200,8 +200,8 @@ public static class FordApiClientExtension
             return new ResponseResult<TResult>(null, result.StatusCode, result.Errors);
         }
 
-        storage.SaveAccessToken(result.Content.Token);
-        storage.SaveRefreshToken(result.Content.RefreshToken);
+        tokenStorage.SetNewAccessToken(result.Content.Token);
+        tokenStorage.SetNewRefreshToken(result.Content.RefreshToken);
 
         Debug.Log("Token has been refreshed");
 

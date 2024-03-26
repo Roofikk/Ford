@@ -17,7 +17,11 @@ namespace Ford.SaveSystem
             _storage = new();
         }
 
-        public override async Task<bool> Initiate(StorageSystem storage, SaveSystemState fromState)
+        public override void GetReady(StorageSystem storage, SaveSystemState fromState)
+        {
+        }
+
+        public override async Task<bool> Initiate(StorageSystem storage)
         {
             _storage.History.ClearHistory();
             _storage.PushAllHorses(storage.Horses.ToList());
@@ -83,7 +87,7 @@ namespace Ford.SaveSystem
         public override async Task<bool> TryChangeState(StorageSystem storage)
         {
             FordApiClient client = new();
-            var accessToken = _storage.GetAccessToken();
+            var accessToken = new TokenStorage().GetAccessToken().ToString();
             var result = await client.GetUserInfoAsync(accessToken);
 
             if (result.Content != null)
@@ -95,6 +99,12 @@ namespace Ford.SaveSystem
             {
                 return false;
             }
+        }
+
+        public override void CloseState(StorageSystem storage)
+        {
+            _storage.History.ClearHistory();
+            _storage.ClearStorage();
         }
     }
 }

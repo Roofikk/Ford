@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using UnityEditorInternal;
 
 namespace Ford.SaveSystem
 {
@@ -12,6 +11,8 @@ namespace Ford.SaveSystem
         private List<HorseBase> _horses;
 
         public SaveSystemStateEnum CurrentState { get; set; }
+        public event Action<SaveSystemStateEnum> OnReadyStateChanged;
+        public SaveSystemStateEnum PrevStateEnum { get; set; }
         private static SaveSystemState PrevState { get; set; }
         private static SaveSystemState State { get; set; }
         internal IReadOnlyCollection<HorseBase> Horses => _horses;
@@ -116,21 +117,34 @@ namespace Ford.SaveSystem
             {
                 case SaveSystemStateEnum.Autorized:
                     PrevState = State;
+                    PrevStateEnum = SaveSystemStateEnum.Unauthorized;
+
                     CurrentState = SaveSystemStateEnum.Autorized;
                     State = new AuthorizedState();
+                    State.GetReady(this, PrevState);
+                    OnReadyStateChanged?.Invoke(CurrentState);
                     break;
                 case SaveSystemStateEnum.Unauthorized:
                     PrevState = State;
+                    PrevStateEnum = SaveSystemStateEnum.Autorized;
+
                     CurrentState = SaveSystemStateEnum.Unauthorized;
                     State = new UnauthorizedState();
-                    ApplyTransition().Wait();
+                    State.GetReady(this, PrevState);
+                    OnReadyStateChanged?.Invoke(CurrentState);
                     break;
             }
         }
 
-        public async Task ApplyTransition()
+        public async Task<bool> ApplyTransition()
         {
-            await State.Initiate(this, PrevState);
+            return await State.Initiate(this);
+        }
+
+        public async Task<bool> DeclineTransition()
+        {
+            ChangeState(PrevStateEnum);
+            return await State.Initiate(this);
         }
     }
 

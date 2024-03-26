@@ -82,8 +82,8 @@ public class ChangePasswordPage : Page
         }
 
         FordApiClient client = new();
-        Storage storage = new();
-        var accessToken = storage.GetAccessToken();
+        var tokenStorage = new TokenStorage();
+        var accessToken = tokenStorage.GetAccessToken().ToString();
 
         var data = new UpdatingPasswordDto()
         {
@@ -98,8 +98,8 @@ public class ChangePasswordPage : Page
             switch (result.StatusCode)
             {
                 case HttpStatusCode.OK:
-                    storage.SaveAccessToken(result.Content.Token);
-                    storage.SaveRefreshToken(result.Content.RefreshToken);
+                    tokenStorage.SetNewAccessToken(result.Content.Token);
+                    tokenStorage.SetNewRefreshToken(result.Content.RefreshToken);
 
                     ToastMessage.Show("Пароль успешно изменен", transform.parent);
                     PageManager.Instance.DisplayLoadingPage(false);
@@ -121,8 +121,8 @@ public class ChangePasswordPage : Page
                         switch (result.StatusCode)
                         {
                             case HttpStatusCode.OK:
-                                storage.SaveAccessToken(result.Content.Token);
-                                storage.SaveRefreshToken(result.Content.RefreshToken);
+                                tokenStorage.SetNewAccessToken(result.Content.Token);
+                                tokenStorage.SetNewRefreshToken(result.Content.RefreshToken);
 
                                 ToastMessage.Show("Пароль успешно изменен", transform.parent);
                                 PageManager.Instance.ClosePage(this);

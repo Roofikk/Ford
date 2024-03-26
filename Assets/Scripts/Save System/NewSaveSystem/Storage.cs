@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using UnityEngine;
 
 namespace Ford.SaveSystem.Ver2
 {
@@ -18,9 +17,6 @@ namespace Ford.SaveSystem.Ver2
 
         private readonly string _horsesFileName = "horses.json";
         private readonly string _storageSettingsFileName = "storageSettings.json";
-
-        private readonly string ACCESS_TOKEN_KEY = "ACCESS_TOKEN_KEY";
-        private readonly string REFRESH_TOKEN_KEY = "REFRESH_TOKEN_KEY";
 
         public StorageHistory History { get; private set; }
 
@@ -189,7 +185,6 @@ namespace Ford.SaveSystem.Ver2
             return existHorse;
         }
 
-        // не забыть удалить сохранения лошади, поскольку они не нужны.
         public bool DeleteHorse(long id)
         {
             var horses = GetHorses();
@@ -416,38 +411,15 @@ namespace Ford.SaveSystem.Ver2
         }
         #endregion
 
-        public string GetAccessToken()
+        public void ClearStorage()
         {
-            return PlayerPrefs.GetString(ACCESS_TOKEN_KEY, "");
-        }
+            var pathHorses = Path.Combine(_storagePath, _horsesFileName);
+            File.Delete(pathHorses);
 
-        public string GetRefreshToken()
-        {
-            return PlayerPrefs.GetString(REFRESH_TOKEN_KEY, "");
-        }
-
-        public void SaveAccessToken(string accessToken)
-        {
-            PlayerPrefs.SetString(ACCESS_TOKEN_KEY, accessToken);
-            PlayerPrefs.Save();
-        }
-
-        public void SaveRefreshToken(string refreshToken)
-        {
-            PlayerPrefs.SetString(REFRESH_TOKEN_KEY, refreshToken);
-            PlayerPrefs.Save();
-        }
-
-        public void ClearAccessToken()
-        {
-            PlayerPrefs.SetString(ACCESS_TOKEN_KEY, "");
-            PlayerPrefs.Save();
-        }
-
-        public void ClearRefreshToken()
-        {
-            PlayerPrefs.SetString(REFRESH_TOKEN_KEY, "");
-            PlayerPrefs.Save();
+            foreach (var file in Directory.GetFiles(_savesPath))
+            {
+                File.Delete(file);
+            }
         }
 
         private string GetSaveFileName()
