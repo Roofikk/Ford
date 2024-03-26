@@ -13,19 +13,21 @@ namespace Ford.SaveSystem
         public SaveSystemStateEnum CurrentState { get; set; }
         public event Action<SaveSystemStateEnum> OnReadyStateChanged;
         public SaveSystemStateEnum PrevStateEnum { get; set; }
-        private static SaveSystemState PrevState { get; set; }
-        private static SaveSystemState State { get; set; }
+        private static SaveSystemState _prevState { get; set; }
+        private static SaveSystemState _state { get; set; }
+        public static SaveSystemState State => _state;
+        public static SaveSystemState PrevState => _prevState;
         internal IReadOnlyCollection<HorseBase> Horses => _horses;
 
         public StorageSystem()
         {
-            switch (State)
+            switch (_state)
             {
                 case UnauthorizedState:
                     CurrentState = SaveSystemStateEnum.Unauthorized;
                     break;
                 case AuthorizedState:
-                    CurrentState = SaveSystemStateEnum.Autorized;
+                    CurrentState = SaveSystemStateEnum.Authorized;
                     break;
                 default:
                     throw new Exception("State has been not initiated");
@@ -37,10 +39,10 @@ namespace Ford.SaveSystem
             switch (state)
             {
                 case SaveSystemStateEnum.Unauthorized:
-                    State = new UnauthorizedState();
+                    _state = new UnauthorizedState();
                     break;
-                case SaveSystemStateEnum.Autorized:
-                    State = new AuthorizedState();
+                case SaveSystemStateEnum.Authorized:
+                    _state = new AuthorizedState();
                     break;
             }
         }
@@ -50,11 +52,11 @@ namespace Ford.SaveSystem
         {
             if (force)
             {
-                _horses = (await State.GetHorses(this, below, above)).ToList();
+                _horses = (await _state.GetHorses(this, below, above)).ToList();
             }
             else
             {
-                _horses ??= (await State.GetHorses(this, above, below)).ToList();
+                _horses ??= (await _state.GetHorses(this, above, below)).ToList();
             }
 
             return _horses;
@@ -62,19 +64,19 @@ namespace Ford.SaveSystem
 
         public async Task<HorseBase> CreateHorse(CreationHorse horse)
         {
-            var createdHorse = await State.CreateHorse(this, horse);
+            var createdHorse = await _state.CreateHorse(this, horse);
             return createdHorse;
         }
 
         public async Task<HorseBase> UpdateHorse(UpdatingHorse horse)
         {
-            var updatingHorse = await State.UpdateHorse(this, horse);
+            var updatingHorse = await _state.UpdateHorse(this, horse);
             return updatingHorse;
         }
 
         public async Task<bool> DeleteHorse(long horseId)
         {
-            bool result = await State.DeleteHorse(this, horseId);
+            bool result = await _state.DeleteHorse(this, horseId);
             return result;
         }
         #endregion
@@ -82,55 +84,61 @@ namespace Ford.SaveSystem
         #region Save
         public async Task<ICollection<SaveInfo>> GetSaves(long horseId, int below = 0, int amount = 20)
         {
-            var result = await State.GetSaves(this, horseId, below, amount);
+            var result = await _state.GetSaves(this, horseId, below, amount);
             return result;
         }
 
         public async Task<FullSaveInfo> GetSave(long horseId, long saveId)
         {
-            var result = await State.GetFullSave(this, horseId, saveId);
+            var result = await _state.GetFullSave(this, horseId, saveId);
             return result;
         }
 
         public async Task<SaveInfo> CreateSave(FullSaveInfo save)
         {
-            var result = await State.CreateSave(this, save);
+            var result = await _state.CreateSave(this, save);
             return result;
         }
 
         public async Task<SaveInfo> UpdateSave(SaveInfo save)
         {
-            var result = await State.UpdateSave(this, save);
+            var result = await _state.UpdateSave(this, save);
             return result;
         }
 
         public async Task<bool> DeleteSave(long saveId)
         {
-            var result = await State.DeleteSave(this, saveId);
+            var result = await _state.DeleteSave(this, saveId);
             return result;
         }
         #endregion
 
-        protected internal void ChangeState(SaveSystemStateEnum state)
+        public async Task<bool> CanChangeState()
+        {
+            var result = await _state.CanChangeState(this);
+            return result;
+        }
+
+        public void ChangeState(SaveSystemStateEnum state)
         {
             switch (state)
             {
-                case SaveSystemStateEnum.Autorized:
-                    PrevState = State;
+                case SaveSystemStateEnum.Authorized:
+                    _prevState = _state;
                     PrevStateEnum = SaveSystemStateEnum.Unauthorized;
 
-                    CurrentState = SaveSystemStateEnum.Autorized;
-                    State = new AuthorizedState();
-                    State.GetReady(this, PrevState);
+                    CurrentState = SaveSystemStateEnum.Authorized;
+                    _state = new AuthorizedState();
+                    _state.GetReady(this, _prevState);
                     OnReadyStateChanged?.Invoke(CurrentState);
                     break;
                 case SaveSystemStateEnum.Unauthorized:
-                    PrevState = State;
-                    PrevStateEnum = SaveSystemStateEnum.Autorized;
+                    _prevState = _state;
+                    PrevStateEnum = SaveSystemStateEnum.Authorized;
 
                     CurrentState = SaveSystemStateEnum.Unauthorized;
-                    State = new UnauthorizedState();
-                    State.GetReady(this, PrevState);
+                    _state = new UnauthorizedState();
+                    _state.GetReady(this, _prevState);
                     OnReadyStateChanged?.Invoke(CurrentState);
                     break;
             }
@@ -138,19 +146,20 @@ namespace Ford.SaveSystem
 
         public async Task<bool> ApplyTransition()
         {
-            return await State.Initiate(this);
+            _prevState.CloseState(this);
+            return await _state.Initiate(this);
         }
 
         public async Task<bool> DeclineTransition()
         {
-            ChangeState(PrevStateEnum);
-            return await State.Initiate(this);
+            _prevState.CloseState(this);
+            return await _state.RawInitiate(this);
         }
     }
 
     public enum SaveSystemStateEnum
     {
-        Autorized,
+        Authorized,
         Unauthorized,
     }
 }

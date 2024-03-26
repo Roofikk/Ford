@@ -50,7 +50,7 @@ public class EditBonePage : Page
         }
 
         _bone.EditBoneName(_nameInputField.text);
-        _toastMessage.Show("Изменения применены");
+        ToastMessage.Show("Изменения применены");
         Close();
     }
 }

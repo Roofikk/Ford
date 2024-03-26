@@ -45,7 +45,7 @@ public class StartProjectObject : MonoBehaviour
 
             if (Player.IsLoggedIn)
             {
-                StorageSystem.Initiate(SaveSystemStateEnum.Autorized);
+                StorageSystem.Initiate(SaveSystemStateEnum.Authorized);
             }
             else
             {

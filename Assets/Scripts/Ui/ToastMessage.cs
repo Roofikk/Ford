@@ -70,7 +70,7 @@ public class ToastMessage : MonoBehaviour
         }
     }
 
-    public void Show(string message)
+    private void Show(string message)
     {
         gameObject.SetActive(true);
         StopAllCoroutines();
@@ -83,7 +83,7 @@ public class ToastMessage : MonoBehaviour
 
     public static void Show(string message, Transform parent = null)
     {
-        GameObject toastPrefab = (GameObject)Resources.Load("Prefabs/UI/Toast", typeof(GameObject));
+        GameObject toastPrefab = Resources.Load("Prefabs/UI/Toast", typeof(GameObject)) as GameObject;
         GameObject toastObject = null;
         if (parent != null)
         {

@@ -12,14 +12,14 @@ namespace Ford.SaveSystem
     public class AuthorizedState : SaveSystemState
     {
         public FordApiClient ApiClient { get; set; }
-        public StorageHistory History { get; private set; }
+        public override StorageHistory History { get; protected set; }
 
         public AuthorizedState()
         {
             ApiClient = new();
         }
 
-        public override void GetReady(StorageSystem storage, SaveSystemState fromState)
+        internal override void GetReady(StorageSystem storage, SaveSystemState fromState)
         {
             if (fromState is UnauthorizedState unauthorizedState)
             {
@@ -27,13 +27,20 @@ namespace Ford.SaveSystem
             }
         }
 
-        public override async Task<bool> Initiate(StorageSystem storage)
+        internal override async Task<bool> Initiate(StorageSystem storage)
         {
             var result = await ApiClient.PushHistory(History);
+            History.ClearHistory();
             return result.StatusCode == HttpStatusCode.OK;
         }
 
-        public override async Task<ICollection<HorseBase>> GetHorses(StorageSystem storage, int below = 0, int amount = 20,
+        internal override async Task<bool> RawInitiate(StorageSystem storage)
+        {
+            History.ClearHistory();
+            return await Task.FromResult(true);
+        }
+
+        internal override async Task<ICollection<HorseBase>> GetHorses(StorageSystem storage, int below = 0, int amount = 20,
             string orderByDate = "desc", string orderByName = "false")
         {
             var tokenStorage = new TokenStorage();
@@ -55,7 +62,7 @@ namespace Ford.SaveSystem
             return newResult.Content;
         }
 
-        public override async Task<HorseBase> CreateHorse(StorageSystem storage, CreationHorse horse)
+        internal override async Task<HorseBase> CreateHorse(StorageSystem storage, CreationHorse horse)
         {
             TokenStorage tokenStorage = new();
             var result = await ApiClient.CreateHorseAsync(tokenStorage.GetAccessToken().ToString(), horse);
@@ -76,7 +83,7 @@ namespace Ford.SaveSystem
             return newResult.Content;
         }
 
-        public override async Task<HorseBase> UpdateHorse(StorageSystem storage, UpdatingHorse horse)
+        internal override async Task<HorseBase> UpdateHorse(StorageSystem storage, UpdatingHorse horse)
         {
             var tokenStorage = new TokenStorage();
             var result = await ApiClient.UpdateHorseAsync(tokenStorage.GetRefreshToken().ToString(), horse);
@@ -108,7 +115,7 @@ namespace Ford.SaveSystem
             return newResult.Content;
         }
 
-        public override async Task<bool> DeleteHorse(StorageSystem storage, long horseId)
+        internal override async Task<bool> DeleteHorse(StorageSystem storage, long horseId)
         {
             var tokenStorage = new TokenStorage();
             var result = await ApiClient.DeleteHorseAsync(tokenStorage.GetAccessToken().ToString(), horseId);
@@ -128,7 +135,7 @@ namespace Ford.SaveSystem
             return true;
         }
 
-        public override async Task<ICollection<SaveInfo>> GetSaves(StorageSystem storage, long horseId, int below = 0, int amount = 20)
+        internal override async Task<ICollection<SaveInfo>> GetSaves(StorageSystem storage, long horseId, int below = 0, int amount = 20)
         {
             TokenStorage tokenStorage = new();
             var result = await ApiClient.GetSavesAsync(tokenStorage.GetAccessToken().ToString(), horseId, below, amount);
@@ -149,7 +156,7 @@ namespace Ford.SaveSystem
             return newResult.Content;
         }
 
-        public override async Task<FullSaveInfo> GetFullSave(StorageSystem storage, long horseId, long saveId)
+        internal override async Task<FullSaveInfo> GetFullSave(StorageSystem storage, long horseId, long saveId)
         {
             TokenStorage tokenStorage = new();
             var result = await ApiClient.GetSaveAsync(tokenStorage.GetAccessToken().ToString(), horseId, saveId);
@@ -170,7 +177,7 @@ namespace Ford.SaveSystem
             return newResult.Content;
         }
 
-        public override async Task<SaveInfo> CreateSave(StorageSystem storage, FullSaveInfo save)
+        internal override async Task<SaveInfo> CreateSave(StorageSystem storage, FullSaveInfo save)
         {
             TokenStorage tokenStorage = new();
             var result = await ApiClient.CreateSaveAsync(tokenStorage.GetAccessToken().ToString(), save);
@@ -191,7 +198,7 @@ namespace Ford.SaveSystem
             return newResult.Content;
         }
 
-        public override async Task<SaveInfo> UpdateSave(StorageSystem storage, SaveInfo save)
+        internal override async Task<SaveInfo> UpdateSave(StorageSystem storage, SaveInfo save)
         {
             TokenStorage tokenStorage = new();
             var result = await ApiClient.UpdateSaveInfoAsync(tokenStorage.GetAccessToken().ToString(), save);
@@ -212,7 +219,7 @@ namespace Ford.SaveSystem
             return newResult.Content;
         }
 
-        public override async Task<bool> DeleteSave(StorageSystem storage, long saveId)
+        internal override async Task<bool> DeleteSave(StorageSystem storage, long saveId)
         {
             TokenStorage tokenStorage = new();
             var result = await ApiClient.DeleteSaveAsync(tokenStorage.GetAccessToken().ToString(), saveId);
@@ -233,13 +240,12 @@ namespace Ford.SaveSystem
             return true;
         }
 
-        public override async Task<bool> TryChangeState(StorageSystem storage)
+        internal override async Task<bool> CanChangeState(StorageSystem storage)
         {
-            storage.ChangeState(SaveSystemStateEnum.Unauthorized);
             return await Task.FromResult(true);
         }
 
-        public override void CloseState(StorageSystem storage)
+        internal override void CloseState(StorageSystem storage)
         {
             ApiClient = null;
             History = null;

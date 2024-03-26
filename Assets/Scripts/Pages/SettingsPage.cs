@@ -189,11 +189,13 @@ public class SettingsPage : Page
                 SetSavePath(pathTarget);
             }
             else
-                Instantiate(_toastPrefab, transform.parent).GetComponent<ToastMessage>().Show("Путь сохранения не изменен, папка должна быть пустой");
+            {
+                // delete
+            }
         }
         else
         {
-            Instantiate(_toastPrefab, transform.parent).GetComponent<ToastMessage>().Show("Путь сохранения не изменен, недостаточно места на диске");
+            // delete
         }
     }
 
@@ -281,7 +283,7 @@ public class SettingsPage : Page
 
     private void CancelChangePathSave()
     {
-        Instantiate(_toastPrefab, transform.parent).GetComponent<ToastMessage>().Show("Путь сохранения не изменен");
+        ToastMessage.Show("Путь сохранения не изменен");
     }
 
     private void SetSavePath(string path)
@@ -289,6 +291,6 @@ public class SettingsPage : Page
         _settings.PathSave = path;
         _pathSaveText.text = _settings.PathSave;
 
-        Instantiate(_toastPrefab, transform.parent).GetComponent<ToastMessage>().Show("Путь сохранения изменен");
+        ToastMessage.Show("Путь сохранения изменен");
     }
 }

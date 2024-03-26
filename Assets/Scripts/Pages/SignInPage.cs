@@ -91,8 +91,7 @@ public class SignInPage : Page
                         PageManager.Instance.OpenPage(_backPage);
                         PageManager.Instance.ClosePage(this);
 
-                        ToastMessage toast = Instantiate(_toastPrefab, transform.parent).GetComponent<ToastMessage>();
-                        toast.Show($"Добро пожаловать, {Player.UserData.FirstName}");
+                        ToastMessage.Show($"Добро пожаловать, {Player.UserData.FirstName}");
 
                         PageManager.Instance.DisplayLoadingPage(false);
                     });

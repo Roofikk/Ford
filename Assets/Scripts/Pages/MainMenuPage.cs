@@ -1,3 +1,5 @@
+using Ford.SaveSystem;
+using System.Data.SqlTypes;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -55,6 +57,7 @@ public class MainMenuPage : Page
     public void UpdatePage()
     {
         _authButton.onClick.RemoveAllListeners();
+        StorageSystem storage = new();
 
         if (Player.IsLoggedIn)
         {
@@ -87,33 +90,4 @@ public class MainMenuPage : Page
 
         Player.OnChangedAuthState -= UpdatePage;
     }
-
-
-
-    //private void StartDevProject()
-    //{
-    //    DevHorseData devHorse = new(
-    //        "Dev Horse",
-    //        "Unsex",
-    //        "01.01.1970",
-    //        "This project start by developer",
-    //        "Developer",
-    //        "Dev City",
-    //        "+7 (123) 456 78 90",
-    //        new List<string>()
-    //    );
-
-    //    Storage storage = new(GameManager.Instance.Settings.PathSave);
-    //    DevHorseSaveData devHorseSaveData = null;//storage.DevGetHorseState(devHorse.Id);
-
-    //    if (devHorseSaveData != null)
-    //    {
-    //        SceneParameters.AddParam(devHorseSaveData);
-    //    }
-
-    //    SceneParameters.AddParam(devHorse);
-
-    //    AsyncOperation loadingOperation = SceneManager.LoadSceneAsync(1);
-    //    _loadScenePage.Open(loadingOperation);
-    //}
 }

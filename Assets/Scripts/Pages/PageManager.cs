@@ -5,10 +5,12 @@ public class PageManager : MonoBehaviour
     [SerializeField] private Page _startPage;
     [SerializeField] private Page _loadingPage;
     [SerializeField] private WarningPage _warningPage;
+    [SerializeField] private Page _historyPage;
 
     public Page StartPage { get { return _startPage; } }
     public static PageManager Instance { get; private set; }
     public Page CurrentPage { get; private set; }
+    public Page HistoryPage => _historyPage;
 
     private void Awake()
     {

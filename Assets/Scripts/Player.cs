@@ -1,4 +1,5 @@
-﻿using Ford.SaveSystem.Ver2;
+﻿using Ford.SaveSystem;
+using Ford.SaveSystem.Ver2;
 using Ford.WebApi;
 using Ford.WebApi.Data;
 using System;
@@ -11,7 +12,6 @@ public class Player : MonoBehaviour
     private static AccountDto _userData = null;
     public static AccountDto UserData => _userData;
     public static bool IsLoggedIn { get; private set; }
-    public static bool Connected { get; private set; }
     public static event Action OnChangedAuthState;
 
     public static Player Instance { get; private set; }
@@ -110,6 +110,38 @@ public class Player : MonoBehaviour
             IsLoggedIn = false;
             onAuthorizeFinished?.Invoke();
             OnChangedAuthState?.Invoke();
+        }
+    }
+
+    public static void Reconnect()
+    {
+        StorageSystem storage = new();
+
+        if (storage.CurrentState == SaveSystemStateEnum.Unauthorized)
+        {
+            storage.CanChangeState().RunOnMainThread(result =>
+            {
+                if (result)
+                {
+                    storage.OnReadyStateChanged += (state) =>
+                    {
+                        var history = StorageSystem.State.History;
+
+                        PageManager.Instance.OpenWarningPage(new WarningData(
+                            "Синхронизация данных",
+                            "Вы успешно авторизовались\nУ вас есть данные на устройстве, которые не загружены в облачное хранилище. Желаете посмотреть?\n" +
+                            "Отмена приведет к потере данных на комплютере",
+                            () => { PageManager.Instance.OpenPage(PageManager.Instance.HistoryPage, new HistoryPageParam(history)); },
+                            () => { storage.DeclineTransition().RunOnMainThread(null); },
+                            () => { storage.DeclineTransition().RunOnMainThread(null); }));
+                    };
+                    storage.ChangeState(SaveSystemStateEnum.Authorized);
+                }
+            });
+        }
+        else
+        {
+            ToastMessage.Show("Вы уже авторизованы");
         }
     }
 

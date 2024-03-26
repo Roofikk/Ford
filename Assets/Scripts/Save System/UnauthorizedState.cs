@@ -10,81 +10,85 @@ namespace Ford.SaveSystem
     public class UnauthorizedState : SaveSystemState
     {
         Storage _storage;
-        internal StorageHistory History => _storage.History;
+        public override StorageHistory History => _storage.History;
 
         public UnauthorizedState()
         {
             _storage = new();
         }
 
-        public override void GetReady(StorageSystem storage, SaveSystemState fromState)
+        internal override void GetReady(StorageSystem storage, SaveSystemState fromState)
         {
         }
 
-        public override async Task<bool> Initiate(StorageSystem storage)
+        internal override async Task<bool> Initiate(StorageSystem storage)
         {
-            _storage.History.ClearHistory();
             _storage.PushAllHorses(storage.Horses.ToList());
             return await Task.FromResult(true);
         }
 
-        public override async Task<ICollection<HorseBase>> GetHorses(StorageSystem storage, int below = 0, int above = 20,
+        internal override async Task<bool> RawInitiate(StorageSystem storage)
+        {
+            return await Initiate(storage);
+        }
+
+        internal override async Task<ICollection<HorseBase>> GetHorses(StorageSystem storage, int below = 0, int above = 20,
             string orderByDate = "desc", string orderByName = "false")
         {
             var result = await Task.Factory.StartNew(_storage.GetHorses);
             return result;
         }
 
-        public override async Task<HorseBase> CreateHorse(StorageSystem storage, CreationHorse horse)
+        internal override async Task<HorseBase> CreateHorse(StorageSystem storage, CreationHorse horse)
         {
             Task<HorseBase> task = Task.Factory.StartNew(() => { return _storage.CreateHorse(horse); });
             await task;
             return await Task.FromResult(task.Result);
         }
 
-        public override Task<HorseBase> UpdateHorse(StorageSystem storage, UpdatingHorse horse)
+        internal override Task<HorseBase> UpdateHorse(StorageSystem storage, UpdatingHorse horse)
         {
             Task<HorseBase> task = Task.Factory.StartNew(() => { return _storage.UpdateHorse(horse); });
             return Task.FromResult(task.Result);
         }
 
-        public override Task<bool> DeleteHorse(StorageSystem storage, long horseId)
+        internal override Task<bool> DeleteHorse(StorageSystem storage, long horseId)
         {
             Task<bool> task = Task.Factory.StartNew(() => { return _storage.DeleteHorse(horseId); });
             return Task.FromResult(task.Result);
         }
 
-        public override Task<ICollection<SaveInfo>> GetSaves(StorageSystem storage, long horseId, int below = 0, int amount = 20)
+        internal override Task<ICollection<SaveInfo>> GetSaves(StorageSystem storage, long horseId, int below = 0, int amount = 20)
         {
             Task<ICollection<SaveInfo>> task = Task.Factory.StartNew(() => { return _storage.GetSaves(horseId, below, amount); });
             return Task.FromResult(task.Result);
         }
 
-        public override Task<FullSaveInfo> GetFullSave(StorageSystem storage, long horseId, long saveId)
+        internal override Task<FullSaveInfo> GetFullSave(StorageSystem storage, long horseId, long saveId)
         {
             Task<FullSaveInfo> task = Task.Factory.StartNew(() => { return _storage.GetFullSave(horseId, saveId); });
             return Task.FromResult(task.Result);
         }
 
-        public override Task<SaveInfo> CreateSave(StorageSystem storage, FullSaveInfo save)
+        internal override Task<SaveInfo> CreateSave(StorageSystem storage, FullSaveInfo save)
         {
             Task<SaveInfo> task = Task.Factory.StartNew(() => { return _storage.CreateSave(save, true); });
             return Task.FromResult(task.Result);
         }
 
-        public override Task<SaveInfo> UpdateSave(StorageSystem storage, SaveInfo save)
+        internal override Task<SaveInfo> UpdateSave(StorageSystem storage, SaveInfo save)
         {
             Task<SaveInfo> task = Task.Factory.StartNew(() => { return _storage.UpdateSave(save); });
             return Task.FromResult(task.Result);
         }
 
-        public override Task<bool> DeleteSave(StorageSystem storage, long saveId)
+        internal override Task<bool> DeleteSave(StorageSystem storage, long saveId)
         {
             Task<bool> task = Task.Factory.StartNew(() => { return _storage.DeleteSave(saveId); });
             return Task.FromResult(task.Result);
         }
 
-        public override async Task<bool> TryChangeState(StorageSystem storage)
+        internal override async Task<bool> CanChangeState(StorageSystem storage)
         {
             FordApiClient client = new();
             var accessToken = new TokenStorage().GetAccessToken().ToString();
@@ -92,7 +96,7 @@ namespace Ford.SaveSystem
 
             if (result.Content != null)
             {
-                storage.ChangeState(SaveSystemStateEnum.Autorized);
+                storage.ChangeState(SaveSystemStateEnum.Authorized);
                 return true;
             }
             else
@@ -101,7 +105,7 @@ namespace Ford.SaveSystem
             }
         }
 
-        public override void CloseState(StorageSystem storage)
+        internal override void CloseState(StorageSystem storage)
         {
             _storage.History.ClearHistory();
             _storage.ClearStorage();
