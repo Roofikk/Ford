@@ -1,8 +1,22 @@
 using Ford.SaveSystem.Ver2;
 using System;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class HistoryPage : Page
 {
+    [SerializeField] private HistoryElement _historyElementPrefab;
+
+    [Space(10)]
+    [Header("UI Elements")]
+    [SerializeField] private ToggleGroup _toggleGroup;
+    [SerializeField] private ScrollRect _scrollRect;
+    [SerializeField] private Button _applyButton;
+    [SerializeField] private Button _declineButton;
+
+    private StorageHistory _history;
+    public StorageHistory History => _history;
+
     public override void Open(int popUpLevel = 0)
     {
         base.Open(popUpLevel);

@@ -25,6 +25,8 @@ namespace Ford.SaveSystem
         public ICollection<HorseUserDto> Users { get; }
         public ICollection<SaveInfo> Saves { get; }
 
+        public string ActionDescription => $"Кличка: {Name}\nДата:{CreationDate}";
+
         public HorseBase(HorseBase horse)
         {
             HorseId = horse.HorseId;

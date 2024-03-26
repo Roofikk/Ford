@@ -14,6 +14,8 @@ namespace Ford.SaveSystem
         public DateTime LastUpdate { get; set; }
         public string SaveFileName { get; set; } = null!;
 
+        public string ActionDescription => $"Заголовок: {Header}\nОписание: {Description}\nДата: {Date:dd.MM.yyyy}";
+
         public SaveInfo(SaveInfo saveData)
         {
             SaveId = saveData.SaveId;
