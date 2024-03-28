@@ -1,4 +1,5 @@
 using Ford.SaveSystem;
+using Ford.SaveSystem.Ver2;
 using System.Data.SqlTypes;
 using TMPro;
 using UnityEngine;
@@ -15,6 +16,10 @@ public class MainMenuPage : Page
     [SerializeField] private Button _exitButton;
     [SerializeField] private Button _startDevProjectButton;
     [SerializeField] private Button _authButton;
+
+    [Space(10)]
+    [Header("FOR TEST")]
+    [SerializeField] private Button _historyTestButton;
 
     [Space(10)]
     [Header("Pages")]
@@ -38,6 +43,12 @@ public class MainMenuPage : Page
         _loadProjectButton.onClick.AddListener(() => { _pageManager.OpenPage(_loadProjectPage); });
         _settingsButton.onClick.AddListener(() => { _pageManager.OpenPage(_settingsPage); });
         _guideButton.onClick.AddListener(() => { _pageManager.OpenPage(_guidePage); });
+        _historyTestButton.onClick.AddListener(() =>
+        {
+            Storage storage = new();
+            HistoryPageParam param = new(storage.History);
+            _pageManager.OpenPage(_pageManager.HistoryPage, param, 2);
+        });
 
         _newProjectButton.onClick.AddListener(() => { _pageManager.ClosePage(this); });
         _loadProjectButton.onClick.AddListener(() => { _pageManager.ClosePage(this); });

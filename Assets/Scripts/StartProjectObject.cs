@@ -39,10 +39,6 @@ public class StartProjectObject : MonoBehaviour
     {
         if (_playerAuthorizeFinished)
         {
-            ProjectStarted = true;
-            _loadingPage.Close();
-            OnProjectStarted?.Invoke();
-
             if (Player.IsLoggedIn)
             {
                 StorageSystem.Initiate(SaveSystemStateEnum.Authorized);
@@ -51,6 +47,10 @@ public class StartProjectObject : MonoBehaviour
             {
                 StorageSystem.Initiate(SaveSystemStateEnum.Unauthorized);
             }
+
+            ProjectStarted = true;
+            _loadingPage.Close();
+            OnProjectStarted?.Invoke();
         }
     }
 }

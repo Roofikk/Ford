@@ -1,29 +1,22 @@
 using Ford.SaveSystem.Ver2;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class HistoryElement : MonoBehaviour
+public class HistoryElement : ChildHistoryElement
 {
-    [SerializeField] private HistoryElement _subhistoryElementPrefab;
+    [SerializeField] private ChildHistoryElement _subHistoryElementPrefab;
 
     [SerializeField] private ToggleGroup _toggleGroup;
-    [SerializeField] private Toggle _toggle;
-    [SerializeField] private TextMeshProUGUI _headerHistoryText;
-    [SerializeField] private TextMeshProUGUI _descriptionText;
+    [SerializeField] private Transform _subHistoryContainer;
+    [SerializeField] private Toggle _showHideToggle;
+    [SerializeField] private Texture _showToggleImage;
+    [SerializeField] private Texture _hideToggleImage;
 
-    [SerializeField] private Transform _subhistoryContainer;
+    private List<ChildHistoryElement> _childHistories = new();
+    public IReadOnlyCollection <ChildHistoryElement> ChildHistories => _childHistories;
 
-    private List<HistoryElement> _subHistories = new();
-    private HistoryElement _parent;
-    public ActionType ActionType { get; private set; }
-    public bool ToggleValue => _toggle.isOn;
-    public IReadOnlyCollection <HistoryElement> SubHistories => _subHistories;
-
-    private Dictionary<ActionType, string> _actionTypeToText = new Dictionary<ActionType, string>()
+    public readonly Dictionary<ActionType, string> ActionTypeToText = new Dictionary<ActionType, string>()
     {
         {ActionType.CreateHorse, "Создание лошади"},
         {ActionType.UpdateHorse, "Изменение лошади"},
@@ -34,50 +27,39 @@ public class HistoryElement : MonoBehaviour
     };
 
     public HistoryElement Initiate(HistoryElement parent, StorageAction<IStorageAction> action, 
-        ICollection<StorageAction<IStorageAction>> subactions)
+        ICollection<StorageAction<IStorageAction>> subActions, ToggleGroup toggleGroup)
     {
         _toggle.onValueChanged.AddListener((value) =>
         {
-            if (CanToggleOff())
+            foreach (var child in ChildHistories)
             {
-                ToastMessage.Show("Вы не можете убрать единственное сохранение");
-                _toggle.isOn = true;
+                child.SwitchToggle(value);
             }
         });
 
-        _headerHistoryText.text = _actionTypeToText[action.ActionType];
+        _showHideToggle.onValueChanged.AddListener((value) =>
+        {
+            _showHideToggle.graphic.material.mainTexture = value ? _showToggleImage : _hideToggleImage;
+            
+            foreach (var child in ChildHistories)
+            {
+                child.gameObject.SetActive(value);
+            }
+        });
+
+        _toggle.group = toggleGroup;
+        _headerText.text = ActionTypeToText[action.ActionType];
         _descriptionText.text = action.Data.ActionDescription;
         _parent = parent;
 
-        // group history
-        // don't forget about contains one or more save in horse
-
-        foreach (var sub in subactions)
+        foreach (var sub in subActions)
         {
-            var subhistory = Instantiate(_subhistoryElementPrefab, _subhistoryContainer)
-                .Initiate(parent, sub, Array.Empty<StorageAction<IStorageAction>>());
+            var subhistory = Instantiate(_subHistoryElementPrefab, _subHistoryContainer)
+                .Initiate(this, sub, ActionTypeToText[sub.ActionType], _toggleGroup);
 
-            _subHistories.Add(subhistory);
+            _childHistories.Add(subhistory);
         }
 
         return this;
-    }
-
-    private bool CanToggleOff()
-    {
-        // Checking for at least one available save
-        if (_parent != null)
-        {
-            if (_parent.ActionType == ActionType.CreateHorse)
-            {
-                var select = _parent.SubHistories.Where(sh => sh.ActionType == ActionType.CreateSave && sh.ToggleValue);
-
-                if (select.Count() < 1)
-                {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 }

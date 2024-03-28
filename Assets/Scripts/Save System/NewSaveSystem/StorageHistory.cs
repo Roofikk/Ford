@@ -45,65 +45,85 @@ namespace Ford.SaveSystem.Ver2
                     History.Add(action);
                     break;
                 case ActionType.UpdateHorse:
-                    var actions = History.Where(h => h.ActionType == ActionType.UpdateHorse &&
-                        (h.Data as HorseBase).HorseId == (action.Data as HorseBase).HorseId);
+                    var currentHorseActions = History.Where(h => h.Data.HorseId == action.Data.HorseId);
+                    var creationHorseAction = currentHorseActions.SingleOrDefault(h => h.ActionType == ActionType.CreateHorse);
+                    var updateHorseActions = currentHorseActions.Where(h => h.ActionType == ActionType.UpdateHorse);
 
-                    while (actions.Any())
+                    while (updateHorseActions.Any())
                     {
-                        History.Remove(actions.First());
+                        History.Remove(updateHorseActions.First());
                     }
+
+                    if (creationHorseAction != null)
+                    {
+                        History.Remove(creationHorseAction);
+                        action.ActionType = ActionType.CreateHorse;
+                    }
+
                     History.Add(action);
                     break;
                 case ActionType.DeleteHorse:
-                    var updateActions = History.Where(h => h.ActionType == ActionType.UpdateHorse &&
-                        (h.Data as HorseBase).HorseId == (action.Data as HorseBase).HorseId);
+                    currentHorseActions = History.Where(h => h.Data.HorseId == action.Data.HorseId);
+                    creationHorseAction = currentHorseActions.SingleOrDefault(h => h.ActionType == ActionType.CreateHorse);
+                    updateHorseActions = currentHorseActions.Where(h => h.ActionType == ActionType.UpdateHorse);
 
-                    while (updateActions.Any())
+                    while (updateHorseActions.Any())
                     {
-                        History.Remove(updateActions.First());
+                        History.Remove(updateHorseActions.First());
                     }
 
-                    var createAction = History.SingleOrDefault(h => h.ActionType == ActionType.CreateHorse &&
-                        (h.Data as HorseBase).HorseId == (action.Data as HorseBase).HorseId);
-
-                    if (createAction != null)
+                    if (creationHorseAction != null)
                     {
-                        History.Remove(createAction);
+                        History.Remove(creationHorseAction);
                     }
                     else
                     {
                         History.Add(action);
                     }
+
                     break;
                 case ActionType.CreateSave:
                     History.Add(action);
                     break;
                 case ActionType.UpdateSave:
-                    actions = History.Where(h => h.ActionType == ActionType.UpdateSave &&
-                        (h.Data as SaveInfo).SaveId == (action.Data as SaveInfo).SaveId);
+                    var saves = History.Where(s => s.Data is SaveInfo);
+                    var currentSaveActions = saves.Where(h => (h.Data as SaveInfo).SaveId == (action.Data as SaveInfo).SaveId);
+                    var updateSaveActions = currentSaveActions.Where(h => h.ActionType == ActionType.UpdateSave);
+                    var creationSaveAction = currentSaveActions.SingleOrDefault(h => h.ActionType == ActionType.CreateSave);
 
-                    while (actions.Any())
+                    while (updateSaveActions.Any())
                     {
-                        History.Remove(actions.First());
+                        History.Remove(updateSaveActions.First());
+                    }
+
+                    if (creationSaveAction != null)
+                    {
+                        var fullAction = new FullSaveInfo((SaveInfo)action.Data);
+
+                        foreach (var bone in ((FullSaveInfo)creationSaveAction.Data).Bones)
+                        {
+                            fullAction.Bones.Add(bone);
+                        }
+
+                        History.Remove(creationSaveAction);
+                        action.ActionType = ActionType.CreateSave;
                     }
 
                     History.Add(action);
                     break;
                 case ActionType.DeleteSave:
-                    updateActions = History.Where(h => h.ActionType == ActionType.UpdateSave &&
-                        (h.Data as SaveInfo).SaveId == (action.Data as SaveInfo).SaveId);
+                    currentSaveActions = History.Where(h => (h.Data as SaveInfo).SaveId == (action.Data as SaveInfo).SaveId);
+                    updateSaveActions = currentSaveActions.Where(h => h.ActionType == ActionType.UpdateSave);
+                    creationSaveAction = currentSaveActions.SingleOrDefault(h => h.ActionType == ActionType.CreateSave);
 
-                    while (updateActions.Any())
+                    while (updateSaveActions.Any())
                     {
-                        History.Remove(updateActions.First());
+                        History.Remove(updateSaveActions.First());
                     }
 
-                    createAction = History.SingleOrDefault(h => h.ActionType == ActionType.CreateSave &&
-                        (h.Data as SaveInfo).SaveId == (action.Data as SaveInfo).SaveId);
-
-                    if (createAction != null)
+                    if (creationSaveAction != null)
                     {
-                        History.Remove(createAction);
+                        History.Remove(creationSaveAction);
                     }
                     else
                     {

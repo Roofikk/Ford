@@ -22,6 +22,7 @@ namespace Ford.SaveSystem
             HorseId = saveData.HorseId;
             Header = saveData.Header;
             Description = saveData.Description;
+            Date = saveData.Date;
             CreationDate = saveData.CreationDate;
             LastUpdate = saveData.LastUpdate;
             SaveFileName = saveData.SaveFileName;

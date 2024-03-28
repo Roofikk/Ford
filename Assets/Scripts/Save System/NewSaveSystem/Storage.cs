@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace Ford.SaveSystem.Ver2
 {
@@ -420,6 +421,9 @@ namespace Ford.SaveSystem.Ver2
             {
                 File.Delete(file);
             }
+
+            History.ClearHistory();
+            ClearIncrements();
         }
 
         private string GetSaveFileName()
@@ -517,6 +521,32 @@ namespace Ford.SaveSystem.Ver2
             using StreamWriter sw = new(path);
             using JsonWriter jsonWriter = new JsonTextWriter(sw);
             JsonSerializer.CreateDefault().Serialize(jsonWriter, new ArraySerializable<SaveBonesData>(saves));
+        }
+
+        private void ClearIncrements()
+        {
+            string pathSettings = Path.Combine(_storagePath, _storageSettingsFileName);
+
+            if (File.Exists(pathSettings))
+            {
+                // read file
+                using FileStream file = new(pathSettings, FileMode.Open, FileAccess.ReadWrite);
+                byte[] buffer = new byte[file.Length];
+                file.Read(buffer, 0, buffer.Length);
+                file.Position = 0;
+
+                // deserialize json
+                string json = Encoding.UTF8.GetString(buffer);
+                var settings = JsonConvert.DeserializeObject<StorageSettingsData>(json);
+                settings.IncrementHorse = 0;
+                settings.IncrementSave = 0;
+
+                // serialize json
+                json = JsonConvert.SerializeObject(settings);
+
+                // write json to file
+                file.Write(Encoding.UTF8.GetBytes(json));
+            }
         }
 
         private long IncrementSaveId()
