@@ -3,7 +3,7 @@ namespace Ford.SaveSystem.Ver2
     public class StorageAction<T> where T : IStorageAction
     {
         public ActionType ActionType { get; set; }
-        public T Data { get; private set; }
+        public T Data { get; set; }
 
         public StorageAction(ActionType action, T data)
         {

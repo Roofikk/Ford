@@ -1,6 +1,6 @@
 using Ford.SaveSystem;
 using Ford.SaveSystem.Ver2;
-using System.Data.SqlTypes;
+using System.Runtime.CompilerServices;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -43,6 +43,8 @@ public class MainMenuPage : Page
         _loadProjectButton.onClick.AddListener(() => { _pageManager.OpenPage(_loadProjectPage); });
         _settingsButton.onClick.AddListener(() => { _pageManager.OpenPage(_settingsPage); });
         _guideButton.onClick.AddListener(() => { _pageManager.OpenPage(_guidePage); });
+
+        // Удалить после проверки!!!
         _historyTestButton.onClick.AddListener(() =>
         {
             Storage storage = new();
@@ -70,18 +72,96 @@ public class MainMenuPage : Page
         _authButton.onClick.RemoveAllListeners();
         StorageSystem storage = new();
 
-        if (Player.IsLoggedIn)
+        if (storage.CurrentState == SaveSystemStateEnum.Offline)
         {
-            _authorizeText.text = $"Приветствую, {Player.UserData.FirstName}";
-            _authButton.onClick.AddListener(() => { _pageManager.OpenPage(_userInfoPage, 1); });
+            if (Player.IsLoggedIn)
+            {
+                _authorizeText.text = "Переподключиться";
+                _authButton.onClick.AddListener(() =>
+                {
+                    TryReconnect();
+                });
+            }
+            else
+            {
+                _authorizeText.text = "Авторизация";
+                _authButton.onClick.AddListener(() => { _pageManager.OpenPage(_loginPage, 2); });
+            }
         }
         else
         {
-            _authorizeText.text = "Авторизация";
-            _authButton.onClick.AddListener(() => { _pageManager.OpenPage(_loginPage, 1); });
+            _authorizeText.text = $"Приветствую, {Player.UserData.FirstName}";
+            _authButton.onClick.AddListener(() => { _pageManager.OpenPage(_userInfoPage, 2); });
         }
     }
 
+    private void TryReconnect()
+    {
+        PageManager.Instance.DisplayLoadingPage(true, 2);
+
+        StorageSystem storage = new();
+        storage.CanChangeState().RunOnMainThread(result =>
+        {
+            if (result)
+            {
+                storage.ChangeState(SaveSystemStateEnum.Authorized);
+                Storage store = new();
+
+                if (store.History.History.Count > 0)
+                {
+                    // show alert for merge
+                    // TODO //
+
+                    PageManager.Instance.OpenWarningPage(new WarningData(
+                        "Предупреждение",
+                        "У вас имеются некоторые изменения, пока вы находились вне сети.\n" +
+                        "Желаете посмотреть и применить их к уже имеющимся?\n" +
+                        "ОТМЕНА приведет к их уничтожению",
+                        () => { ShowHistoryPage(store.History); },
+                        RawApplyTransition), 2);
+
+                    PageManager.Instance.DisplayLoadingPage(false);
+                }
+                else
+                {
+                    ApplyTransition(storage);
+                }
+            }
+            else
+            {
+                ToastMessage.Show("Не удалось подключиться. Попробуйте авторизовать заново");
+                PageManager.Instance.DisplayLoadingPage(false);
+            }
+        });
+    }
+
+    private void ApplyTransition(StorageSystem storage)
+    {
+        storage.ApplyTransition().RunOnMainThread(result =>
+        {
+            if (result)
+            {
+                ToastMessage.Show($"Подключение завершено.\nС возвращением, {Player.UserData.FirstName}");
+            }
+            else
+            {
+                ToastMessage.Show("Произошла ошибка");
+            }
+
+            PageManager.Instance.DisplayLoadingPage(false);
+        });
+    }
+
+    private void RawApplyTransition()
+    {
+
+    }
+
+    private void ShowHistoryPage(StorageHistory history)
+    {
+        var param = new HistoryPageParam(history);
+        PageManager.Instance.OpenPage(_pageManager.HistoryPage, param, 2);
+    }
 
     public override void Close()
     {

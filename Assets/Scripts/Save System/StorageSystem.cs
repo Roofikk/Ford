@@ -11,20 +11,20 @@ namespace Ford.SaveSystem
         private List<HorseBase> _horses;
 
         public SaveSystemStateEnum CurrentState { get; set; }
-        public event Action<SaveSystemStateEnum> OnReadyStateChanged;
         public SaveSystemStateEnum PrevStateEnum { get; set; }
         private static SaveSystemState _prevState { get; set; }
         private static SaveSystemState _state { get; set; }
         public static SaveSystemState State => _state;
-        public static SaveSystemState PrevState => _prevState;
         internal IReadOnlyCollection<HorseBase> Horses => _horses;
+
+        public event Action<SaveSystemStateEnum> OnReadyStateChanged;
 
         public StorageSystem()
         {
             switch (_state)
             {
-                case UnauthorizedState:
-                    CurrentState = SaveSystemStateEnum.Unauthorized;
+                case OfflineState:
+                    CurrentState = SaveSystemStateEnum.Offline;
                     break;
                 case AuthorizedState:
                     CurrentState = SaveSystemStateEnum.Authorized;
@@ -38,8 +38,8 @@ namespace Ford.SaveSystem
         {
             switch (state)
             {
-                case SaveSystemStateEnum.Unauthorized:
-                    _state = new UnauthorizedState();
+                case SaveSystemStateEnum.Offline:
+                    _state = new OfflineState();
                     break;
                 case SaveSystemStateEnum.Authorized:
                     _state = new AuthorizedState();
@@ -121,45 +121,60 @@ namespace Ford.SaveSystem
 
         public void ChangeState(SaveSystemStateEnum state)
         {
+            _prevState = _state;
+
             switch (state)
             {
                 case SaveSystemStateEnum.Authorized:
-                    _prevState = _state;
-                    PrevStateEnum = SaveSystemStateEnum.Unauthorized;
-
+                    PrevStateEnum = SaveSystemStateEnum.Offline;
                     CurrentState = SaveSystemStateEnum.Authorized;
                     _state = new AuthorizedState();
-                    _state.GetReady(this, _prevState);
-                    OnReadyStateChanged?.Invoke(CurrentState);
                     break;
-                case SaveSystemStateEnum.Unauthorized:
-                    _prevState = _state;
+                case SaveSystemStateEnum.Offline:
                     PrevStateEnum = SaveSystemStateEnum.Authorized;
-
-                    CurrentState = SaveSystemStateEnum.Unauthorized;
-                    _state = new UnauthorizedState();
-                    _state.GetReady(this, _prevState);
-                    OnReadyStateChanged?.Invoke(CurrentState);
+                    CurrentState = SaveSystemStateEnum.Offline;
+                    _state = new OfflineState();
                     break;
             }
+
+            _state.GetReady(this, _prevState);
+            OnReadyStateChanged?.Invoke(CurrentState);
         }
 
         public async Task<bool> ApplyTransition()
         {
-            _prevState.CloseState(this);
-            return await _state.Initiate(this);
+            var result = await _state.Initiate(this);
+
+            if (result)
+            {
+                _prevState.CloseState(this);
+            }
+
+            return result;
         }
 
-        public async Task<bool> DeclineTransition()
+        public async Task<bool> RawApplyTransition()
         {
-            _prevState.CloseState(this);
-            return await _state.RawInitiate(this);
+            var result = await _state.RawInitiate(this);
+
+            if (result)
+            {
+                _prevState.CloseState(this);
+            }
+
+            return result;
+        }
+
+        public void DeclineTransition()
+        {
+            _state.CloseState(this);
+            _state = _prevState;
         }
     }
 
     public enum SaveSystemStateEnum
     {
         Authorized,
-        Unauthorized,
+        Offline,
     }
 }

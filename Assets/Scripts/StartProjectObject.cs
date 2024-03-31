@@ -45,7 +45,7 @@ public class StartProjectObject : MonoBehaviour
             }
             else
             {
-                StorageSystem.Initiate(SaveSystemStateEnum.Unauthorized);
+                StorageSystem.Initiate(SaveSystemStateEnum.Offline);
             }
 
             ProjectStarted = true;

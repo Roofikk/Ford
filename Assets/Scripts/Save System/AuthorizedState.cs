@@ -4,7 +4,6 @@ using Ford.WebApi.Data;
 using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Security;
 using System.Threading.Tasks;
 
 namespace Ford.SaveSystem
@@ -21,7 +20,7 @@ namespace Ford.SaveSystem
 
         internal override void GetReady(StorageSystem storage, SaveSystemState fromState)
         {
-            if (fromState is UnauthorizedState unauthorizedState)
+            if (fromState is OfflineState unauthorizedState)
             {
                 History = unauthorizedState.History;
             }
@@ -29,7 +28,21 @@ namespace Ford.SaveSystem
 
         internal override async Task<bool> Initiate(StorageSystem storage)
         {
-            var result = await ApiClient.PushHistory(History);
+            if (History.History.Count == 0)
+            {
+                History.ClearHistory();
+                return true;
+            }
+
+            var tokenStorage = new TokenStorage();
+            var result = await ApiClient.PushHistory(tokenStorage.GetAccessToken().ToString(), History);
+            var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken().ToString(), ApiClient.PushHistory, History);
+
+            if (result.StatusCode != HttpStatusCode.OK)
+            {
+                return false;
+            }
+
             History.ClearHistory();
             return result.StatusCode == HttpStatusCode.OK;
         }
@@ -49,7 +62,7 @@ namespace Ford.SaveSystem
 
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {
-                storage.ChangeState(SaveSystemStateEnum.Unauthorized);
+                storage.ChangeState(SaveSystemStateEnum.Offline);
                 await storage.ApplyTransition();
                 return await storage.GetHorses();
             }
@@ -64,13 +77,13 @@ namespace Ford.SaveSystem
 
         internal override async Task<HorseBase> CreateHorse(StorageSystem storage, CreationHorse horse)
         {
-            TokenStorage tokenStorage = new();
+            var tokenStorage = new TokenStorage();
             var result = await ApiClient.CreateHorseAsync(tokenStorage.GetAccessToken().ToString(), horse);
             var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken().ToString(), ApiClient.CreateHorseAsync, horse);
 
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {
-                storage.ChangeState(SaveSystemStateEnum.Unauthorized);
+                storage.ChangeState(SaveSystemStateEnum.Offline);
                 await storage.ApplyTransition();
                 return await storage.CreateHorse(horse);
             }
@@ -91,7 +104,7 @@ namespace Ford.SaveSystem
 
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {
-                storage.ChangeState(SaveSystemStateEnum.Unauthorized);
+                storage.ChangeState(SaveSystemStateEnum.Offline);
                 await storage.ApplyTransition();
                 return await storage.CreateHorse(new CreationHorse()
                 {
@@ -123,7 +136,7 @@ namespace Ford.SaveSystem
 
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {
-                storage.ChangeState(SaveSystemStateEnum.Unauthorized);
+                storage.ChangeState(SaveSystemStateEnum.Offline);
                 return false;
             }
 
@@ -137,13 +150,13 @@ namespace Ford.SaveSystem
 
         internal override async Task<ICollection<SaveInfo>> GetSaves(StorageSystem storage, long horseId, int below = 0, int amount = 20)
         {
-            TokenStorage tokenStorage = new();
+            var tokenStorage = new TokenStorage();
             var result = await ApiClient.GetSavesAsync(tokenStorage.GetAccessToken().ToString(), horseId, below, amount);
             var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken().ToString(), ApiClient.GetSavesAsync, horseId, below, amount);
 
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {
-                storage.ChangeState(SaveSystemStateEnum.Unauthorized);
+                storage.ChangeState(SaveSystemStateEnum.Offline);
                 await storage.ApplyTransition();
                 return await storage.GetSaves(horseId, below, amount);
             }
@@ -158,13 +171,13 @@ namespace Ford.SaveSystem
 
         internal override async Task<FullSaveInfo> GetFullSave(StorageSystem storage, long horseId, long saveId)
         {
-            TokenStorage tokenStorage = new();
+            var tokenStorage = new TokenStorage();
             var result = await ApiClient.GetSaveAsync(tokenStorage.GetAccessToken().ToString(), horseId, saveId);
             var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken().ToString(), ApiClient.GetSaveAsync, horseId, saveId);
 
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {
-                storage.ChangeState(SaveSystemStateEnum.Unauthorized);
+                storage.ChangeState(SaveSystemStateEnum.Offline);
                 await storage.ApplyTransition();
                 return await storage.GetSave(horseId, saveId);
             }
@@ -179,13 +192,13 @@ namespace Ford.SaveSystem
 
         internal override async Task<SaveInfo> CreateSave(StorageSystem storage, FullSaveInfo save)
         {
-            TokenStorage tokenStorage = new();
+            var tokenStorage = new TokenStorage();
             var result = await ApiClient.CreateSaveAsync(tokenStorage.GetAccessToken().ToString(), save);
             var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken().ToString(), ApiClient.CreateSaveAsync, save);
 
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {
-                storage.ChangeState(SaveSystemStateEnum.Unauthorized);
+                storage.ChangeState(SaveSystemStateEnum.Offline);
                 await storage.ApplyTransition();
                 return await storage.CreateSave(save);
             }
@@ -200,13 +213,13 @@ namespace Ford.SaveSystem
 
         internal override async Task<SaveInfo> UpdateSave(StorageSystem storage, SaveInfo save)
         {
-            TokenStorage tokenStorage = new();
+            var tokenStorage = new TokenStorage();
             var result = await ApiClient.UpdateSaveInfoAsync(tokenStorage.GetAccessToken().ToString(), save);
             var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken().ToString(), ApiClient.UpdateSaveInfoAsync, save);
 
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {
-                storage.ChangeState(SaveSystemStateEnum.Unauthorized);
+                storage.ChangeState(SaveSystemStateEnum.Offline);
                 await storage.ApplyTransition();
                 return await storage.CreateSave((FullSaveInfo)save);
             }
@@ -221,13 +234,13 @@ namespace Ford.SaveSystem
 
         internal override async Task<bool> DeleteSave(StorageSystem storage, long saveId)
         {
-            TokenStorage tokenStorage = new();
+            var tokenStorage = new TokenStorage();
             var result = await ApiClient.DeleteSaveAsync(tokenStorage.GetAccessToken().ToString(), saveId);
             var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken().ToString(), ApiClient.DeleteSaveAsync, saveId);
 
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {
-                storage.ChangeState(SaveSystemStateEnum.Unauthorized);
+                storage.ChangeState(SaveSystemStateEnum.Offline);
                 await storage.ApplyTransition();
                 return false;
             }
@@ -251,6 +264,7 @@ namespace Ford.SaveSystem
             History = null;
         }
 
+        #region Help methods
         private async Task<ResponseResult> RefreshTokenAndRetrieveResult(ResponseResult result,
             string accessToken, Func<string, Task<ResponseResult>> repeat)
         {
@@ -337,5 +351,6 @@ namespace Ford.SaveSystem
             FordApiClient client = new();
             return await client.RefreshTokenAndReply(accessToken, repeat, param1, param2, param3, param4);
         }
+        #endregion
     }
 }

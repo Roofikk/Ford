@@ -8,29 +8,34 @@ public class ChildHistoryElement : MonoBehaviour
 {
     [SerializeField] protected TextMeshProUGUI _headerText;
     [SerializeField] protected TextMeshProUGUI _descriptionText;
-    [SerializeField] protected Toggle _toggle;
+    [SerializeField] private Toggle _toggle;
 
     protected HistoryElement _parent;
-    public ActionType ActionType { get; protected set; }
-    public bool ToggleValue => _toggle.isOn;
+    private bool ToggleValue { get => _toggle.isOn; }
+    protected StorageAction<IStorageAction> _storageAction;
+    public IStorageAction ActionData => _storageAction.Data;
+    public ActionType ActionType => _storageAction.ActionType;
 
     public virtual ChildHistoryElement Initiate(HistoryElement parent, StorageAction<IStorageAction> action,
-        string header, ToggleGroup toggleGroup)
+        string header)
     {
-        _toggle.onValueChanged.AddListener((value) =>
-        {
-            if (CanToggleOff())
-            {
-                ToastMessage.Show("¬ы не можете убрать единственное сохранение");
-                _toggle.isOn = true;
-            }
-        });
+        _storageAction = action;
+        _toggle.isOn = true;
 
         _headerText.text = header;
         _descriptionText.text = action.Data.ActionDescription;
-        _toggle.group = toggleGroup;
 
         _parent = parent;
+
+        if (_parent.ActionType == ActionType.DeleteHorse)
+        {
+            _toggle.interactable = false;
+        }
+
+        _toggle.onValueChanged.AddListener((value) =>
+        {
+            ChangeParentToggleState();
+        });
 
         return this;
     }
@@ -40,25 +45,33 @@ public class ChildHistoryElement : MonoBehaviour
         _toggle.isOn = value;
     }
 
-    private bool CanToggleOff()
+    private void ChangeParentToggleState()
     {
-        if (_parent == null)
+        switch (_parent.ActionType)
         {
-            return true;
+            case ActionType.CreateHorse:
+                var activeToggles = _parent.ChildHistories.Where(x => x.ToggleValue);
+
+                if (activeToggles.Count() == _parent.ChildHistories.Count)
+                {
+                    _parent.ChangeState(ToggleState.On);
+                }
+                else if (activeToggles.Count() == 0)
+                {
+                    _parent.ChangeState(ToggleState.Off);
+                }
+                else
+                {
+                    _parent.ChangeState(ToggleState.Partial);
+                }
+
+                break;
+            case ActionType.UpdateHorse:
+
+                break;
+            case ActionType.DeleteHorse:
+
+                break;
         }
-
-        if (!_parent.ToggleValue)
-        {
-            return true;
-        }
-
-        var select = _parent.ChildHistories.Where(sh => sh.ActionType == ActionType.CreateSave && sh.ToggleValue);
-
-        if (select.Count() < 1)
-        {
-            return false;
-        }
-
-        return true;
     }
 }

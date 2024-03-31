@@ -145,6 +145,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4282937843008505308}
+  - component: {fileID: 2389598011059486711}
   - component: {fileID: 8310145698448816529}
   - component: {fileID: 7523549682235464487}
   m_Layer: 5
@@ -174,6 +175,22 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2389598011059486711
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 497732252031477133}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ad23025d88648b4380dfbeda86a38d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _checkMark: {fileID: 8497245344816762594}
+  _stateOnImage: {fileID: 21300000, guid: b08c35898ec0b5b49964aaf53a17c4b3, type: 3}
+  _stateOffImage: {fileID: 0}
+  _statePartialImage: {fileID: 21300000, guid: f3690227a3b464c48badc72b141fe8aa, type: 3}
 --- !u!114 &8310145698448816529
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -216,7 +233,7 @@ MonoBehaviour:
   m_Interactable: 1
   m_TargetGraphic: {fileID: 6004021240326284158}
   toggleTransition: 1
-  graphic: {fileID: 8497245344816762594}
+  graphic: {fileID: 0}
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:
@@ -453,7 +470,6 @@ GameObject:
   - component: {fileID: 6721989837776738669}
   - component: {fileID: 2356892377321144629}
   - component: {fileID: 3108276482274809926}
-  - component: {fileID: 1145833521683823972}
   m_Layer: 5
   m_Name: HistoryElement
   m_TagString: Untagged
@@ -481,7 +497,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 500, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6721989837776738669
 CanvasRenderer:
@@ -534,24 +550,9 @@ MonoBehaviour:
   _toggle: {fileID: 8310145698448816529}
   _subHistoryElementPrefab: {fileID: 799959150117285165, guid: 3840727236f6c2f438d73723509ec1bf,
     type: 3}
-  _toggleGroup: {fileID: 0}
+  _stateToggle: {fileID: 2389598011059486711}
   _subHistoryContainer: {fileID: 938525210606758731}
-  _showHideToggle: {fileID: 3640985118272938975}
-  _showToggleImage: {fileID: 2800000, guid: 48f8fd710eb87814dac07f4170bf7f05, type: 3}
-  _hideToggleImage: {fileID: 2800000, guid: 271975d7f2ad675468be024221dcb9e7, type: 3}
---- !u!114 &1145833521683823972
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3476125010896033679}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2fafe2cfe61f6974895a912c3755e8f1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_AllowSwitchOff: 1
+  _shutter: {fileID: 2198204790330289879}
 --- !u!1 &3913357504011266898
 GameObject:
   m_ObjectHideFlags: 0
@@ -698,6 +699,7 @@ GameObject:
   - component: {fileID: 126237796778095856}
   - component: {fileID: 1104277469163343423}
   - component: {fileID: 7553754142214976128}
+  - component: {fileID: 2198204790330289879}
   m_Layer: 5
   m_Name: Shutter
   m_TagString: Untagged
@@ -759,6 +761,22 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &2198204790330289879
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3992542397005249889}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e524b672f8a14345b60a8c5786a63ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _toggle: {fileID: 3640985118272938975}
+  _toggleImage: {fileID: 8328458185884435877}
+  _showTexture: {fileID: 21300000, guid: 48f8fd710eb87814dac07f4170bf7f05, type: 3}
+  _hideTexture: {fileID: 21300000, guid: 271975d7f2ad675468be024221dcb9e7, type: 3}
 --- !u!1 &5008545540445426519
 GameObject:
   m_ObjectHideFlags: 0
@@ -1216,7 +1234,7 @@ MonoBehaviour:
   m_Interactable: 1
   m_TargetGraphic: {fileID: 4350335066813193144}
   toggleTransition: 0
-  graphic: {fileID: 8328458185884435877}
+  graphic: {fileID: 0}
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:

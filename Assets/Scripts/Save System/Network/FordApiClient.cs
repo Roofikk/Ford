@@ -35,7 +35,7 @@ namespace Ford.WebApi
             _hostUri = new Uri(host);
         }
 
-        public async Task<ResponseResult> PushHistory(StorageHistory history)
+        public async Task<ResponseResult> PushHistory(string accessToken, StorageHistory history)
         {
             Uri uri = new(_hostUri, _savesUri);
             var result = await PostRequest(uri, history.History);

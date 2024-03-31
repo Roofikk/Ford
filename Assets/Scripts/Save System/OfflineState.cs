@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace Ford.SaveSystem
 {
-    public class UnauthorizedState : SaveSystemState
+    public class OfflineState : SaveSystemState
     {
         Storage _storage;
         public override StorageHistory History => _storage.History;
 
-        public UnauthorizedState()
+        public OfflineState()
         {
             _storage = new();
         }
@@ -94,20 +94,21 @@ namespace Ford.SaveSystem
             var accessToken = new TokenStorage().GetAccessToken().ToString();
             var result = await client.GetUserInfoAsync(accessToken);
 
-            if (result.Content != null)
+            if (result.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                storage.ChangeState(SaveSystemStateEnum.Authorized);
-                return true;
+                var newResult = await client.RefreshTokenAndReply(accessToken, client.GetUserInfoAsync);
+
+                if (newResult.StatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    return false;
+                }
             }
-            else
-            {
-                return false;
-            }
+
+            return result.StatusCode == System.Net.HttpStatusCode.OK;
         }
 
         internal override void CloseState(StorageSystem storage)
         {
-            _storage.History.ClearHistory();
             _storage.ClearStorage();
         }
     }
