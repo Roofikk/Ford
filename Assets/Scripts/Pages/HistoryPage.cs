@@ -1,6 +1,7 @@
 using Ford.SaveSystem;
 using Ford.SaveSystem.Ver2;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,6 +15,8 @@ public class HistoryPage : Page
     [SerializeField] private ScrollRect _scrollRect;
     [SerializeField] private Button _applyButton;
     [SerializeField] private Button _declineButton;
+
+    private List<HistoryElement> _historyElements = new();
 
     private StorageHistory _storageHistory;
     public StorageHistory StorageHistory => _storageHistory;
@@ -41,8 +44,6 @@ public class HistoryPage : Page
     public override void Open(int popUpLevel = 0)
     {
         base.Open(popUpLevel);
-
-        // don't forget about grouping history
     }
 
     public override void Open<T>(T param, int popUpLevel = 0)
@@ -68,6 +69,8 @@ public class HistoryPage : Page
 
             var historyElement = Instantiate(_historyElementPrefab, _scrollRect.content.transform)
                 .Initiate(null, horseAction, saveActions.ToList());
+
+            _historyElements.Add(historyElement);
         }
     }
 
@@ -78,8 +81,22 @@ public class HistoryPage : Page
 
     private void Apply()
     {
-        var storage = new StorageSystem();
         PageManager.Instance.DisplayLoadingPage(true, 8);
+        var storage = new StorageSystem();
+
+        // choose selecting histories
+        List<StorageAction<IStorageAction>> newHistory = new();
+
+        foreach (var element in _historyElements)
+        {
+            newHistory.Add(new(
+                element.ActionType,
+                element.ActionData));
+
+            newHistory.AddRange(element.ChildHistories.Select(x => new StorageAction<IStorageAction>(action: x.ActionType, data: x.ActionData)));
+        }
+
+        storage.History.RewriteHistory(newHistory.ToArray());
         storage.ApplyTransition().RunOnMainThread((result) =>
         {
             if (result)

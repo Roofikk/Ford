@@ -38,6 +38,12 @@ namespace Ford.SaveSystem.Ver2
             }
         }
 
+        public ICollection<StorageAction<IStorageAction>> RewriteHistory(StorageAction<IStorageAction>[] newHistory)
+        {
+            _history = new List<StorageAction<IStorageAction>>(newHistory);
+            return History.ToList();
+        }
+
         public void PushHistory(StorageAction<IStorageAction> action)
         {
             switch (action.ActionType)

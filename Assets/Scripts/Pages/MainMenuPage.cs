@@ -2,6 +2,7 @@ using Ford.SaveSystem;
 using Ford.SaveSystem.Ver2;
 using System.Runtime.CompilerServices;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -58,6 +59,18 @@ public class MainMenuPage : Page
         _guideButton.onClick.AddListener(() => { _pageManager.ClosePage(this); });
 
         Player.OnChangedAuthState += UpdatePage;
+    }
+
+    private void OnDestroy()
+    {
+        _startDevProjectButton.onClick.RemoveAllListeners();
+        _newProjectButton.onClick.RemoveAllListeners();
+        _loadProjectButton.onClick.RemoveAllListeners();
+        _settingsButton.onClick.RemoveAllListeners();
+        _guideButton.onClick.RemoveAllListeners();
+        _authButton.onClick.RemoveAllListeners();
+
+        Player.OnChangedAuthState -= UpdatePage;
     }
 
     public override void Open(int popUpLevel = 0)
@@ -168,17 +181,5 @@ public class MainMenuPage : Page
         base.Close();
 
         _authButton.onClick.RemoveAllListeners();
-    }
-
-    private void OnDestroy()
-    {
-        _startDevProjectButton.onClick.RemoveAllListeners();
-        _newProjectButton.onClick.RemoveAllListeners();
-        _loadProjectButton.onClick.RemoveAllListeners();
-        _settingsButton.onClick.RemoveAllListeners();
-        _guideButton.onClick.RemoveAllListeners();
-        _authButton.onClick.RemoveAllListeners();
-
-        Player.OnChangedAuthState -= UpdatePage;
     }
 }

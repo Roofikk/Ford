@@ -112,38 +112,6 @@ public class Player : MonoBehaviour
         }
     }
 
-    //public static void Reconnect()
-    //{
-    //    StorageSystem storage = new();
-
-    //    if (storage.CurrentState == SaveSystemStateEnum.Offline)
-    //    {
-    //        storage.CanChangeState().RunOnMainThread(result =>
-    //        {
-    //            if (result)
-    //            {
-    //                storage.OnReadyStateChanged += (state) =>
-    //                {
-    //                    var history = StorageSystem.State.History;
-
-    //                    PageManager.Instance.OpenWarningPage(new WarningData(
-    //                        "Синхронизация данных",
-    //                        "Вы успешно авторизовались\nУ вас есть данные на устройстве, которые не загружены в облачное хранилище. Желаете посмотреть?\n" +
-    //                        "Отмена приведет к потере данных на комплютере",
-    //                        () => { PageManager.Instance.OpenPage(PageManager.Instance.HistoryPage, new HistoryPageParam(history)); },
-    //                        () => { storage.RawApplyTransition().RunOnMainThread(null); },
-    //                        () => { storage.RawApplyTransition().RunOnMainThread(null); }));
-    //                };
-    //                storage.ChangeState(SaveSystemStateEnum.Authorized);
-    //            }
-    //        });
-    //    }
-    //    else
-    //    {
-    //        ToastMessage.Show("Вы уже авторизованы");
-    //    }
-    //}
-
     public static void Logout()
     {
         _userData = null;

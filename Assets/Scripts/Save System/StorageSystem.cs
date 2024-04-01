@@ -1,3 +1,4 @@
+using Ford.SaveSystem.Ver2;
 using Ford.WebApi.Data;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,8 @@ namespace Ford.SaveSystem
         private static SaveSystemState _state { get; set; }
         public static SaveSystemState State => _state;
         internal IReadOnlyCollection<HorseBase> Horses => _horses;
+
+        public StorageHistory History => _state.History;
 
         public event Action<SaveSystemStateEnum> OnReadyStateChanged;
 
