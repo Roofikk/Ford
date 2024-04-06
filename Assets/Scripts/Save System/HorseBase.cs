@@ -22,8 +22,8 @@ namespace Ford.SaveSystem
         public HorseUserDto Self { get; set; }
         public DateTime CreationDate { get; set; }
         public DateTime LastUpdate { get; set; }
-        public ICollection<HorseUserDto> Users { get; }
-        public ICollection<SaveInfo> Saves { get; }
+        public ICollection<HorseUserDto> Users { get; set; }
+        public ICollection<SaveInfo> Saves { get; set; }
 
         public string ActionDescription => $"Кличка: {Name}\nДата:{CreationDate}";
 

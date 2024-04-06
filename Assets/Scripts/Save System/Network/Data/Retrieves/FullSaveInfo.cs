@@ -6,7 +6,7 @@ namespace Ford.SaveSystem
 {
     public class FullSaveInfo : SaveInfo, IStorageData
     {
-        public ICollection<BoneSave> Bones { get; }
+        public ICollection<BoneSave> Bones { get; set; }
 
         public FullSaveInfo()
         {

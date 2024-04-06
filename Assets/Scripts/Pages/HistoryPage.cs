@@ -28,7 +28,7 @@ public class HistoryPage : Page
             PageManager.Instance.OpenWarningPage(new WarningData(
                 "Предупреждение",
                 "Вы уверены, что хотите применить данныые сохранения?\nВернуть невыбранные изменения будет уже невозможно",
-                Apply));
+                Apply), 6);
         });
 
         _declineButton.onClick.AddListener(() =>
@@ -37,7 +37,7 @@ public class HistoryPage : Page
                 "Предупреждение",
                 "Вы точно уверены, что хотите отменить слияние?\n" +
                 "Все сохранения, совершенные на вашем персональном компбютере, будут утеряны навсегда",
-                Decline));
+                Decline), 6);
         });
     }
 

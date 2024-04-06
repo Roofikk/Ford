@@ -145,8 +145,8 @@ namespace Ford.WebApi
             string orderByDate = "desc", string orderByName = "false")
         {
             Uri uri = new(_hostUri, $"{_horsesUrl}?below={below}&amount={amount}&orderByDate={orderByDate}&orderByName={orderByName}");
-            var result = await GetRequest<RetrieveArray<HorseBase>>(uri, accessToken);
-            return new ResponseResult<ICollection<HorseBase>>(result.Content.Items, result.StatusCode, result.Errors);
+            var result = await GetRequest<ICollection<HorseBase>>(uri, accessToken);
+            return new ResponseResult<ICollection<HorseBase>>(result.Content, result.StatusCode, result.Errors);
         }
 
         /// <summary>
