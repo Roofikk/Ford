@@ -122,16 +122,13 @@ public class MainMenuPage : Page
 
                 if (store.History.History.Count > 0)
                 {
-                    // show alert for merge
-                    // TODO //
-
                     PageManager.Instance.OpenWarningPage(new WarningData(
                         "Предупреждение",
                         "У вас имеются некоторые изменения, пока вы находились вне сети.\n" +
                         "Желаете посмотреть и применить их к уже имеющимся?\n" +
                         "ОТМЕНА приведет к их уничтожению",
                         () => { ShowHistoryPage(store.History); },
-                        RawApplyTransition), 2);
+                        onCancel: () => { RawApplyTransition(storage); }), 2);
 
                     PageManager.Instance.DisplayLoadingPage(false);
                 }
@@ -142,7 +139,7 @@ public class MainMenuPage : Page
             }
             else
             {
-                ToastMessage.Show("Не удалось подключиться. Попробуйте авторизовать заново");
+                ToastMessage.Show("Не удалось подключиться. Попробуйте авторизоваться заново");
                 PageManager.Instance.DisplayLoadingPage(false);
             }
         });
@@ -165,9 +162,21 @@ public class MainMenuPage : Page
         });
     }
 
-    private void RawApplyTransition()
+    private void RawApplyTransition(StorageSystem storage)
     {
+        storage.RawApplyTransition().RunOnMainThread(result =>
+        {
+            if (result)
+            {
+                ToastMessage.Show($"Подключение завершено.\nС возвращением, {Player.UserData.FirstName}");
+            }
+            else
+            {
+                ToastMessage.Show("Произошла ошибка");
+            }
 
+            PageManager.Instance.DisplayLoadingPage(false);
+        });
     }
 
     private void ShowHistoryPage(StorageHistory history)

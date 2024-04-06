@@ -58,6 +58,45 @@ public class Player : MonoBehaviour
     public static void Authorize(Action onAuthorizeFinished = null)
     {
         FordApiClient client = new();
+        StorageSystem storage = new();
+
+        storage.OnReadyStateChanged += (state) =>
+        {
+            if (state != SaveSystemStateEnum.Authorized)
+            {
+                //onAuthorizeFinished?.Invoke();
+                return;
+            }
+
+            if (storage.History.History.Count == 0)
+            {
+                storage.ApplyTransition().RunOnMainThread(result =>
+                {
+                    //onAuthorizeFinished?.Invoke();
+                });
+                return;
+            }
+
+            PageManager.Instance.OpenWarningPage(new WarningData(
+                "Предупреждение",
+                "У вас имеются некоторые изменения, пока вы находились вне сети.\n" +
+                "Желаете посмотреть и применить их к уже имеющимся?\n" +
+                "ОТМЕНА приведет к их уничтожению",
+                () =>
+                {
+                    PageManager.Instance.OpenPage(PageManager.Instance.HistoryPage, new HistoryPageParam(storage.History), 2);
+                },
+                onCancel: () =>
+                {
+                    storage.RawApplyTransition().RunOnMainThread(result =>
+                    {
+                        //onAuthorizeFinished?.Invoke();
+                    });
+                }
+            ), 2);
+
+            onAuthorizeFinished?.Invoke();
+        };
 
         using var tokenStorage = new TokenStorage();
 
@@ -70,32 +109,33 @@ public class Player : MonoBehaviour
                     case HttpStatusCode.OK:
                         IsLoggedIn = true;
                         _userData = result.Content;
-                        onAuthorizeFinished?.Invoke();
-                        OnChangedAuthState?.Invoke();
+
+                        storage.ChangeState(SaveSystemStateEnum.Authorized);
                         break;
                     case HttpStatusCode.Unauthorized:
                         client.RefreshTokenAndReply(tokenStorage.GetAccessToken(), client.GetUserInfoAsync)
                         .RunOnMainThread(result =>
                         {
-                            if (result.Content != null)
+                            switch (result.StatusCode)
                             {
-                                _userData = result.Content;
-                                IsLoggedIn = true;
+                                case HttpStatusCode.OK:
+                                    _userData = result.Content;
+                                    IsLoggedIn = true;
+
+                                    storage.ChangeState(SaveSystemStateEnum.Authorized);
+                                    break;
+                                default:
+                                    _userData = null;
+                                    IsLoggedIn = false;
+                                    onAuthorizeFinished?.Invoke();
+                                    break;
                             }
-                            else
-                            {
-                                _userData = null;
-                                IsLoggedIn = false;
-                            }
-                            onAuthorizeFinished?.Invoke();
-                            OnChangedAuthState?.Invoke();
                         });
                         break;
                     default:
                         _userData = null;
                         IsLoggedIn = false;
                         onAuthorizeFinished?.Invoke();
-                        OnChangedAuthState?.Invoke();
                         break;
                 }
             });
@@ -104,7 +144,6 @@ public class Player : MonoBehaviour
         {
             IsLoggedIn = false;
             onAuthorizeFinished?.Invoke();
-            OnChangedAuthState?.Invoke();
         }
     }
 

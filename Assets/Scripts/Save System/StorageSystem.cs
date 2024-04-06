@@ -124,6 +124,11 @@ namespace Ford.SaveSystem
 
         public void ChangeState(SaveSystemStateEnum state)
         {
+            if (state == CurrentState)
+            {
+                return;
+            }
+
             _prevState = _state;
 
             switch (state)
