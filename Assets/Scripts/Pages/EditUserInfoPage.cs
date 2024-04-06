@@ -95,7 +95,7 @@ public class EditUserInfoPage : Page
         }
 
         FordApiClient client = new();
-        TokenStorage storage = new();
+        using var tokenStorage = new TokenStorage();
 
         UpdatingAccountDto data = new()
         {
@@ -109,7 +109,7 @@ public class EditUserInfoPage : Page
         };
         PageManager.Instance.DisplayLoadingPage(true, 6);
 
-        client.UpdateUserInfoAsync(storage.GetAccessToken().ToString(), data).RunOnMainThread(result =>
+        client.UpdateUserInfoAsync(tokenStorage.GetAccessToken(), data).RunOnMainThread(result =>
         {
             switch (result.StatusCode)
             {
@@ -131,7 +131,7 @@ public class EditUserInfoPage : Page
                     PageManager.Instance.DisplayLoadingPage(false);
                     break;
                 case HttpStatusCode.Unauthorized:
-                    client.RefreshTokenAndReply(storage.GetAccessToken().ToString(), client.UpdateUserInfoAsync, data).RunOnMainThread(result =>
+                    client.RefreshTokenAndReply(tokenStorage.GetAccessToken(), client.UpdateUserInfoAsync, data).RunOnMainThread(result =>
                     {
                         switch (result.StatusCode)
                         {

@@ -24,7 +24,7 @@ namespace Ford.WebApi
         private readonly string _accountUri = "api/identity/account";
         private readonly string _passwordChangeUri = "api/identity/account/password";
 
-        private readonly string _horsesUri = "api/horses";
+        private readonly string _horsesUrl = "api/horses";
         private readonly string _updateHorseOwnersUri = "api/horseOwners";
         private readonly string _changeOwnerRoleUri = "api/horseOwners/change-owner-role";
 
@@ -33,13 +33,6 @@ namespace Ford.WebApi
         public static void SetHost(string host)
         {
             _hostUri = new Uri(host);
-        }
-
-        public async Task<ResponseResult> PushHistory(string accessToken, StorageHistory history)
-        {
-            Uri uri = new(_hostUri, _savesUri);
-            var result = await PostRequest(uri, history.History);
-            return result;
         }
 
         #region User
@@ -137,7 +130,7 @@ namespace Ford.WebApi
         /// <returns>Horse object</returns>
         public async Task<ResponseResult<HorseBase>> GetHorseAsync(string accessToken, long horseId)
         {
-            Uri uri = new(_hostUri, $"{_horsesUri}?horseId={horseId}");
+            Uri uri = new(_hostUri, $"{_horsesUrl}?horseId={horseId}");
             var horse = await GetRequest<HorseBase>(uri, accessToken);
             return horse;
         }
@@ -151,7 +144,7 @@ namespace Ford.WebApi
         public async Task<ResponseResult<ICollection<HorseBase>>> GetHorsesAsync(string accessToken, int below, int amount,
             string orderByDate = "desc", string orderByName = "false")
         {
-            Uri uri = new(_hostUri, $"{_horsesUri}?below={below}&amount={amount}&orderByDate={orderByDate}&orderByName={orderByName}");
+            Uri uri = new(_hostUri, $"{_horsesUrl}?below={below}&amount={amount}&orderByDate={orderByDate}&orderByName={orderByName}");
             var result = await GetRequest<RetrieveArray<HorseBase>>(uri, accessToken);
             return new ResponseResult<ICollection<HorseBase>>(result.Content.Items, result.StatusCode, result.Errors);
         }
@@ -165,7 +158,7 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult<HorseBase>> CreateHorseAsync(string accessToken, CreationHorse horse)
         {
-            Uri uri = new(_hostUri, _horsesUri);
+            Uri uri = new(_hostUri, _horsesUrl);
             var result = await PostRequest<HorseBase>(uri, horse, accessToken);
             return result;
         }
@@ -179,7 +172,7 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult<HorseBase>> UpdateHorseAsync(string accessToken, UpdatingHorse horse)
         {
-            Uri uri = new(_hostUri, _horsesUri);
+            Uri uri = new(_hostUri, _horsesUrl);
             var result = await PutRequest<HorseBase>(uri, horse, accessToken);
             return result;
         }
@@ -194,8 +187,22 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult> DeleteHorseAsync(string accessToken, long horseId)
         {
-            Uri uri = new(_hostUri, $"{_horsesUri}?horseId={horseId}");
+            Uri uri = new(_hostUri, $"{_horsesUrl}?horseId={horseId}");
             var result = await DeleteRequest(uri, accessToken);
+            return result;
+        }
+
+        /// <summary>
+        /// Push history while user was offline<br/>
+        /// POST request
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <param name="history"></param>
+        /// <returns></returns>
+        public async Task<ResponseResult> PushHistory(string accessToken, ICollection<StorageAction> history)
+        {
+            Uri uri = new(_hostUri, _horsesUrl + "/history");
+            var result = await PostRequest(uri, history);
             return result;
         }
         #endregion
@@ -225,7 +232,7 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult> DeleteHorseOwnerAsync(string accessToken, long horseId, long userId)
         {
-            Uri uri = new(_hostUri, $"{_horsesUri}?userId={userId}&horseId={horseId}");
+            Uri uri = new(_hostUri, $"{_horsesUrl}?userId={userId}&horseId={horseId}");
             var result = await DeleteRequest(uri, accessToken);
             return result;
         }

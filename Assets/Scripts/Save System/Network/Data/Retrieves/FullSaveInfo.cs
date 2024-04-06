@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Ford.SaveSystem
 {
-    public class FullSaveInfo : SaveInfo, IStorageAction
+    public class FullSaveInfo : SaveInfo, IStorageData
     {
         public ICollection<BoneSave> Bones { get; }
 

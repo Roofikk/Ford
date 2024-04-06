@@ -48,26 +48,22 @@ public class Player : MonoBehaviour
 
     public static void Authorize(TokenDto tokens, Action onAuthorizeFinished = null)
     {
-        TokenStorage storage = new();
+        using var storage = new TokenStorage();
         storage.SetNewAccessToken(tokens.Token);
         storage.SetNewRefreshToken(tokens.RefreshToken);
 
-        Authorize(tokens.Token, onAuthorizeFinished);
+        Authorize(onAuthorizeFinished);
     }
 
-    public static void Authorize(string accessToken = "", Action onAuthorizeFinished = null)
+    public static void Authorize(Action onAuthorizeFinished = null)
     {
         FordApiClient client = new();
 
-        if (string.IsNullOrEmpty(accessToken))
-        {
-            TokenStorage storage = new();
-            accessToken = storage.GetAccessToken().ToString();
-        }
+        using var tokenStorage = new TokenStorage();
 
-        if (!string.IsNullOrEmpty(accessToken))
+        if (!string.IsNullOrEmpty(tokenStorage.GetAccessToken()))
         {
-            client.GetUserInfoAsync(accessToken).RunOnMainThread(result =>
+            client.GetUserInfoAsync(tokenStorage.GetAccessToken()).RunOnMainThread(result =>
             {
                 switch (result.StatusCode)
                 {
@@ -78,7 +74,7 @@ public class Player : MonoBehaviour
                         OnChangedAuthState?.Invoke();
                         break;
                     case HttpStatusCode.Unauthorized:
-                        client.RefreshTokenAndReply(accessToken, client.GetUserInfoAsync)
+                        client.RefreshTokenAndReply(tokenStorage.GetAccessToken(), client.GetUserInfoAsync)
                         .RunOnMainThread(result =>
                         {
                             if (result.Content != null)
@@ -117,9 +113,9 @@ public class Player : MonoBehaviour
         _userData = null;
         IsLoggedIn = false;
 
-        TokenStorage storage = new();
-        storage.SetNewAccessToken("");
-        storage.SetNewRefreshToken("");
+        using var tokenStorage = new TokenStorage();
+        tokenStorage.SetNewAccessToken("");
+        tokenStorage.SetNewRefreshToken("");
 
         OnChangedAuthState?.Invoke();
     }

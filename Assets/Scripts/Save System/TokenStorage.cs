@@ -1,66 +1,146 @@
+using System;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Security;
 using UnityEngine;
+using System.IO;
+using System.Text;
 
-public class TokenStorage
+public class TokenStorage : IDisposable
 {
-    private readonly string ACCESS_TOKEN = "ACCESS_TOKEN";
-    private readonly string REFRESH_TOKEN = "REFRESH_TOKEN";
+    private string ACCESS_TOKEN { get; } = "ACCESS_TOKEN";
+    private string REFRESH_TOKEN { get; } = "REFRESH_TOKEN";
+    private string ENCRYPTED_KEY { get; } = "ENCRYPTED_KEY";
     private static SecureString _accessToken = new();
     private static SecureString _refreshToken = new();
 
-    public SecureString GetAccessToken()
+    public TokenStorage()
     {
-        if (_accessToken.Length == 0)
+        if (PlayerPrefs.HasKey(ACCESS_TOKEN))
         {
-            string token = PlayerPrefs.GetString(ACCESS_TOKEN, "");
+            var encryptedToken = PlayerPrefs.GetString(ACCESS_TOKEN, "");
 
-            foreach (var c in token)
+            if (!string.IsNullOrEmpty(encryptedToken))
             {
-                _accessToken.AppendChar(c);
+                string token = DecryptToken(Convert.FromBase64String(encryptedToken));
+                _accessToken = StringToSecureString(token);
             }
         }
 
-        return _accessToken;
-    }
-
-    public SecureString GetRefreshToken()
-    {
-        if (_refreshToken.Length == 0)
+        if (PlayerPrefs.HasKey(REFRESH_TOKEN))
         {
-            string refreshToken = PlayerPrefs.GetString(REFRESH_TOKEN, "");
+            string encryptedRefreshToken = PlayerPrefs.GetString(REFRESH_TOKEN, "");
 
-            foreach (var c in refreshToken)
+            if (!string.IsNullOrEmpty(encryptedRefreshToken))
             {
-                _refreshToken.AppendChar(c);
+                string refreshToken = DecryptToken(Convert.FromBase64String(encryptedRefreshToken));
+                _refreshToken = StringToSecureString(refreshToken);
             }
         }
-
-        return _refreshToken;
     }
 
-    public SecureString SetNewAccessToken(string accessToken)
+    public string GetAccessToken()
     {
-        PlayerPrefs.SetString(ACCESS_TOKEN, accessToken);
-        _accessToken = new();
-
-        foreach (var c in accessToken)
-        {
-            _accessToken.AppendChar(c);
-        }
-
-        return _accessToken;
+        return SecureStringToString(_accessToken);
     }
 
-    public SecureString SetNewRefreshToken(string refreshToken)
+    public string GetRefreshToken()
     {
-        PlayerPrefs.SetString(REFRESH_TOKEN, refreshToken);
-        _refreshToken = new();
+        return SecureStringToString(_refreshToken);
+    }
 
-        foreach (var c in refreshToken)
+    public void SetNewAccessToken(string accessToken)
+    {
+        var encryptedToken = EncryptToken(accessToken);
+        PlayerPrefs.SetString(ACCESS_TOKEN, Convert.ToBase64String(encryptedToken));
+        _accessToken = StringToSecureString(accessToken);
+    }
+
+    public void SetNewRefreshToken(string refreshToken)
+    {
+        var encryptedRefreshToken = EncryptToken(refreshToken);
+        PlayerPrefs.SetString(REFRESH_TOKEN, Convert.ToBase64String(encryptedRefreshToken));
+        _refreshToken = StringToSecureString(refreshToken);
+    }
+
+    private string SecureStringToString(SecureString ss)
+    {
+        IntPtr bstr = Marshal.SecureStringToBSTR(ss);
+        return Marshal.PtrToStringBSTR(bstr);
+    }
+
+    private SecureString StringToSecureString(string s)
+    {
+        SecureString ss = new();
+
+        foreach (var c in s)
         {
-            _refreshToken.AppendChar(c);
+            ss.AppendChar(c);
         }
 
-        return _refreshToken;
+        return ss;
+    }
+
+    private void SetSecureKey(byte[] bytes)
+    {
+        string key = Convert.ToBase64String(bytes);
+        PlayerPrefs.SetString(ENCRYPTED_KEY, key);
+    }
+
+    private byte[] GetSecureKey()
+    {
+        string key = PlayerPrefs.GetString(ENCRYPTED_KEY, "");
+
+        if (key.Length == 0)
+        {
+            var bytes = GenerateSecureKey();
+            SetSecureKey(bytes);
+            return bytes;
+        }
+
+        return Convert.FromBase64String(key);
+    }
+
+    private byte[] GenerateSecureKey()
+    {
+        using Aes aes = Aes.Create();
+        aes.GenerateKey();
+        return aes.Key;
+    }
+
+    private byte[] EncryptToken(string token)
+    {
+        using Aes aes = Aes.Create();
+        aes.Key = GetSecureKey();
+        aes.IV = new byte[16];
+
+        using MemoryStream ms = new();
+        using (CryptoStream cs = new(ms, aes.CreateEncryptor(), CryptoStreamMode.Write))
+        {
+            byte[] tokenBytes = Encoding.UTF8.GetBytes(token);
+            cs.Write(tokenBytes, 0, tokenBytes.Length);
+        }
+
+        return ms.ToArray();
+    }
+
+    private string DecryptToken(byte[] encryptedToken)
+    {
+        using Aes aes = Aes.Create();
+        aes.Key = GetSecureKey();
+        aes.IV = new byte[16];
+
+        // Расшифровка токена
+        using MemoryStream ms = new(encryptedToken);
+        using CryptoStream cs = new(ms, aes.CreateDecryptor(), CryptoStreamMode.Read);
+        using StreamReader reader = new(cs);
+        
+        return reader.ReadToEnd();
+    }
+
+    public void Dispose()
+    {
+        _accessToken.Dispose();
+        _refreshToken.Dispose();
     }
 }

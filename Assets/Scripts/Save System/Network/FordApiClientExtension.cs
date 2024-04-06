@@ -10,7 +10,7 @@ public static class FordApiClientExtension
     public static async Task<ResponseResult> RefreshTokenAndReply(this FordApiClient client,
         string token, Func<string, Task<ResponseResult>> func)
     {
-        TokenStorage tokenStorage = new();
+        using var tokenStorage = new TokenStorage();
         var refreshToken = tokenStorage.GetRefreshToken();
 
         TokenDto tokenDto = new()
@@ -39,7 +39,7 @@ public static class FordApiClientExtension
         string token, Func<string, Task<ResponseResult<T>>> func)
         where T : class
     {
-        TokenStorage tokenStorage = new();
+        using var tokenStorage = new TokenStorage();
         var refreshToken = tokenStorage.GetRefreshToken();
 
         TokenDto tokenDto = new()
@@ -67,7 +67,7 @@ public static class FordApiClientExtension
     public static async Task<ResponseResult> RefreshTokenAndReply<TParam>(this FordApiClient client,
         string token, Func<string, TParam, Task<ResponseResult>> func, TParam param1)
     {
-        TokenStorage tokenStorage = new();
+        using var tokenStorage = new TokenStorage();
         var refreshToken = tokenStorage.GetRefreshToken();
 
         TokenDto tokenDto = new()
@@ -96,7 +96,7 @@ public static class FordApiClientExtension
         string token, Func<string, TParam, Task<ResponseResult<TResult>>> func, TParam param1)
         where TResult : class
     {
-        TokenStorage tokenStorage = new();
+        using var tokenStorage = new TokenStorage();
         var refreshToken = tokenStorage.GetRefreshToken();
 
         TokenDto tokenDto = new()
@@ -125,7 +125,7 @@ public static class FordApiClientExtension
         string token, Func<string, TParam1, TParam2, Task<ResponseResult<TResult>>> func, TParam1 param1, TParam2 param2)
         where TResult : class
     {
-        TokenStorage tokenStorage = new();
+        using var tokenStorage = new TokenStorage();
         var refreshToken = tokenStorage.GetRefreshToken();
 
         TokenDto tokenDto = new()
@@ -154,7 +154,7 @@ public static class FordApiClientExtension
         string token, Func<string, TParam1, TParam2, TParam3, Task<ResponseResult<TResult>>> func, TParam1 param1, TParam2 param2, TParam3 param3)
         where TResult : class
     {
-        TokenStorage tokenStorage = new();
+        using var tokenStorage = new TokenStorage();
         var refreshToken = tokenStorage.GetRefreshToken();
 
         TokenDto tokenDto = new()
@@ -184,7 +184,7 @@ public static class FordApiClientExtension
         TParam1 param1, TParam2 param2, TParam3 param3, TParam4 param4)
         where TResult : class
     {
-        TokenStorage tokenStorage = new();
+        using var tokenStorage = new TokenStorage();
         var refreshToken = tokenStorage.GetRefreshToken();
 
         TokenDto tokenDto = new()

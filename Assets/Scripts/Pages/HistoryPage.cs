@@ -85,7 +85,7 @@ public class HistoryPage : Page
         var storage = new StorageSystem();
 
         // choose selecting histories
-        List<StorageAction<IStorageAction>> newHistory = new();
+        List<StorageAction> newHistory = new();
 
         foreach (var element in _historyElements)
         {
@@ -93,7 +93,7 @@ public class HistoryPage : Page
                 element.ActionType,
                 element.ActionData));
 
-            newHistory.AddRange(element.ChildHistories.Select(x => new StorageAction<IStorageAction>(action: x.ActionType, data: x.ActionData)));
+            newHistory.AddRange(element.ChildHistories.Select(x => new StorageAction(action: x.ActionType, data: x.ActionData)));
         }
 
         storage.History.RewriteHistory(newHistory.ToArray());

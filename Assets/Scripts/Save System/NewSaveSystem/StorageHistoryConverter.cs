@@ -5,14 +5,14 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using System;
 
-public class StorageHistoryConverter : CustomCreationConverter<StorageAction<IStorageAction>>
+public class StorageHistoryConverter : CustomCreationConverter<StorageAction>
 {
-    public override StorageAction<IStorageAction> Create(Type objectType)
+    public override StorageAction Create(Type objectType)
     {
         throw new NotImplementedException();
     }
 
-    public StorageAction<IStorageAction> Create(Type objectType, JObject jObject)
+    public StorageAction Create(Type objectType, JObject jObject)
     {
         var stringType = (string)jObject.Property("ActionType");
         var type = Enum.Parse<ActionType>(stringType);
@@ -20,17 +20,17 @@ public class StorageHistoryConverter : CustomCreationConverter<StorageAction<ISt
         switch (type)
         {
             case ActionType.CreateHorse:
-                return new StorageAction<IStorageAction>(ActionType.CreateHorse, new HorseBase());
+                return new StorageAction(ActionType.CreateHorse, new HorseBase());
             case ActionType.UpdateHorse:
-                return new StorageAction<IStorageAction>(ActionType.UpdateHorse, new HorseBase());
+                return new StorageAction(ActionType.UpdateHorse, new HorseBase());
             case ActionType.DeleteHorse:
-                return new StorageAction<IStorageAction>(ActionType.DeleteHorse, new HorseBase());
+                return new StorageAction(ActionType.DeleteHorse, new HorseBase());
             case ActionType.CreateSave:
-                return new StorageAction<IStorageAction>(ActionType.CreateSave, new FullSaveInfo());
+                return new StorageAction(ActionType.CreateSave, new FullSaveInfo());
             case ActionType.UpdateSave:
-                return new StorageAction<IStorageAction>(ActionType.UpdateSave, new SaveInfo());
+                return new StorageAction(ActionType.UpdateSave, new SaveInfo());
             case ActionType.DeleteSave:
-                return new StorageAction<IStorageAction>(ActionType.DeleteSave, new SaveInfo());
+                return new StorageAction(ActionType.DeleteSave, new SaveInfo());
         }
 
         throw new NotImplementedException($"The action type {type} is not supported");

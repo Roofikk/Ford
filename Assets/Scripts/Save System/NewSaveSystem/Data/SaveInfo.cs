@@ -3,7 +3,7 @@ using System;
 
 namespace Ford.SaveSystem
 {
-    public class SaveInfo : ISaveInfo, IStorageAction
+    public class SaveInfo : ISaveInfo, IStorageData
     {
         public long SaveId { get; set; }
         public long HorseId { get; set; }

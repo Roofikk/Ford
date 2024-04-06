@@ -3,6 +3,7 @@ using Ford.WebApi;
 using Ford.WebApi.Data;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -34,9 +35,10 @@ namespace Ford.SaveSystem
                 return true;
             }
 
-            var tokenStorage = new TokenStorage();
-            var result = await ApiClient.PushHistory(tokenStorage.GetAccessToken().ToString(), History);
-            var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken().ToString(), ApiClient.PushHistory, History);
+            using var tokenStorage = new TokenStorage();
+            var result = await ApiClient.PushHistory(tokenStorage.GetAccessToken(), History.History.ToList());
+            var newResult = await RefreshTokenAndRetrieveResult(
+                result, tokenStorage.GetAccessToken(), ApiClient.PushHistory, History.History.ToList());
 
             if (result.StatusCode != HttpStatusCode.OK)
             {
@@ -56,9 +58,10 @@ namespace Ford.SaveSystem
         internal override async Task<ICollection<HorseBase>> GetHorses(StorageSystem storage, int below = 0, int amount = 20,
             string orderByDate = "desc", string orderByName = "false")
         {
-            var tokenStorage = new TokenStorage();
-            var result = await ApiClient.GetHorsesAsync(tokenStorage.GetAccessToken().ToString(), below, amount, orderByDate, orderByName);
-            var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken().ToString(), ApiClient.GetHorsesAsync, below, amount, orderByDate, orderByName);
+            using var tokenStorage = new TokenStorage();
+            var result = await ApiClient.GetHorsesAsync(tokenStorage.GetAccessToken(), below, amount, orderByDate, orderByName);
+            var newResult = await RefreshTokenAndRetrieveResult(
+                result, tokenStorage.GetAccessToken(), ApiClient.GetHorsesAsync, below, amount, orderByDate, orderByName);
 
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {
@@ -77,9 +80,9 @@ namespace Ford.SaveSystem
 
         internal override async Task<HorseBase> CreateHorse(StorageSystem storage, CreationHorse horse)
         {
-            var tokenStorage = new TokenStorage();
-            var result = await ApiClient.CreateHorseAsync(tokenStorage.GetAccessToken().ToString(), horse);
-            var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken().ToString(), ApiClient.CreateHorseAsync, horse);
+            using var tokenStorage = new TokenStorage();
+            var result = await ApiClient.CreateHorseAsync(tokenStorage.GetAccessToken(), horse);
+            var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken(), ApiClient.CreateHorseAsync, horse);
 
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {
@@ -98,9 +101,9 @@ namespace Ford.SaveSystem
 
         internal override async Task<HorseBase> UpdateHorse(StorageSystem storage, UpdatingHorse horse)
         {
-            var tokenStorage = new TokenStorage();
-            var result = await ApiClient.UpdateHorseAsync(tokenStorage.GetRefreshToken().ToString(), horse);
-            var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken().ToString(), ApiClient.UpdateHorseAsync, horse);
+            using var tokenStorage = new TokenStorage();
+            var result = await ApiClient.UpdateHorseAsync(tokenStorage.GetRefreshToken(), horse);
+            var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken(), ApiClient.UpdateHorseAsync, horse);
 
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {
@@ -130,9 +133,9 @@ namespace Ford.SaveSystem
 
         internal override async Task<bool> DeleteHorse(StorageSystem storage, long horseId)
         {
-            var tokenStorage = new TokenStorage();
-            var result = await ApiClient.DeleteHorseAsync(tokenStorage.GetAccessToken().ToString(), horseId);
-            var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken().ToString(), ApiClient.DeleteHorseAsync, horseId);
+            using var tokenStorage = new TokenStorage();
+            var result = await ApiClient.DeleteHorseAsync(tokenStorage.GetAccessToken(), horseId);
+            var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken(), ApiClient.DeleteHorseAsync, horseId);
 
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {
@@ -150,9 +153,10 @@ namespace Ford.SaveSystem
 
         internal override async Task<ICollection<SaveInfo>> GetSaves(StorageSystem storage, long horseId, int below = 0, int amount = 20)
         {
-            var tokenStorage = new TokenStorage();
-            var result = await ApiClient.GetSavesAsync(tokenStorage.GetAccessToken().ToString(), horseId, below, amount);
-            var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken().ToString(), ApiClient.GetSavesAsync, horseId, below, amount);
+            using var tokenStorage = new TokenStorage();
+            var result = await ApiClient.GetSavesAsync(tokenStorage.GetAccessToken(), horseId, below, amount);
+            var newResult = await RefreshTokenAndRetrieveResult(
+                result, tokenStorage.GetAccessToken(), ApiClient.GetSavesAsync, horseId, below, amount);
 
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {
@@ -171,9 +175,10 @@ namespace Ford.SaveSystem
 
         internal override async Task<FullSaveInfo> GetFullSave(StorageSystem storage, long horseId, long saveId)
         {
-            var tokenStorage = new TokenStorage();
-            var result = await ApiClient.GetSaveAsync(tokenStorage.GetAccessToken().ToString(), horseId, saveId);
-            var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken().ToString(), ApiClient.GetSaveAsync, horseId, saveId);
+            using var tokenStorage = new TokenStorage();
+            var result = await ApiClient.GetSaveAsync(tokenStorage.GetAccessToken(), horseId, saveId);
+            var newResult = await RefreshTokenAndRetrieveResult(
+                result, tokenStorage.GetAccessToken(), ApiClient.GetSaveAsync, horseId, saveId);
 
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {
@@ -192,9 +197,9 @@ namespace Ford.SaveSystem
 
         internal override async Task<SaveInfo> CreateSave(StorageSystem storage, FullSaveInfo save)
         {
-            var tokenStorage = new TokenStorage();
-            var result = await ApiClient.CreateSaveAsync(tokenStorage.GetAccessToken().ToString(), save);
-            var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken().ToString(), ApiClient.CreateSaveAsync, save);
+            using var tokenStorage = new TokenStorage();
+            var result = await ApiClient.CreateSaveAsync(tokenStorage.GetAccessToken(), save);
+            var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken(), ApiClient.CreateSaveAsync, save);
 
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {
@@ -213,9 +218,9 @@ namespace Ford.SaveSystem
 
         internal override async Task<SaveInfo> UpdateSave(StorageSystem storage, SaveInfo save)
         {
-            var tokenStorage = new TokenStorage();
-            var result = await ApiClient.UpdateSaveInfoAsync(tokenStorage.GetAccessToken().ToString(), save);
-            var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken().ToString(), ApiClient.UpdateSaveInfoAsync, save);
+            using var tokenStorage = new TokenStorage();
+            var result = await ApiClient.UpdateSaveInfoAsync(tokenStorage.GetAccessToken(), save);
+            var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken(), ApiClient.UpdateSaveInfoAsync, save);
 
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {
@@ -234,9 +239,9 @@ namespace Ford.SaveSystem
 
         internal override async Task<bool> DeleteSave(StorageSystem storage, long saveId)
         {
-            var tokenStorage = new TokenStorage();
-            var result = await ApiClient.DeleteSaveAsync(tokenStorage.GetAccessToken().ToString(), saveId);
-            var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken().ToString(), ApiClient.DeleteSaveAsync, saveId);
+            using var tokenStorage = new TokenStorage();
+            var result = await ApiClient.DeleteSaveAsync(tokenStorage.GetAccessToken(), saveId);
+            var newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken(), ApiClient.DeleteSaveAsync, saveId);
 
             if (newResult.StatusCode == HttpStatusCode.Unauthorized || newResult.StatusCode == HttpStatusCode.InternalServerError)
             {

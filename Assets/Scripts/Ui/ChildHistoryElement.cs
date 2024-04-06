@@ -12,11 +12,11 @@ public class ChildHistoryElement : MonoBehaviour
 
     protected HistoryElement _parent;
     private bool ToggleValue { get => _toggle.isOn; }
-    protected StorageAction<IStorageAction> _storageAction;
-    public IStorageAction ActionData => _storageAction.Data;
+    protected StorageAction _storageAction;
+    public IStorageData ActionData => _storageAction.Data;
     public ActionType ActionType => _storageAction.ActionType;
 
-    public virtual ChildHistoryElement Initiate(HistoryElement parent, StorageAction<IStorageAction> action,
+    public virtual ChildHistoryElement Initiate(HistoryElement parent, StorageAction action,
         string header)
     {
         _storageAction = action;

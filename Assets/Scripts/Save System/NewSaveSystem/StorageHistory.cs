@@ -8,8 +8,8 @@ namespace Ford.SaveSystem.Ver2
     public class StorageHistory
     {
         private string _pathSaveHistory;
-        private List<StorageAction<IStorageAction>> _history;
-        public IReadOnlyCollection<StorageAction<IStorageAction>> History => _history;
+        private List<StorageAction> _history;
+        public IReadOnlyCollection<StorageAction> History => _history;
 
         public StorageHistory(string pathDir)
         {
@@ -27,7 +27,7 @@ namespace Ford.SaveSystem.Ver2
                 string json = sr.ReadToEnd();
                 if (!string.IsNullOrEmpty(json))
                 {
-                    var data = JsonConvert.DeserializeObject<List<StorageAction<IStorageAction>>>(json, new StorageHistoryConverter());
+                    var data = JsonConvert.DeserializeObject<List<StorageAction>>(json, new StorageHistoryConverter());
 
                     foreach (var action in data)
                     {
@@ -38,13 +38,13 @@ namespace Ford.SaveSystem.Ver2
             }
         }
 
-        public ICollection<StorageAction<IStorageAction>> RewriteHistory(StorageAction<IStorageAction>[] newHistory)
+        public ICollection<StorageAction> RewriteHistory(StorageAction[] newHistory)
         {
-            _history = new List<StorageAction<IStorageAction>>(newHistory);
+            _history = new List<StorageAction>(newHistory);
             return History.ToList();
         }
 
-        public void PushHistory(StorageAction<IStorageAction> action)
+        public void PushHistory(StorageAction action)
         {
             switch (action.ActionType)
             {

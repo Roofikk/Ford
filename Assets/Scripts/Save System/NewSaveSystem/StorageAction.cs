@@ -1,11 +1,11 @@
 namespace Ford.SaveSystem.Ver2
 {
-    public class StorageAction<T> where T : IStorageAction
+    public class StorageAction
     {
         public ActionType ActionType { get; set; }
-        public T Data { get; set; }
+        public IStorageData Data { get; set; }
 
-        public StorageAction(ActionType action, T data)
+        public StorageAction(ActionType action, IStorageData data)
         {
             ActionType = action;
             Data = data;

@@ -91,12 +91,12 @@ namespace Ford.SaveSystem
         internal override async Task<bool> CanChangeState(StorageSystem storage)
         {
             FordApiClient client = new();
-            var accessToken = new TokenStorage().GetAccessToken().ToString();
-            var result = await client.GetUserInfoAsync(accessToken);
+            using var tokenStorage = new TokenStorage();
+            var result = await client.GetUserInfoAsync(tokenStorage.GetAccessToken());
 
             if (result.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                var newResult = await client.RefreshTokenAndReply(accessToken, client.GetUserInfoAsync);
+                var newResult = await client.RefreshTokenAndReply(tokenStorage.GetAccessToken(), client.GetUserInfoAsync);
 
                 if (newResult.StatusCode != System.Net.HttpStatusCode.OK)
                 {

@@ -24,8 +24,8 @@ public class HistoryElement : ChildHistoryElement
         {ActionType.DeleteSave, "Удаление сохранения"},
     };
 
-    public HistoryElement Initiate(HistoryElement parent, StorageAction<IStorageAction> action, 
-        ICollection<StorageAction<IStorageAction>> subActions)
+    public HistoryElement Initiate(HistoryElement parent, StorageAction action, 
+        ICollection<StorageAction> subActions)
     {
         _storageAction = action;
         _stateToggle.SetState(ToggleState.On);

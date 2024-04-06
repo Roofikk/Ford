@@ -82,8 +82,7 @@ public class ChangePasswordPage : Page
         }
 
         FordApiClient client = new();
-        var tokenStorage = new TokenStorage();
-        var accessToken = tokenStorage.GetAccessToken().ToString();
+        using var tokenStorage = new TokenStorage();
 
         var data = new UpdatingPasswordDto()
         {
@@ -93,7 +92,7 @@ public class ChangePasswordPage : Page
 
         PageManager.Instance.DisplayLoadingPage(true, 6);
 
-        client.ChangePasswordAsync(accessToken, data).RunOnMainThread((result) =>
+        client.ChangePasswordAsync(tokenStorage.GetAccessToken(), data).RunOnMainThread((result) =>
         {
             switch (result.StatusCode)
             {
@@ -116,7 +115,7 @@ public class ChangePasswordPage : Page
                     PageManager.Instance.DisplayLoadingPage(false);
                     break;
                 case HttpStatusCode.Unauthorized:
-                    client.RefreshTokenAndReply(accessToken, client.ChangePasswordAsync, data).RunOnMainThread(result =>
+                    client.RefreshTokenAndReply(tokenStorage.GetAccessToken(), client.ChangePasswordAsync, data).RunOnMainThread(result =>
                     {
                         switch (result.StatusCode)
                         {

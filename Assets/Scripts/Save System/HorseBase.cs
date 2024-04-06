@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Ford.SaveSystem
 {
-    public class HorseBase : IStorageAction
+    public class HorseBase : IStorageData
     {
         public long HorseId { get; set; }
         public string Name { get; set; }
