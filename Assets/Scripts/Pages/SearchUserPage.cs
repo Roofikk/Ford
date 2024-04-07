@@ -25,7 +25,7 @@ public class SearchUserPage : Page
     [SerializeField] private Button _addButton;
     public event Action<HorseUserDto> OnAddButtonClicked;
 
-    private User _user;
+    private UserDto _user;
 
     private void Start()
     {
@@ -61,7 +61,8 @@ public class SearchUserPage : Page
 
         //search
         FordApiClient client = new();
-        client.FindUser(_searchInput.text.Trim()).RunOnMainThread((result) =>
+        using var tokenStorage = new TokenStorage();
+        client.FindUserAsync(tokenStorage.GetAccessToken(), _searchInput.text.Trim()).RunOnMainThread((result) =>
         {
             PageManager.Instance.DisplayLoadingPage(false);
 
@@ -76,7 +77,7 @@ public class SearchUserPage : Page
         });
     }
 
-    private void OnUserFound(User user)
+    private void OnUserFound(UserDto user)
     {
         _user = user;
         _personPanel.SetActive(true);

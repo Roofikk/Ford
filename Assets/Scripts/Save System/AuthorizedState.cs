@@ -147,7 +147,7 @@ namespace Ford.SaveSystem
 
             using (var tokenStorage = new TokenStorage())
             {
-                var result = await ApiClient.UpdateHorseAsync(tokenStorage.GetRefreshToken(), horse);
+                var result = await ApiClient.UpdateHorseAsync(tokenStorage.GetAccessToken(), horse);
                 newResult = await RefreshTokenAndRetrieveResult(result, tokenStorage.GetAccessToken(), ApiClient.UpdateHorseAsync, horse);
             }
 

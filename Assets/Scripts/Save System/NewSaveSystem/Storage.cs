@@ -1,7 +1,6 @@
 using Ford.SaveSystem.Data;
 using Ford.SaveSystem.Data.Dtos;
 using Ford.SaveSystem.Ver2.Data;
-using Ford.WebApi.Data;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -56,7 +55,8 @@ namespace Ford.SaveSystem.Ver2
         }
 
         #region Horse CRUD
-        public ICollection<HorseBase> GetHorses()
+        public ICollection<HorseBase> GetHorses(int below = 0, int amount = 20, 
+            string orderByDate = "desc", string orderByName = "false")
         {
             string pathHorses = Path.Combine(_storagePath, _horsesFileName);
 
@@ -66,22 +66,23 @@ namespace Ford.SaveSystem.Ver2
             }
 
             ICollection<HorseBase> horseData = GetSerializableArrayFromFile<HorseBase>(pathHorses);
-            using (StreamReader sr = new(pathHorses))
-            using (JsonTextReader reader = new(sr))
-            {
-                reader.SupportMultipleContent = true;
-                var serializer = new JsonSerializer();
 
-                while (reader.Read())
-                {
-                    if (reader.TokenType == JsonToken.StartObject)
-                    {
-                        horseData = serializer.Deserialize<ICollection<HorseBase>>(reader);
-                    }
-                }
+            switch (orderByDate)
+            {
+                case "true":
+                    horseData = horseData.OrderBy(x => x.CreatedBy.Date).ToList();
+                    break;
+                case "desc":
+                    horseData = horseData.OrderByDescending(x => x.CreatedBy.Date).ToList();
+                    break;
             }
 
-            return horseData == null ? new List<HorseBase>() : horseData;
+            horseData = horseData
+                .Skip(below)
+                .Take(amount)
+                .ToList();
+
+            return horseData ?? new List<HorseBase>();
         }
 
         public HorseBase GetHorse(long horseId)

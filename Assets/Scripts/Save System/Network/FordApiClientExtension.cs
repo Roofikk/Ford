@@ -34,9 +34,9 @@ public static class FordApiClientExtension
         return response;
     }
 
-    public static async Task<ResponseResult<T>> RefreshTokenAndReply<T>(this FordApiClient client,
-        string token, Func<string, Task<ResponseResult<T>>> func)
-        where T : class
+    public static async Task<ResponseResult<TResult>> RefreshTokenAndReply<TResult>(this FordApiClient client,
+        string token, Func<string, Task<ResponseResult<TResult>>> func)
+        where TResult : class
     {
         using var tokenStorage = new TokenStorage();
         var refreshToken = tokenStorage.GetRefreshToken();
@@ -51,7 +51,7 @@ public static class FordApiClientExtension
 
         if (result.Content == null)
         {
-            return new ResponseResult<T>(null, result.StatusCode, result.Errors);
+            return new ResponseResult<TResult>(null, result.StatusCode, result.Errors);
         }
 
         tokenStorage.SetNewAccessToken(result.Content.Token);

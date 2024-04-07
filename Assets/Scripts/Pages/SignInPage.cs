@@ -77,7 +77,7 @@ public class SignInPage : Page
         FordApiClient client = new();
         client.SignInAsync(new()
         {
-            Login = _loginField.text,
+            UserName = _loginField.text,
             Password = _passwordField.text
         }).RunOnMainThread(result =>
         {

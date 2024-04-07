@@ -1,53 +1,83 @@
-using TMPro;
+using Ford.WebApi;
+using Ford.WebApi.Data;
+using System.Collections.Generic;
+using System.Net;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class UserInfoPage : Page
 {
-    [SerializeField] private Page _editUserInfoPage;
-    [SerializeField] private Page _signInPage;
-    [SerializeField] private Page _changePasswordPage;
-
-    [Space(10)]
-    [SerializeField] private TextMeshProUGUI _fullNameText;
-    [SerializeField] private TextMeshProUGUI _regionAndCityText;
-    [SerializeField] private TextMeshProUGUI _roleText;
-    [SerializeField] private TextMeshProUGUI _loginText;
-    [SerializeField] private TextMeshProUGUI _emailText;
-    [SerializeField] private TextMeshProUGUI _phoneText;
-    [SerializeField] private TextMeshProUGUI _countryText;
-    [SerializeField] private TextMeshProUGUI _birthDateText;
-    [SerializeField] private TextMeshProUGUI _lastUpdateText;
-    [SerializeField] private TextMeshProUGUI _signUpDateText;
-
-    [Space(10)]
-    [SerializeField] private Button _editButton;
-    [SerializeField] private Button _changePasswordButton;
-    [SerializeField] private Button _logoutButton;
     [SerializeField] private Button _closeButton;
 
-    public void Start()
+    [Space(10)]
+    [SerializeField] private LoadFieldText _fullNameText;
+    [SerializeField] private LoadFieldText _locationText;
+    [SerializeField] private LoadFieldText _usernameText;
+    [SerializeField] private LoadFieldText _phoneNumberText;
+    [SerializeField] private LoadFieldText _countryText;
+    [SerializeField] private LoadFieldText _birthDateText;
+
+    private List<LoadFieldText> _loadFields = new();
+
+    private void Start()
     {
-        _logoutButton.onClick.AddListener(() =>
-        {
-            PageManager.Instance.OpenWarningPage(new("Выйти из учетной записи?", 
-                "Вы уверены, что хотите выйти из своей учетной записи?\nВсе сохранения будут утеряны до повторного входа.", Logout),4);
-        });
-
-        _editButton.onClick.AddListener(() =>
-        {
-            PageManager.Instance.OpenPage(_editUserInfoPage, 2);
-        });
-
         _closeButton.onClick.AddListener(() =>
         {
             PageManager.Instance.ClosePage(this);
-            PageManager.Instance.OpenPage(PageManager.Instance.StartPage);
         });
+    }
 
-        _changePasswordButton.onClick.AddListener(() =>
+    public override void Open<T>(T param, int popUpLevel = 0)
+    {
+        base.Open(param, popUpLevel);
+
+        if (param is not UserIdentity userParam)
         {
-            PageManager.Instance.OpenPage(_changePasswordPage, 4);
+            throw new System.Exception("Wrong param type. Expected UserPageParam");
+        }
+
+        if (userParam.UserId == null && string.IsNullOrEmpty(userParam.UserName))
+        {
+            throw new System.Exception("Cannot being all fields empty");
+        }
+
+        var client = new FordApiClient();
+        using var tokenStorage = new TokenStorage();
+
+        client.CheckTokenAsync(tokenStorage.GetAccessToken()).RunOnMainThread(result =>
+        {
+            using var tokenStorage = new TokenStorage();
+            if (result.StatusCode != HttpStatusCode.OK)
+            {
+                client.RefreshTokenAndReply(tokenStorage.GetAccessToken(), client.GetUserInfoAsync, userParam).RunOnMainThread(result =>
+                {
+                    if (result.StatusCode == HttpStatusCode.OK)
+                    {
+                        SetUserInfo(result.Content);
+                    }
+                    else
+                    {
+                        ToastMessage.Show("Не удалось получить информацию о пользователе\n" +
+                            "Повторите попытку позднее");
+                    }
+                });
+            }
+            else
+            {
+
+                client.GetUserInfoAsync(tokenStorage.GetAccessToken(), userParam).RunOnMainThread(result =>
+                {
+                    if (result.StatusCode == HttpStatusCode.OK)
+                    {
+                        SetUserInfo(result.Content);
+                    }
+                    else
+                    {
+                        ToastMessage.Show("Не удалось получить информацию о пользователе\n" +
+                            "Повторите попытку позднее");
+                    }
+                });
+            }
         });
     }
 
@@ -55,47 +85,84 @@ public class UserInfoPage : Page
     {
         base.Open(popUpLevel);
 
-        var data = Player.UserData;
-
-        _fullNameText.text = $"{data.FirstName} {data.LastName}";
-
-        if (string.IsNullOrEmpty(data.Region) && string.IsNullOrEmpty(data.City))
+        if (_loadFields.Count == 0)
         {
-            _regionAndCityText.text = "Неизвестно";
-        }
-        else
-        {
-            _regionAndCityText.text = $"{data.Region}, {data.City}";
+            _loadFields.Add(_fullNameText);
+            _loadFields.Add(_locationText);
+            _loadFields.Add(_usernameText);
+            _loadFields.Add(_phoneNumberText);
+            _loadFields.Add(_countryText);
+            _loadFields.Add(_birthDateText);
         }
 
-        _loginText.text = data.Login;
-        _emailText.text = data.Email;
-        _phoneText.text = data.PhoneNumber;
-        _countryText.text = data.Country;
-
-        if (data.BirthDate.HasValue)
-        {
-            _birthDateText.text = data.BirthDate.Value.ToString("dd.MM.yyyy");
-        }
-        else
-        {
-            _birthDateText.text = "Не задано";
-        }
-
-        _lastUpdateText.text = data.LastUpdatedDate.ToString("dd.MM.yyyy");
-        _signUpDateText.text = data.CreationDate.ToString("dd.MM.yyyy");
-    }
-
-    private void Logout()
-    {
-        Player.Logout();
-
-        PageManager.Instance.ClosePage(this);
-        PageManager.Instance.OpenPage(_signInPage, 2);
+        DisplayFields(false);
     }
 
     public override void Close()
     {
         base.Close();
+
+        DisplayFields(false);
+    }
+
+    private void SetUserInfo(UserDto userData)
+    {
+        DisplayFields(true);
+
+        _fullNameText.SetInfo($"{userData.FirstName} {userData.LastName}");
+
+        if (string.IsNullOrEmpty(userData.Region) && string.IsNullOrEmpty(userData.City))
+        {
+            _locationText.SetInfo("Неизвестно");
+        }
+        else if (string.IsNullOrEmpty(userData.Region))
+        {
+            _locationText.SetInfo(userData.City);
+        }   
+        else if (string.IsNullOrEmpty(userData.City))
+        {
+            _locationText.SetInfo(userData.Region);
+        }
+        else
+        {
+            _locationText.SetInfo($"{userData.Region}, {userData.City}");
+        }
+
+        _usernameText.SetInfo(userData.UserName);
+
+        if (!string.IsNullOrEmpty(userData.PhoneNumber))
+        {
+            _phoneNumberText.SetInfo(userData.PhoneNumber);
+        }
+        else
+        {
+            _phoneNumberText.SetInfo("Неизвестно");
+        }
+
+        if (!string.IsNullOrEmpty(userData.Country))
+        {
+            _countryText.SetInfo(userData.Country);
+        }
+        else
+        {
+            _countryText.SetInfo("Неизвестно");
+        }
+
+        if (userData.BirthDate != null)
+        {
+            _birthDateText.SetInfo(userData.BirthDate.Value.ToString("dd.MM.yyyy"));
+        }
+        else
+        {
+            _birthDateText.SetInfo("Неизвестно");
+        }
+    }
+
+    private void DisplayFields(bool enable)
+    {
+        foreach (var field in _loadFields)
+        {
+            field.DisplayEffect(!enable);
+        }
     }
 }

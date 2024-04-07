@@ -85,7 +85,7 @@ public class SignUpPage : Page
 
         var user = new RegisterUserDto()
         {
-            Login = _loginField.text,
+            UserName = _loginField.text,
             Email = _emailField.text,
             FirstName = _firstNameField.text,
             LastName = _lastNameField.text,

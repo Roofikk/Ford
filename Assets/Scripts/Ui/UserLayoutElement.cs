@@ -1,4 +1,5 @@
 using Ford.SaveSystem.Data;
+using Ford.WebApi.Data;
 using System;
 using TMPro;
 using UnityEngine;
@@ -6,13 +7,23 @@ using UnityEngine.UI;
 
 public class UserLayoutElement : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI _fullName;
+    [SerializeField] private TextMeshProUGUI _usernameText;
     [SerializeField] private Button _removeButton;
+    [SerializeField] private Button _button;
+
+    private long _userId;
 
     public event Action OnRemoved;
 
     private void Start()
     {
+        _button = _button == null ? GetComponent<Button>() : _button;
+
+        _button.onClick.AddListener(() =>
+        {
+            PageManager.Instance.OpenPage(PageManager.Instance.UserInfoPage, new UserIdentity(_userId), 4);
+        });
+
         _removeButton.onClick.AddListener(() =>
         {
             OnRemoved?.Invoke();
@@ -22,7 +33,8 @@ public class UserLayoutElement : MonoBehaviour
 
     public UserLayoutElement Initiate(HorseUserDto user, Action onRemoved)
     {
-        _fullName.text = $"{user.FirstName} {user.LastName}".Trim();
+        _userId = user.UserId;
+        _usernameText.text = $"{user.FirstName} {user.LastName}".Trim();
         OnRemoved += onRemoved;
         return this;
     }

@@ -36,7 +36,7 @@ namespace Ford.SaveSystem
         internal override async Task<ICollection<HorseBase>> GetHorses(StorageSystem storage, int below = 0, int above = 20,
             string orderByDate = "desc", string orderByName = "false")
         {
-            var result = await Task.Factory.StartNew(_storage.GetHorses);
+            var result = await Task.Factory.StartNew(() => { return _storage.GetHorses(below, above, orderByDate, orderByName); });
             return result;
         }
 
@@ -93,11 +93,11 @@ namespace Ford.SaveSystem
         {
             FordApiClient client = new();
             using var tokenStorage = new TokenStorage();
-            var result = await client.GetUserInfoAsync(tokenStorage.GetAccessToken());
+            var result = await client.GetAccountInfoAsync(tokenStorage.GetAccessToken());
 
             if (result.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                var newResult = await client.RefreshTokenAndReply(tokenStorage.GetAccessToken(), client.GetUserInfoAsync);
+                var newResult = await client.RefreshTokenAndReply(tokenStorage.GetAccessToken(), client.GetAccountInfoAsync);
 
                 if (newResult.StatusCode != System.Net.HttpStatusCode.OK)
                 {

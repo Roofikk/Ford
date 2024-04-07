@@ -3494,6 +3494,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _settings: {fileID: 11400000, guid: 9a012334a8cbd824e8c40e862b08bece, type: 2}
+  _closeButton: {fileID: 1748727703432120774}
   _pathSaveText: {fileID: 1353085395491077028}
   _showInFolderButton: {fileID: 5900900762376377856}
   _inverseMovementPlayerToggle: {fileID: 1748727703909863033}
@@ -3898,13 +3899,13 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1748727703432120775}
   - {fileID: 1748727702988971943}
   - {fileID: 1748727703348789249}
   - {fileID: 1748727702807733857}
   - {fileID: 1748727703085518296}
   - {fileID: 1748727703469246941}
   - {fileID: 1748727703137691081}
-  - {fileID: 1748727703432120775}
   m_Father: {fileID: 1748727704152415090}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}

@@ -70,7 +70,7 @@ public class Player : MonoBehaviour
 
         if (!string.IsNullOrEmpty(tokenStorage.GetAccessToken()))
         {
-            client.GetUserInfoAsync(tokenStorage.GetAccessToken()).RunOnMainThread(result =>
+            client.GetAccountInfoAsync(tokenStorage.GetAccessToken()).RunOnMainThread(result =>
             {
                 using var tokenStorage = new TokenStorage();
                 switch (result.StatusCode)
@@ -82,7 +82,7 @@ public class Player : MonoBehaviour
                         storage.ChangeState(StorageSystemStateEnum.Authorized);
                         break;
                     case HttpStatusCode.Unauthorized:
-                        client.RefreshTokenAndReply(tokenStorage.GetAccessToken(), client.GetUserInfoAsync)
+                        client.RefreshTokenAndReply(tokenStorage.GetAccessToken(), client.GetAccountInfoAsync)
                         .RunOnMainThread(result =>
                         {
                             switch (result.StatusCode)

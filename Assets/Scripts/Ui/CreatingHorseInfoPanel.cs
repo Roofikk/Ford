@@ -1,4 +1,5 @@
 using Ford.SaveSystem.Data;
+using Ford.WebApi.Data;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -24,12 +25,12 @@ public class CreatingHorseInfoPanel : MonoBehaviour
     {
         _creatorMoreInfoButton.onClick.AddListener(() =>
         {
-            PageManager.Instance.OpenPage(_userInfoPage, new UserPageData(_creator), 4);
+            PageManager.Instance.OpenPage(_userInfoPage, new UserIdentity(_creator.UserId), 4);
         });
 
         _lastModifiedByUserMoreInfoButton.onClick.AddListener(() =>
         {
-            PageManager.Instance.OpenPage(_userInfoPage, new UserPageData(_lastUserModified), 4);
+            PageManager.Instance.OpenPage(_userInfoPage, new UserIdentity(_lastUserModified.UserId), 4);
         });
     }
 

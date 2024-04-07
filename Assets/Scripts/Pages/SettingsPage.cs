@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class SettingsPage : Page
 {
     [SerializeField] private Settings _settings;
+    [SerializeField] private Button _closeButton;
 
     [Space(10)]
     [SerializeField] private TMP_InputField _pathSaveText;
@@ -28,6 +29,10 @@ public class SettingsPage : Page
     {
         _showInFolderButton.onClick.AddListener(ShowSavePathFolder);
         _showInFolderButton.onClick.AddListener(_showInFolderButton.Select);
+        _closeButton.onClick.AddListener(() =>
+        {
+            PageManager.Instance.ClosePage(this);
+        });
     }
 
     public override void Open(int popUpLevel = 0)

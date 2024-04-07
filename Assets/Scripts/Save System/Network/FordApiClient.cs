@@ -1,4 +1,3 @@
-using Ford.SaveSystem;
 using Ford.SaveSystem.Data;
 using Ford.SaveSystem.Data.Dtos;
 using Ford.SaveSystem.Ver2;
@@ -16,33 +15,72 @@ namespace Ford.WebApi
 {
     public class FordApiClient
     {
-        private static Uri _hostUri;
+        private static Uri _hostDomain;
 
-        private readonly string _usersUri = "api/users";
+        private string UsersPath { get; } = "api/users";
 
-        private readonly string _signUpUri = "api/identity/sign-up";
-        private readonly string _signInUri = "api/identity/login";
-        private readonly string _refreshTokenUri = "api/identity/refresh-token";
-        private readonly string _accountUri = "api/identity/account";
-        private readonly string _passwordChangeUri = "api/identity/account/password";
+        private string IdentityPath { get; } = "api/identity";
+        private string SignUpPath => $"{IdentityPath}/sign-up";
+        private string SignInPath => $"{IdentityPath}/sign-in";
+        private string RefreshTokenPath => $"{IdentityPath}/refresh-token";
+        private string AccountPath => $"{IdentityPath}/account";
+        private string PasswordChangePath => $"{AccountPath}/password";
 
-        private readonly string _horsesUrl = "api/horses";
-        private readonly string _updateHorseOwnersUri = "api/horseOwners";
-        private readonly string _changeOwnerRoleUri = "api/horseOwners/change-owner-role";
+        private string HorsesPath { get; } = "api/horses";
+        private string UpdateHorseOwnersPath { get; } = "api/horseOwners";
+        private string ChangeOwnerRolePath => $"{UpdateHorseOwnersPath}/change-owner-role";
 
-        private readonly string _savesUri = "api/saves";
+        private string SavesPath { get; } = "api/saves";
 
         public static void SetHost(string host)
         {
-            _hostUri = new Uri(host);
+            _hostDomain = new Uri(host);
         }
 
-        #region User
-        public async Task<ResponseResult<User>> FindUser(string login)
+        #region Users
+        /// <summary>
+        /// Find user by user name<br/>
+        /// GET request
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <param name="login"></param>
+        /// <returns></returns>
+        public async Task<ResponseResult<UserDto>> FindUserAsync(string accessToken, string login)
         {
-            Uri uri = new(_hostUri, $"{_usersUri}/search?userName={login}");
-            var result = await GetRequest<User>(uri);
+            Uri uri = new(_hostDomain, $"{UsersPath}/search?userName={login}");
+            var result = await GetRequest<UserDto>(uri, accessToken);
             return result;
+        }
+
+        /// <summary>
+        /// Get information about user<br/>
+        /// GET request
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<ResponseResult<UserDto>> GetUserInfoAsync(string accessToken, long userId)
+        {
+            Uri uri = new(_hostDomain, $"{UsersPath}?userId={userId}");
+            var result = await GetRequest<UserDto>(uri, accessToken);
+            return result;
+        }
+
+        public async Task<ResponseResult<UserDto>> GetUserInfoAsync(string accessToken, UserIdentity userData)
+        {
+            if (userData.UserId == null && string.IsNullOrEmpty(userData.UserName))
+            {
+                return new ResponseResult<UserDto>(null, HttpStatusCode.BadRequest);
+            }
+
+            if (userData.UserId != null)
+            {
+                return await GetUserInfoAsync(accessToken, userData.UserId.Value);
+            }
+            else
+            {
+                return await FindUserAsync(accessToken, userData.UserName);
+            }
         }
         #endregion
 
@@ -55,7 +93,7 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult<AccountDto>> SignUpAsync(RegisterUserDto registerUser)
         {
-            Uri uri = new Uri(_hostUri, _signUpUri);
+            Uri uri = new Uri(_hostDomain, SignUpPath);
             var result = await PostRequest<AccountDto>(uri, registerUser);
             return result;
         }
@@ -68,14 +106,27 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult<TokenDto>> SignInAsync(LoginRequestDto loginRequestData)
         {
-            Uri uri = new Uri(_hostUri, _signInUri);
+            Uri uri = new Uri(_hostDomain, SignInPath);
             var result = await PostRequest<TokenDto>(uri, loginRequestData);
             return result;
         }
 
+        public async Task<ResponseResult> CheckTokenAsync(string accessToken)
+        {
+            Uri uri = new(_hostDomain, $"{IdentityPath}/check-token");
+            var result = await GetRequest(uri, accessToken);
+            return result;
+        }
+
+        /// <summary>
+        /// Refresh token<br/>
+        /// POST request
+        /// </summary>
+        /// <param name="requestToken"></param>
+        /// <returns></returns>
         public async Task<ResponseResult<TokenDto>> RefreshTokenAsync(TokenDto requestToken)
         {
-            Uri uri = new(_hostUri, _refreshTokenUri);
+            Uri uri = new(_hostDomain, RefreshTokenPath);
             var result = await PostRequest<TokenDto>(uri, requestToken);
             return result;
         }
@@ -86,9 +137,9 @@ namespace Ford.WebApi
         /// </summary>
         /// <param name="accessToken"></param>
         /// <returns></returns>
-        public async Task<ResponseResult<AccountDto>> GetUserInfoAsync(string accessToken)
+        public async Task<ResponseResult<AccountDto>> GetAccountInfoAsync(string accessToken)
         {
-            Uri uri = new(_hostUri, _accountUri);
+            Uri uri = new(_hostDomain, AccountPath);
             var account = await GetRequest<AccountDto>(uri, accessToken);
             return account;
         }
@@ -102,7 +153,7 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult<AccountDto>> UpdateUserInfoAsync(string accessToken, UpdatingAccountDto requestAccount)
         {
-            Uri uri = new(_hostUri, _accountUri);
+            Uri uri = new(_hostDomain, AccountPath);
             var result = await PostRequest<AccountDto>(uri, requestAccount, accessToken);
             return result;
         }
@@ -116,7 +167,7 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult<TokenDto>> ChangePasswordAsync(string accessToken, UpdatingPasswordDto passwordRequest)
         {
-            Uri uri = new(_hostUri, _passwordChangeUri);
+            Uri uri = new(_hostDomain, PasswordChangePath);
             var result = await PostRequest<TokenDto>(uri, passwordRequest, accessToken);
             return result;
         }
@@ -132,7 +183,7 @@ namespace Ford.WebApi
         /// <returns>Horse object</returns>
         public async Task<ResponseResult<HorseBase>> GetHorseAsync(string accessToken, long horseId)
         {
-            Uri uri = new(_hostUri, $"{_horsesUrl}?horseId={horseId}");
+            Uri uri = new(_hostDomain, $"{HorsesPath}?horseId={horseId}");
             var horse = await GetRequest<HorseBase>(uri, accessToken);
             return horse;
         }
@@ -146,7 +197,7 @@ namespace Ford.WebApi
         public async Task<ResponseResult<ICollection<HorseBase>>> GetHorsesAsync(string accessToken, int below, int amount,
             string orderByDate = "desc", string orderByName = "false")
         {
-            Uri uri = new(_hostUri, $"{_horsesUrl}?below={below}&amount={amount}&orderByDate={orderByDate}&orderByName={orderByName}");
+            Uri uri = new(_hostDomain, $"{HorsesPath}?below={below}&amount={amount}&orderByDate={orderByDate}&orderByName={orderByName}");
             var result = await GetRequest<ICollection<HorseBase>>(uri, accessToken);
             return new ResponseResult<ICollection<HorseBase>>(result.Content, result.StatusCode, result.Errors);
         }
@@ -160,7 +211,7 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult<HorseBase>> CreateHorseAsync(string accessToken, CreationHorse horse)
         {
-            Uri uri = new(_hostUri, _horsesUrl);
+            Uri uri = new(_hostDomain, HorsesPath);
             var result = await PostRequest<HorseBase>(uri, horse, accessToken);
             return result;
         }
@@ -174,7 +225,7 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult<HorseBase>> UpdateHorseAsync(string accessToken, UpdatingHorse horse)
         {
-            Uri uri = new(_hostUri, _horsesUrl);
+            Uri uri = new(_hostDomain, HorsesPath);
             var result = await PutRequest<HorseBase>(uri, horse, accessToken);
             return result;
         }
@@ -189,7 +240,7 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult> DeleteHorseAsync(string accessToken, long horseId)
         {
-            Uri uri = new(_hostUri, $"{_horsesUrl}?horseId={horseId}");
+            Uri uri = new(_hostDomain, $"{HorsesPath}?horseId={horseId}");
             var result = await DeleteRequest(uri, accessToken);
             return result;
         }
@@ -203,7 +254,7 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult> PushHistory(string accessToken, ICollection<StorageAction> history)
         {
-            Uri uri = new(_hostUri, _horsesUrl + "/history");
+            Uri uri = new(_hostDomain, HorsesPath + "/history");
             var result = await PostRequest(uri, history);
             return result;
         }
@@ -219,7 +270,7 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult<HorseBase>> UpdateHorseOwnersAsync(string accessToken, UpdatingHorseOwnersDto horseOwners)
         {
-            Uri uri = new(_hostUri, _updateHorseOwnersUri);
+            Uri uri = new(_hostDomain, UpdateHorseOwnersPath);
             var horse = await PostRequest<HorseBase>(uri, horseOwners, accessToken);
             return horse;
         }
@@ -234,7 +285,7 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult> DeleteHorseOwnerAsync(string accessToken, long horseId, long userId)
         {
-            Uri uri = new(_hostUri, $"{_horsesUrl}?userId={userId}&horseId={horseId}");
+            Uri uri = new(_hostDomain, $"{HorsesPath}?userId={userId}&horseId={horseId}");
             var result = await DeleteRequest(uri, accessToken);
             return result;
         }
@@ -248,7 +299,7 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult<HorseUserDto>> AddOwnerAsync(string accessToken, AddingHorseOwner horseOwner)
         {
-            Uri uri = new(_hostUri, _updateHorseOwnersUri);
+            Uri uri = new(_hostDomain, UpdateHorseOwnersPath);
             var ownerDto = new AddingHorseOwnerDto(horseOwner);
             var result = await PostRequest<HorseUserDto>(uri, ownerDto, accessToken);
             return result;
@@ -263,7 +314,7 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult<HorseUserDto>> ChangeOwnerRoleAsync(string accessToken, AddingHorseOwner horseOwner)
         {
-            Uri uri = new(_hostUri, _changeOwnerRoleUri);
+            Uri uri = new(_hostDomain, ChangeOwnerRolePath);
             var ownerDto = new AddingHorseOwnerDto(horseOwner);
             var result = await PostRequest<HorseUserDto>(uri, ownerDto, accessToken);
             return result;
@@ -273,35 +324,35 @@ namespace Ford.WebApi
         #region Saves
         public async Task<ResponseResult<ICollection<SaveInfo>>> GetSavesAsync(string accessToken, long horseId, int below = 0, int amount = 20)
         {
-            Uri uri = new Uri(_hostUri, $"{_savesUri}?horseId={horseId}&below={below}&amount={amount}");
+            Uri uri = new Uri(_hostDomain, $"{SavesPath}?horseId={horseId}&below={below}&amount={amount}");
             var result = await GetRequest<ICollection<SaveInfo>>(uri, accessToken);
             return result;
         }
 
         public async Task<ResponseResult<FullSaveInfo>> GetSaveAsync(string accessToken, long horseId, long saveId)
         {
-            Uri uri = new Uri(_hostUri, $"{_savesUri}?horseId={horseId}&saveId={saveId}");
+            Uri uri = new Uri(_hostDomain, $"{SavesPath}?horseId={horseId}&saveId={saveId}");
             var result = await GetRequest<FullSaveInfo>(uri, accessToken);
             return result;
         }
 
         public async Task<ResponseResult<SaveInfo>> CreateSaveAsync(string accessToken, CreatingSaveDto fullSave)
         {
-            Uri uri = new Uri(_hostUri, $"{_savesUri}");
+            Uri uri = new Uri(_hostDomain, $"{SavesPath}");
             var result = await PostRequest<SaveInfo>(uri, fullSave, accessToken);
             return result;
         }
 
         public async Task<ResponseResult<SaveInfo>> UpdateSaveInfoAsync(string accessToken, ModifiedSaveDto save)
         {
-            Uri uri = new Uri(_hostUri, _savesUri);
+            Uri uri = new Uri(_hostDomain, SavesPath);
             var result = await PutRequest<SaveInfo>(uri, save, accessToken);
             return result;
         }
 
         public async Task<ResponseResult> DeleteSaveAsync(string accessToken, long saveId)
         {
-            Uri uri = new Uri(_hostUri, $"{_savesUri}&saveId={saveId}");
+            Uri uri = new Uri(_hostDomain, $"{SavesPath}&saveId={saveId}");
             var result = await DeleteRequest(uri, accessToken);
             return result;
         }
@@ -330,7 +381,7 @@ namespace Ford.WebApi
 
                 return ReturnBadResponse<T>(responseText, response.StatusCode);
             }
-            catch (HttpRequestException ex)
+            catch (Exception)
             {
                 return new ResponseResult<T>(null, HttpStatusCode.InternalServerError, new List<ResponseError>()
                 {
@@ -340,6 +391,34 @@ namespace Ford.WebApi
                         Message = "Check your connection or repeat the request later"
                     }
                 });
+            }
+        }
+
+        private async Task<ResponseResult> GetRequest(Uri uri, string accessToken = "")
+        {
+            HttpClient client = new();
+            HttpRequestMessage request = new(HttpMethod.Get, uri);
+
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            }
+
+            try
+            {
+                var response = await client.SendAsync(request);
+                var result = new ResponseResult(response.StatusCode, new());
+
+                foreach (var header in response.Headers)
+                {
+                    result.Errors.Add(new(header.Key, string.Join("\n------------------\n", header.Value)));
+                }
+
+                return result;
+            }
+            catch (Exception)
+            {
+                return new ResponseResult(HttpStatusCode.InternalServerError);
             }
         }
 

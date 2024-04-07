@@ -100,6 +100,7 @@ public class LoadHorsePage : Page
         }
 
         _horseInfoDict.Clear();
+        ShowEmptyHorseScroll(true);
     }
 
     private void ClearSaves()
@@ -111,6 +112,7 @@ public class LoadHorsePage : Page
 
         ActivateButtons(false);
         _saveInfoDict.Clear();
+        ShowEmptySaveScroll(true);
     }
 
     private void FillHorseList(List<HorseBase> horses)
@@ -207,6 +209,8 @@ public class LoadHorsePage : Page
             _saveInfoDict.Add(save.SaveId, saveElement);
         }
 
+        ShowEmptySaveScroll(saves.Count == 0);
+
         _loadButton.onClick.RemoveAllListeners();
         _editButton.onClick.RemoveAllListeners();
 
@@ -221,8 +225,6 @@ public class LoadHorsePage : Page
         {
             OpenSaveInfoPage(_saveToggleGroup.GetFirstActiveToggle().GetComponent<SaveElementUI>().SaveData.SaveId);
         });
-
-        ShowEmptySaveScroll(saves.Count == 0);
     }
 
     private void ActivateButtons(bool enable, UserAccessRole userAccessRole = UserAccessRole.Viewer)
@@ -264,7 +266,18 @@ public class LoadHorsePage : Page
     public void DeleteHorseLoadElement(long horseId)
     {
         Destroy(_horseInfoDict[horseId].gameObject);
+
+        if (_saveInfoDict.Any(s => s.Value.SaveData.HorseId == horseId))
+        {
+            ClearSaves();
+        }
+
         _horseInfoDict.Remove(horseId);
+
+        if (_horseInfoDict.Count == 0)
+        {
+            ShowEmptyHorseScroll(true);
+        }
     }
 
     public void DeleteSaveLoadElement(long saveId)
