@@ -12,8 +12,6 @@ public class LockCustomScroll : MonoBehaviour
     private Canvas _canvas;
     private CanvasGroup _canvasGroup;
     private GraphicRaycaster _graphicRaycaster;
-    private Image _image;
-    private Tween _tween;
 
     private void Start()
     {

@@ -105,7 +105,7 @@ public class SavePanel : Page
                         }), 4);
                 });
 
-                if (Enum.Parse<UserAccessRole>(param.Self.AccessRole) > UserAccessRole.Read)
+                if (Enum.Parse<UserAccessRole>(param.Self.AccessRole) > UserAccessRole.Viewer)
                 {
                     _applyButton.interactable = true;
                     _declineButton.interactable = true;
@@ -155,7 +155,7 @@ public class SavePanel : Page
                     });
                 }
 
-                if (Enum.Parse<UserAccessRole>(param.Self.AccessRole) > UserAccessRole.Read)
+                if (Enum.Parse<UserAccessRole>(param.Self.AccessRole) > UserAccessRole.Viewer)
                 {
                     _applyButton.interactable = true;
                 }

@@ -1,8 +1,7 @@
 using Ford.SaveSystem.Data;
 using System;
-using UnityEngine;
 
-public class UserDate : MonoBehaviour
+public class UserDate
 {
     public DateTime Date { get; set; }
     public HorseUserDto User { get; set; }

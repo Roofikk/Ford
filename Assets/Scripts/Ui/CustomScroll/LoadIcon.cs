@@ -76,7 +76,7 @@ public class LoadIcon : MonoBehaviour
 
     public void EnableLayout(bool enable)
     {
-        _layoutElement.enabled = enable;
+        _layoutElement.ignoreLayout = !enable;
     }
 
     public void EnableFreeRotate(bool enable)

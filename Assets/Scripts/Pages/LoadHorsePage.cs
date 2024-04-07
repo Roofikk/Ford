@@ -75,6 +75,18 @@ public class LoadHorsePage : Page
         _horsesScrollRect.OnRefreshFocused -= RefreshHorsePage;
     }
 
+    private void ShowEmptyHorseScroll(bool enable)
+    {
+        _emptyHorseListText.gameObject.SetActive(enable);
+        _horsesScrollRect.vertical = !enable;
+    }
+
+    private void ShowEmptySaveScroll(bool enable)
+    {
+        _emptySaveListText.gameObject.SetActive(enable);
+        _savesScroll.vertical = !enable;
+    }
+
     private void RefreshHorsePage()
     {
         GetNextHorses(true);
@@ -112,8 +124,6 @@ public class LoadHorsePage : Page
                     _horseToggleGroup);
             _horseInfoDict.Add(horse.HorseId, horseElement);
         }
-
-        _emptyHorseListText.gameObject.SetActive(horses.Count == 0);
     }
 
     private void GetNextHorses(bool isRefresh = false)
@@ -148,8 +158,7 @@ public class LoadHorsePage : Page
 
             if (result.Count > 0)
             {
-                List<HorseBase> horses = result.ToList();
-                FillHorseList(horses);
+                FillHorseList(result.ToList());
 
                 if (isRefresh)
                 {
@@ -157,6 +166,8 @@ public class LoadHorsePage : Page
                     ClearSaves();
                 }
             }
+
+            ShowEmptyHorseScroll(result.Count == 0);
 
             if (result.Count != _amount)
             {
@@ -211,10 +222,10 @@ public class LoadHorsePage : Page
             OpenSaveInfoPage(_saveToggleGroup.GetFirstActiveToggle().GetComponent<SaveElementUI>().SaveData.SaveId);
         });
 
-        _emptySaveListText.gameObject.SetActive(saves.Count == 0);
+        ShowEmptySaveScroll(saves.Count == 0);
     }
 
-    private void ActivateButtons(bool enable, UserAccessRole userAccessRole = UserAccessRole.Read)
+    private void ActivateButtons(bool enable, UserAccessRole userAccessRole = UserAccessRole.Viewer)
     {
         _loadButton.interactable = enable;
         _editButton.interactable = enable;
@@ -228,7 +239,7 @@ public class LoadHorsePage : Page
             _deleteButton.interactable = false;
         }
 
-        if (userAccessRole == UserAccessRole.Read)
+        if (userAccessRole == UserAccessRole.Viewer)
         {
             _editButton.interactable = false;
             _deleteButton.interactable = false;

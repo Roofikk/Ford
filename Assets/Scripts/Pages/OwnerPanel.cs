@@ -83,6 +83,27 @@ public class OwnerPanel : Page
         _addUserButton.gameObject.SetActive(Player.IsLoggedIn);
         _removeOwnerButton.gameObject.SetActive(false);
 
+        if (Player.IsLoggedIn)
+        {
+            _self = new()
+            {
+                UserId = Player.UserData.UserId,
+                FirstName = Player.UserData.FirstName,
+                LastName = Player.UserData.LastName,
+                PhoneNumber = Player.UserData.PhoneNumber,
+                AccessRole = UserAccessRole.Creator.ToString(),
+            };
+        }
+        else
+        {
+            _self = new()
+            {
+                UserId = -1,
+                FirstName = "Self",
+                AccessRole = UserAccessRole.Creator.ToString(),
+            };
+        }
+
         Mode = PageMode.Write;
 
         DisplayAccessRoleDropdown(false);
@@ -149,7 +170,7 @@ public class OwnerPanel : Page
 
                 foreach (var user in ownerParam.Users)
                 {
-                    AddUser(user, SelfAccessRole > UserAccessRole.Write, false);
+                    AddUser(user, SelfAccessRole > UserAccessRole.Writer, false);
                 }
                 break;
         }
@@ -181,13 +202,12 @@ public class OwnerPanel : Page
 
     private void OpenWriteMode()
     {
-        _addYourselfButton.gameObject.SetActive(SelfAccessRole > UserAccessRole.Write);
-        _searchUserButton.gameObject.SetActive(SelfAccessRole > UserAccessRole.Write);
-        _removeOwnerButton.gameObject.SetActive(SelfAccessRole > UserAccessRole.Write);
-        _addUserButton.gameObject.SetActive(SelfAccessRole > UserAccessRole.Write);
+        _addYourselfButton.gameObject.SetActive(SelfAccessRole > UserAccessRole.Writer);
+        _searchUserButton.gameObject.SetActive(SelfAccessRole > UserAccessRole.Writer);
+        _removeOwnerButton.gameObject.SetActive(SelfAccessRole > UserAccessRole.Writer);
+        _addUserButton.gameObject.SetActive(SelfAccessRole > UserAccessRole.Writer);
 
-
-        _accessDropdown.interactable = SelfAccessRole > UserAccessRole.Write;
+        _accessDropdown.interactable = SelfAccessRole > UserAccessRole.Writer;
     }
 
     public void RefreshData()
@@ -231,7 +251,7 @@ public class OwnerPanel : Page
         _accessDropdown.value = (int)Enum.Parse<UserAccessRole>(user.AccessRole);
         if (Mode != PageMode.Read)
         {
-            _removeOwnerButton.gameObject.SetActive(SelfAccessRole > UserAccessRole.Write);
+            _removeOwnerButton.gameObject.SetActive(SelfAccessRole > UserAccessRole.Writer);
         }
     }
 

@@ -191,7 +191,7 @@ public class HorsePage : Page
             PageManager.Instance.OpenPage(this, new HorsePageParam(PageMode.Write, copy), 2);
         });
 
-        if (Enum.Parse<UserAccessRole>(_horseBase.Self.AccessRole) > UserAccessRole.Read)
+        if (Enum.Parse<UserAccessRole>(_horseBase.Self.AccessRole) > UserAccessRole.Viewer)
         {
             _applyButton.interactable = true;
         }
@@ -228,7 +228,7 @@ public class HorsePage : Page
                 }), 4);
         });
 
-        if (accessRole > UserAccessRole.Read)
+        if (accessRole > UserAccessRole.Viewer)
         {
             _applyButton.interactable = true;
         }

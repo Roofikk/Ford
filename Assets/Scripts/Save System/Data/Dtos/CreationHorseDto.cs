@@ -30,8 +30,8 @@ namespace Ford.SaveSystem.Data
 
     public enum UserAccessRole
     {
-        Read,
-        Write,
+        Viewer,
+        Writer,
         All,
         Creator
     }

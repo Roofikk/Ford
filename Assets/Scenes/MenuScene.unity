@@ -14114,7 +14114,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 871457106}
   m_Direction: 0
   m_Value: 0
-  m_Size: 0.99999994
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -17928,7 +17928,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 105769869}
   m_Direction: 0
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.99999994
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -43257,6 +43257,7 @@ MonoBehaviour:
   _cityInputFiled: {fileID: 764152798}
   _regionInputFiled: {fileID: 1279033551}
   _usersPanel: {fileID: 1521205912}
+  _creatingHorseInfoPanel: {fileID: 1414487375}
   _closeButton: {fileID: 682417671}
   _applyButton: {fileID: 1976061574}
   _declineButton: {fileID: 226900554}
