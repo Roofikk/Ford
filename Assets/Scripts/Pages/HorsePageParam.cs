@@ -1,4 +1,4 @@
-using Ford.SaveSystem;
+using Ford.SaveSystem.Data;
 
 public class HorsePageParam
 {

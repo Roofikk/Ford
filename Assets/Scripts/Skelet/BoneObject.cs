@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEditor;
 using UnityEngine;
-using CustomVector3 = Ford.WebApi.Data.Vector;
+using CustomVector3 = Ford.SaveSystem.Data.Vector;
 
 [RequireComponent(typeof(Outline))]
 [RequireComponent(typeof(MeshCollider))]

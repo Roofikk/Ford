@@ -1,9 +1,9 @@
-using Ford.SaveSystem;
+using Ford.SaveSystem.Data.Dtos;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
-namespace Ford.WebApi.Data
+namespace Ford.SaveSystem.Data
 {
     public class CreationHorse
     {
@@ -17,8 +17,8 @@ namespace Ford.WebApi.Data
         public string Country { get; set; }
         public string OwnerName { get; set; }
         public string OwnerPhoneNumber { get; set; }
-        public ICollection<SaveInfo> Saves { get; set; } = new List<SaveInfo>();
-        public ICollection<CreationHorseUser> Users { get; set; } = new List<CreationHorseUser>();
+        public List<CreatingSaveDto> Saves { get; set; } = new();
+        public List<CreationHorseUser> Users { get; set; } = new();
     }
 
     public class CreationHorseUser

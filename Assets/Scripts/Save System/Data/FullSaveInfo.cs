@@ -2,7 +2,7 @@
 using Ford.WebApi.Data;
 using System.Collections.Generic;
 
-namespace Ford.SaveSystem
+namespace Ford.SaveSystem.Data
 {
     public class FullSaveInfo : SaveInfo, IStorageData
     {

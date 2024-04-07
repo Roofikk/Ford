@@ -1,5 +1,6 @@
+using Ford.SaveSystem.Data;
+using Ford.SaveSystem.Data.Dtos;
 using Ford.SaveSystem.Ver2;
-using Ford.WebApi.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +10,10 @@ namespace Ford.SaveSystem
 {
     public class StorageSystem
     {
-        private List<HorseBase> _horses;
+        private List<HorseBase> _horses = new();
 
-        public SaveSystemStateEnum CurrentState { get; set; }
-        public SaveSystemStateEnum PrevStateEnum { get; set; }
+        public StorageSystemStateEnum CurrentState { get; set; }
+        public StorageSystemStateEnum PrevStateEnum { get; set; }
         private static SaveSystemState _prevState { get; set; }
         private static SaveSystemState _state { get; set; }
         public static SaveSystemState State => _state;
@@ -20,31 +21,31 @@ namespace Ford.SaveSystem
 
         public StorageHistory History => _state.History;
 
-        public event Action<SaveSystemStateEnum> OnReadyStateChanged;
+        public event Action<StorageSystemStateEnum> OnReadyStateChanged;
 
         public StorageSystem()
         {
             switch (_state)
             {
                 case OfflineState:
-                    CurrentState = SaveSystemStateEnum.Offline;
+                    CurrentState = StorageSystemStateEnum.Offline;
                     break;
                 case AuthorizedState:
-                    CurrentState = SaveSystemStateEnum.Authorized;
+                    CurrentState = StorageSystemStateEnum.Authorized;
                     break;
                 default:
                     throw new Exception("State has been not initiated");
             }
         }
 
-        public static void Initiate(SaveSystemStateEnum state)
+        public static void Initiate(StorageSystemStateEnum state)
         {
             switch (state)
             {
-                case SaveSystemStateEnum.Offline:
+                case StorageSystemStateEnum.Offline:
                     _state = new OfflineState();
                     break;
-                case SaveSystemStateEnum.Authorized:
+                case StorageSystemStateEnum.Authorized:
                     _state = new AuthorizedState();
                     break;
             }
@@ -97,13 +98,13 @@ namespace Ford.SaveSystem
             return result;
         }
 
-        public async Task<SaveInfo> CreateSave(FullSaveInfo save)
+        public async Task<SaveInfo> CreateSave(CreatingSaveDto save)
         {
             var result = await _state.CreateSave(this, save);
             return result;
         }
 
-        public async Task<SaveInfo> UpdateSave(SaveInfo save)
+        public async Task<SaveInfo> UpdateSave(ModifiedSaveDto save)
         {
             var result = await _state.UpdateSave(this, save);
             return result;
@@ -122,7 +123,7 @@ namespace Ford.SaveSystem
             return result;
         }
 
-        public void ChangeState(SaveSystemStateEnum state)
+        public void ChangeState(StorageSystemStateEnum state)
         {
             if (state == CurrentState)
             {
@@ -133,14 +134,14 @@ namespace Ford.SaveSystem
 
             switch (state)
             {
-                case SaveSystemStateEnum.Authorized:
-                    PrevStateEnum = SaveSystemStateEnum.Offline;
-                    CurrentState = SaveSystemStateEnum.Authorized;
+                case StorageSystemStateEnum.Authorized:
+                    PrevStateEnum = StorageSystemStateEnum.Offline;
+                    CurrentState = StorageSystemStateEnum.Authorized;
                     _state = new AuthorizedState();
                     break;
-                case SaveSystemStateEnum.Offline:
-                    PrevStateEnum = SaveSystemStateEnum.Authorized;
-                    CurrentState = SaveSystemStateEnum.Offline;
+                case StorageSystemStateEnum.Offline:
+                    PrevStateEnum = StorageSystemStateEnum.Authorized;
+                    CurrentState = StorageSystemStateEnum.Offline;
                     _state = new OfflineState();
                     break;
             }
@@ -155,7 +156,7 @@ namespace Ford.SaveSystem
 
             if (result)
             {
-                _prevState.CloseState(this);
+                _prevState?.CloseState(this);
             }
 
             return result;
@@ -167,7 +168,7 @@ namespace Ford.SaveSystem
 
             if (result)
             {
-                _prevState.CloseState(this);
+                _prevState?.CloseState(this);
             }
 
             return result;
@@ -180,7 +181,7 @@ namespace Ford.SaveSystem
         }
     }
 
-    public enum SaveSystemStateEnum
+    public enum StorageSystemStateEnum
     {
         Authorized,
         Offline,

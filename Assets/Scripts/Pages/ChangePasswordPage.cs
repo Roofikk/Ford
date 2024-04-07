@@ -1,4 +1,3 @@
-using Ford.SaveSystem.Ver2;
 using Ford.WebApi;
 using Ford.WebApi.Data;
 using System.Collections.Generic;
@@ -94,6 +93,7 @@ public class ChangePasswordPage : Page
 
         client.ChangePasswordAsync(tokenStorage.GetAccessToken(), data).RunOnMainThread((result) =>
         {
+            using var tokenStorage = new TokenStorage();
             switch (result.StatusCode)
             {
                 case HttpStatusCode.OK:
@@ -117,6 +117,7 @@ public class ChangePasswordPage : Page
                 case HttpStatusCode.Unauthorized:
                     client.RefreshTokenAndReply(tokenStorage.GetAccessToken(), client.ChangePasswordAsync, data).RunOnMainThread(result =>
                     {
+                        using var tokenStorage = new TokenStorage();
                         switch (result.StatusCode)
                         {
                             case HttpStatusCode.OK:

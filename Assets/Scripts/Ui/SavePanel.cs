@@ -4,8 +4,9 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Ford.SaveSystem.Data;
 using Ford.SaveSystem;
-using Ford.WebApi.Data;
+using Ford.SaveSystem.Data.Dtos;
 
 public class SavePanel : Page
 {
@@ -80,8 +81,8 @@ public class SavePanel : Page
                 }
 
                 _additionalPanel.gameObject.SetActive(true);
-                _creationDateField.text = param.SaveInfo.CreationDate.ToString("dd.MM.yyyy HH:mm");
-                _lastUpdateField.text = param.SaveInfo.LastUpdate.ToString("dd.MM.yyyy HH:mm");
+                _creationDateField.text = param.SaveInfo.CreatedBy.Date.ToLocalTime().ToString("dd.MM.yyyy HH:mm");
+                _lastUpdateField.text = param.SaveInfo.LastModifiedBy.Date.ToLocalTime().ToString("dd.MM.yyyy HH:mm");
 
                 _applyButton.GetComponentInChildren<TextMeshProUGUI>().text = "Изменить";
                 _applyButton.onClick.AddListener(() =>
@@ -188,14 +189,10 @@ public class SavePanel : Page
         StorageSystem storage = new();
         storage.UpdateSave(new()
         {
-            HorseId = SaveInfo.HorseId,
             SaveId = SaveInfo.SaveId,
             Header = _headerInputField.text,
             Date = _dateInputField.GetComponent<InputFieldDateValidator>().Date.Value,
             Description = _descriptionInputField.text,
-            LastUpdate = DateTime.Now,
-            CreationDate = SaveInfo.CreationDate,
-            SaveFileName = ((SaveInfo)SaveInfo).SaveFileName,
         }).RunOnMainThread(result =>
         {
             SaveInfo = result;
@@ -223,13 +220,12 @@ public class SavePanel : Page
             return;
         }
 
-        FullSaveInfo save = new()
+        CreatingSaveDto save = new()
         {
+            CreationDate = DateTime.Now,
             Header = _headerInputField.text,
             Description = _descriptionInputField.text,
             Date = _dateInputField.GetComponent<InputFieldDateValidator>().Date.Value,
-            CreationDate = DateTime.UtcNow,
-            LastUpdate = DateTime.UtcNow,
             HorseId = SaveInfo.HorseId,
         };
 

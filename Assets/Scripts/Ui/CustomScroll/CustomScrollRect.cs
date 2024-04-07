@@ -61,30 +61,35 @@ public class CustomScrollRect : ScrollRect
 
     private void FillAmount(Vector2 vector2)
     {
-        var percentage = _loadIcon.MinHeight / (content.rect.height - viewport.rect.height);
-
-        if (vector2.y >= 1)
+        if (content.anchoredPosition.y < 0)
         {
-            var delta = (Mathf.Abs(vector2.y) - 1f) / percentage;
-            _loadIcon.FillIcon(delta);
+            float percentage = MathF.Abs(content.anchoredPosition.y) / _loadIcon.MinHeight;
+            _loadIcon.FillIcon(percentage);
         }
     }
 
     private void CheckRefreshFocus(Vector2 vector2)
     {
-        var percentage = _loadIcon.MinHeight / (content.rect.height - viewport.rect.height);
-        var result = 1f + percentage;
-
-        if (vector2.y > result)
+        if (content.anchoredPosition.y < 0)
         {
-            _loadIcon.EnableLayout(true);
-            _loadIcon.EnableFreeRotate(true);
-            OnRefreshFocused?.Invoke();
+            float percentage = MathF.Abs(content.anchoredPosition.y) / _loadIcon.MinHeight;
+
+            if (percentage > 1f)
+            {
+                _loadIcon.EnableLayout(true);
+                _loadIcon.EnableFreeRotate(true);
+                OnRefreshFocused?.Invoke();
+            }
         }
     }
 
     private void CheckUploadFocus(Vector2 vector2)
     {
+        if (content.rect.height - viewport.rect.height < 0)
+        {
+            return;
+        }
+
         var delta = DistanceForPagination / (content.rect.height - viewport.rect.height);
 
         if (vector2.y < delta && !scrollLocker.IsLocked)

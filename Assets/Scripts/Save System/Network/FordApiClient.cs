@@ -1,4 +1,6 @@
 using Ford.SaveSystem;
+using Ford.SaveSystem.Data;
+using Ford.SaveSystem.Data.Dtos;
 using Ford.SaveSystem.Ver2;
 using Ford.WebApi.Data;
 using Newtonsoft.Json;
@@ -283,14 +285,14 @@ namespace Ford.WebApi
             return result;
         }
 
-        public async Task<ResponseResult<SaveInfo>> CreateSaveAsync(string accessToken, FullSaveInfo fullSave)
+        public async Task<ResponseResult<SaveInfo>> CreateSaveAsync(string accessToken, CreatingSaveDto fullSave)
         {
             Uri uri = new Uri(_hostUri, $"{_savesUri}");
             var result = await PostRequest<SaveInfo>(uri, fullSave, accessToken);
             return result;
         }
 
-        public async Task<ResponseResult<SaveInfo>> UpdateSaveInfoAsync(string accessToken, SaveInfo save)
+        public async Task<ResponseResult<SaveInfo>> UpdateSaveInfoAsync(string accessToken, ModifiedSaveDto save)
         {
             Uri uri = new Uri(_hostUri, _savesUri);
             var result = await PutRequest<SaveInfo>(uri, save, accessToken);

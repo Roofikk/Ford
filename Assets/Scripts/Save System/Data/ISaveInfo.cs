@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 
-namespace Ford.SaveSystem
+namespace Ford.SaveSystem.Data
 {
     public interface ISaveInfo
     {
@@ -11,7 +11,7 @@ namespace Ford.SaveSystem
         public string Description { get; set; }
         [JsonConverter(typeof(DateConverter))]
         public DateTime Date { get; set; }
-        public DateTime CreationDate { get; set; }
-        public DateTime LastUpdate { get; set; }
+        public UserDate CreatedBy { get; set; }
+        public UserDate LastModifiedBy { get; set; }
     }
 }

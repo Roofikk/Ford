@@ -4,10 +4,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using Ford.SaveSystem.Ver2.Dto;
 using Ford.SaveSystem;
 using System.Linq;
-using Ford.WebApi.Data;
+using Ford.SaveSystem.Data;
 
 public class HorsePage : Page
 {
@@ -23,6 +22,7 @@ public class HorsePage : Page
     [SerializeField] private TMP_InputField _cityInputFiled;
     [SerializeField] private TMP_InputField _regionInputFiled;
     [SerializeField] private OwnerPanel _usersPanel;
+    [SerializeField] private CreatingHorseInfoPanel _creatingHorseInfoPanel;
 
     [Space(10)]
     [Header("Buttons")]
@@ -32,10 +32,6 @@ public class HorsePage : Page
 
     [Space(10)]
     [SerializeField] private LoadScenePage _loadScenePage;
-
-    [Space(10)]
-    [Header("Toast message")]
-    [SerializeField] private ToastMessage _toastMessagePrefab;
 
     private List<TMP_InputField> _inputFields;
     private List<FieldMaskValidate> _validators;
@@ -92,6 +88,7 @@ public class HorsePage : Page
         {
             case PageMode.Read:
                 SetReadMode();
+                _creatingHorseInfoPanel.SetInfo(param.Horse.CreatedBy, param.Horse.LastModifiedBy);
                 break;
             case PageMode.Write:
                 SetWriteMode();
@@ -114,12 +111,20 @@ public class HorsePage : Page
         //Field inputs
         _headerText.text = _horseBase.Name;
         _horseNameInputField.text = param.Horse.Name;
-        _sexDropdown.value = (int)Enum.Parse<HorseSex>(param.Horse.Sex);
         _birthdayInputFiled.text = param.Horse.BirthDate?.ToString("dd.MM.yyyy");
         _descriptionInputField.text = param.Horse.Description;
         _countryInputFiled.text = param.Horse.Country;
         _cityInputFiled.text = param.Horse.City;
         _regionInputFiled.text = param.Horse.Region;
+
+        if (Enum.TryParse<HorseSex>(param.Horse.Sex, out var sex))
+        {
+            _sexDropdown.value = (int)sex;
+        }
+        else
+        {
+            _sexDropdown.value = 0;
+        }
 
         base.Open(horseData, popUpLevel);
     }
@@ -160,6 +165,8 @@ public class HorsePage : Page
         _applyButton.GetComponentInChildren<TextMeshProUGUI>().text = "Начать";
         _applyButton.onClick.AddListener(StartProject);
 
+        _creatingHorseInfoPanel.gameObject.SetActive(false);
+
         _declineButton.GetComponentInChildren<TextMeshProUGUI>().text = "Назад";
         _declineButton.onClick.AddListener(Close);
         _declineButton.onClick.AddListener(() => { PageManager.Instance.OpenPage(PageManager.Instance.StartPage); });
@@ -192,6 +199,8 @@ public class HorsePage : Page
         {
             _applyButton.interactable = false;
         }
+
+        _creatingHorseInfoPanel.gameObject.SetActive(false);
 
         var accessRole = Enum.Parse<UserAccessRole>(_horseBase.Self.AccessRole);
 
@@ -241,6 +250,8 @@ public class HorsePage : Page
 
         _applyButton.GetComponentInChildren<TextMeshProUGUI>().text = "Сохранить";
         _applyButton.onClick.AddListener(EditHorse);
+
+        _creatingHorseInfoPanel.gameObject.SetActive(false);
 
         var copy = new HorseBase(_horseBase);
 
@@ -319,14 +330,6 @@ public class HorsePage : Page
         if (!CheckValidData())
             return;
 
-        CreateSaveDto save = new()
-        {
-            Header = "Новый проект",
-            Description = "Стартовое сохранение без каких либо изменений",
-            Date = DateTime.Now,
-            Bones = null
-        };
-
         CreationHorse horse = new()
         {
             Name = _horseNameInputField.text,
@@ -382,8 +385,6 @@ public class HorsePage : Page
             Header = "Начальное сохранение",
             Description = "Это начальное сохранение, оно всегда создается при создании нового проекта",
             Date = DateTime.Now,
-            CreationDate = DateTime.Now,
-            LastUpdate = DateTime.Now,
         });
 
         PageManager.Instance.DisplayLoadingPage(true, 4);

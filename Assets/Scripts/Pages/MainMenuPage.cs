@@ -85,7 +85,7 @@ public class MainMenuPage : Page
         _authButton.onClick.RemoveAllListeners();
         StorageSystem storage = new();
 
-        if (storage.CurrentState == SaveSystemStateEnum.Offline)
+        if (storage.CurrentState == StorageSystemStateEnum.Offline)
         {
             if (Player.IsLoggedIn)
             {
@@ -117,7 +117,7 @@ public class MainMenuPage : Page
         {
             if (result)
             {
-                storage.ChangeState(SaveSystemStateEnum.Authorized);
+                storage.ChangeState(StorageSystemStateEnum.Authorized);
                 Storage store = new();
 
                 if (store.History.History.Count > 0)

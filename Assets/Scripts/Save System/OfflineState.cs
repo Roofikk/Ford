@@ -1,6 +1,7 @@
+using Ford.SaveSystem.Data;
+using Ford.SaveSystem.Data.Dtos;
 using Ford.SaveSystem.Ver2;
 using Ford.WebApi;
-using Ford.WebApi.Data;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -70,13 +71,13 @@ namespace Ford.SaveSystem
             return Task.FromResult(task.Result);
         }
 
-        internal override Task<SaveInfo> CreateSave(StorageSystem storage, FullSaveInfo save)
+        internal override Task<SaveInfo> CreateSave(StorageSystem storage, CreatingSaveDto save)
         {
-            Task<SaveInfo> task = Task.Factory.StartNew(() => { return _storage.CreateSave(save, true); });
+            Task<SaveInfo> task = Task.Factory.StartNew(() => { return _storage.CreateSave(save); });
             return Task.FromResult(task.Result);
         }
 
-        internal override Task<SaveInfo> UpdateSave(StorageSystem storage, SaveInfo save)
+        internal override Task<SaveInfo> UpdateSave(StorageSystem storage, ModifiedSaveDto save)
         {
             Task<SaveInfo> task = Task.Factory.StartNew(() => { return _storage.UpdateSave(save); });
             return Task.FromResult(task.Result);

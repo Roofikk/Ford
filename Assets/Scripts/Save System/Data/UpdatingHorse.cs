@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
-namespace Ford.WebApi.Data
+namespace Ford.SaveSystem.Data
 {
     public class UpdatingHorse
     {

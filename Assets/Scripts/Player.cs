@@ -62,39 +62,7 @@ public class Player : MonoBehaviour
 
         storage.OnReadyStateChanged += (state) =>
         {
-            if (state != SaveSystemStateEnum.Authorized)
-            {
-                //onAuthorizeFinished?.Invoke();
-                return;
-            }
-
-            if (storage.History.History.Count == 0)
-            {
-                storage.ApplyTransition().RunOnMainThread(result =>
-                {
-                    //onAuthorizeFinished?.Invoke();
-                });
-                return;
-            }
-
-            PageManager.Instance.OpenWarningPage(new WarningData(
-                "Предупреждение",
-                "У вас имеются некоторые изменения, пока вы находились вне сети.\n" +
-                "Желаете посмотреть и применить их к уже имеющимся?\n" +
-                "ОТМЕНА приведет к их уничтожению",
-                () =>
-                {
-                    PageManager.Instance.OpenPage(PageManager.Instance.HistoryPage, new HistoryPageParam(storage.History), 2);
-                },
-                onCancel: () =>
-                {
-                    storage.RawApplyTransition().RunOnMainThread(result =>
-                    {
-                        //onAuthorizeFinished?.Invoke();
-                    });
-                }
-            ), 2);
-
+            OnChangedStorageState(state);
             onAuthorizeFinished?.Invoke();
         };
 
@@ -104,13 +72,14 @@ public class Player : MonoBehaviour
         {
             client.GetUserInfoAsync(tokenStorage.GetAccessToken()).RunOnMainThread(result =>
             {
+                using var tokenStorage = new TokenStorage();
                 switch (result.StatusCode)
                 {
                     case HttpStatusCode.OK:
                         IsLoggedIn = true;
                         _userData = result.Content;
 
-                        storage.ChangeState(SaveSystemStateEnum.Authorized);
+                        storage.ChangeState(StorageSystemStateEnum.Authorized);
                         break;
                     case HttpStatusCode.Unauthorized:
                         client.RefreshTokenAndReply(tokenStorage.GetAccessToken(), client.GetUserInfoAsync)
@@ -122,7 +91,7 @@ public class Player : MonoBehaviour
                                     _userData = result.Content;
                                     IsLoggedIn = true;
 
-                                    storage.ChangeState(SaveSystemStateEnum.Authorized);
+                                    storage.ChangeState(StorageSystemStateEnum.Authorized);
                                     break;
                                 default:
                                     _userData = null;
@@ -156,7 +125,51 @@ public class Player : MonoBehaviour
         tokenStorage.SetNewAccessToken("");
         tokenStorage.SetNewRefreshToken("");
 
-        OnChangedAuthState?.Invoke();
+        var storage = new StorageSystem();
+        storage.OnReadyStateChanged += (state) => { OnChangedStorageState(state, OnChangedAuthState); };
+        storage.ChangeState(StorageSystemStateEnum.Offline);
+
+        //OnChangedAuthState?.Invoke();
+    }
+
+    private static void OnChangedStorageState(StorageSystemStateEnum state, Action onStateChanged = null)
+    {
+        if (state != StorageSystemStateEnum.Authorized)
+        {
+            onStateChanged?.Invoke();
+            return;
+        }
+
+        StorageSystem storage = new();
+
+        if (storage.History.History.Count == 0)
+        {
+            storage.ApplyTransition().RunOnMainThread(result =>
+            {
+                onStateChanged?.Invoke();
+            });
+            return;
+        }
+
+        PageManager.Instance.OpenWarningPage(new WarningData(
+            "Предупреждение",
+            "У вас имеются некоторые изменения, пока вы находились вне сети.\n" +
+            "Желаете посмотреть и применить их к уже имеющимся?\n" +
+            "ОТМЕНА приведет к их уничтожению",
+            () =>
+            {
+                PageManager.Instance.OpenPage(PageManager.Instance.HistoryPage, new HistoryPageParam(storage.History), 2);
+            },
+            onCancel: () =>
+            {
+                storage.RawApplyTransition().RunOnMainThread(result =>
+                {
+                    onStateChanged?.Invoke();
+                });
+            }
+        ), 2);
+
+        //onStateChanged?.Invoke();
     }
 
     public static void UpdateUserInfo(AccountDto data)

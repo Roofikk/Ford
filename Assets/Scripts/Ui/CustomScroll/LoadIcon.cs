@@ -81,6 +81,11 @@ public class LoadIcon : MonoBehaviour
 
     public void EnableFreeRotate(bool enable)
     {
+        if (!enable)
+        {
+            _loadImage.rectTransform.rotation = Quaternion.Euler(0, 0, 0);
+        }
+
         _freeRotation = enable;
     }
 }

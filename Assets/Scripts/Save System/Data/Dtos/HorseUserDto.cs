@@ -1,4 +1,4 @@
-namespace Ford.WebApi.Data
+namespace Ford.SaveSystem.Data
 {
     public class HorseUserDto
     {

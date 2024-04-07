@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Ford.WebApi.Data
+namespace Ford.SaveSystem.Data
 {
     public struct Vector
     {

@@ -26,7 +26,7 @@ public class StartProjectObject : MonoBehaviour
             var host = JsonConvert.DeserializeObject<Host>(json);
 
             FordApiClient.SetHost(host.HostConnection);
-            StorageSystem.Initiate(SaveSystemStateEnum.Offline);
+            StorageSystem.Initiate(StorageSystemStateEnum.Offline);
 
             Player.Authorize(onAuthorizeFinished: () =>
             {
@@ -40,15 +40,6 @@ public class StartProjectObject : MonoBehaviour
     {
         if (_playerAuthorizeFinished)
         {
-            //if (Player.IsLoggedIn)
-            //{
-            //    StorageSystem.Initiate(SaveSystemStateEnum.Authorized);
-            //}
-            //else
-            //{
-            //    StorageSystem.Initiate(SaveSystemStateEnum.Offline);
-            //}
-
             ProjectStarted = true;
             _loadingPage.Close();
             OnProjectStarted?.Invoke();

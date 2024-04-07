@@ -1,4 +1,5 @@
 using Ford.SaveSystem.Data;
+using Ford.SaveSystem.Data.Dtos;
 using Ford.SaveSystem.Ver2.Data;
 using Ford.WebApi.Data;
 using Newtonsoft.Json;
@@ -8,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace Ford.SaveSystem.Ver2
 {
@@ -23,7 +25,8 @@ namespace Ford.SaveSystem.Ver2
 
         public Storage()
         {
-            _storagePath = Path.Combine(Environment.CurrentDirectory, "storage");
+            _storagePath = Path.Combine(Application.persistentDataPath, "storage");
+            //_storagePath = Path.Combine(Environment.CurrentDirectory, "storage");
             _savesPath = Path.Combine(_storagePath, "saves");
 
             if (!Directory.Exists(_savesPath))
@@ -71,7 +74,7 @@ namespace Ford.SaveSystem.Ver2
                 {
                     if (reader.TokenType == JsonToken.StartObject)
                     {
-                        horseData = serializer.Deserialize<ArraySerializable<HorseBase>>(reader)?.Items;
+                        horseData = serializer.Deserialize<ICollection<HorseBase>>(reader);
                     }
                 }
             }
@@ -109,8 +112,6 @@ namespace Ford.SaveSystem.Ver2
                 City = horseData.City,
                 Region = horseData.Region,
                 Country = horseData.Country,
-                CreationDate = DateTime.Now,
-                LastUpdate = DateTime.Now,
             };
 
             addHorse.Self = new()
@@ -121,11 +122,21 @@ namespace Ford.SaveSystem.Ver2
                 FirstName = "Myself",
             };
 
+            addHorse.CreatedBy = new()
+            {
+                Date = DateTime.Now,
+                User = addHorse.Self
+            };
+
+            addHorse.LastModifiedBy = new()
+            {
+                Date = DateTime.Now,
+                User = addHorse.Self
+            };
+
             foreach (var save in horseData.Saves)
             {
-                save.HorseId = horseId;
-                FullSaveInfo fullSave = new(save);
-                var createdSave = CreateSave(fullSave, false);
+                var createdSave = CreateSave(save, false);
 
                 if (createdSave == null)
                 {
@@ -177,7 +188,12 @@ namespace Ford.SaveSystem.Ver2
             existHorse.City = horseData.City;
             existHorse.Region = horseData.Region;
             existHorse.Country = horseData.Country;
-            existHorse.LastUpdate = DateTime.Now;
+
+            existHorse.LastModifiedBy = new()
+            {
+                Date = DateTime.Now,
+                User = existHorse.Self
+            };
             //
 
             RewriteHorseFile(horses);
@@ -272,13 +288,10 @@ namespace Ford.SaveSystem.Ver2
             return saves.FirstOrDefault(s => s.SaveId == saveId);
         }
 
-        public SaveInfo CreateSave(FullSaveInfo saveData, bool addToHorse)
+        public SaveInfo CreateSave(CreatingSaveDto saveData, bool addToHorse = true)
         {
             string fileName = GetSaveFileName();
             long saveId = IncrementSaveId();
-
-            saveData.SaveFileName = fileName;
-            saveData.SaveId = saveId;
 
             SaveInfo save = new()
             {
@@ -286,9 +299,20 @@ namespace Ford.SaveSystem.Ver2
                 Header = saveData.Header,
                 Description = saveData.Description,
                 Date = saveData.Date,
-                CreationDate = DateTime.Now,
-                LastUpdate = DateTime.Now,
                 SaveFileName = fileName
+            };
+
+            save.SaveFileName = fileName;
+            save.SaveId = saveId;
+
+            save.CreatedBy = new()
+            {
+                Date = DateTime.Now,
+            };
+
+            save.LastModifiedBy = new()
+            {
+                Date = DateTime.Now
             };
 
             if (addToHorse)
@@ -300,7 +324,7 @@ namespace Ford.SaveSystem.Ver2
                     return null;
                 }
 
-                HorseBase existingHorse = horses.FirstOrDefault(h => h.HorseId == saveData.HorseId);
+                HorseBase existingHorse = horses.FirstOrDefault(h => h.HorseId == saveData.HorseId.Value);
 
                 if (existingHorse is null)
                 {
@@ -313,7 +337,7 @@ namespace Ford.SaveSystem.Ver2
             }
             else
             {
-                save.HorseId = saveData.HorseId;
+                save.HorseId = saveData.HorseId.Value;
             }
 
             SaveBonesData saveBones = new()
@@ -341,12 +365,12 @@ namespace Ford.SaveSystem.Ver2
 
 
             RewriteSaveBonesFile(path, saves);
-            History.PushHistory(new(ActionType.CreateSave, saveData));
+            History.PushHistory(new(ActionType.CreateSave, save));
 
             return save;
         }
 
-        public SaveInfo UpdateSave(SaveInfo saveData)
+        public SaveInfo UpdateSave(ModifiedSaveDto saveData)
         {
             var horses = GetHorses();
 
@@ -365,7 +389,7 @@ namespace Ford.SaveSystem.Ver2
             save.Header = saveData.Header;
             save.Description = saveData.Description;
             save.Date = saveData.Date;
-            save.LastUpdate = DateTime.Now;
+            save.LastModifiedBy.Date = DateTime.Now;
 
             RewriteHorseFile(horses);
             History.PushHistory(new(ActionType.UpdateSave, save));
@@ -493,7 +517,7 @@ namespace Ford.SaveSystem.Ver2
                 {
                     if (reader.TokenType == JsonToken.StartObject)
                     {
-                        collection = serializer.Deserialize<ArraySerializable<T>>(reader)?.Items;
+                        collection = serializer.Deserialize<ICollection<T>>(reader);
                     }
                 }
                 reader.Close();
@@ -507,7 +531,7 @@ namespace Ford.SaveSystem.Ver2
             string path = Path.Combine(_storagePath, _horsesFileName);
             using StreamWriter sw = new(path);
             using JsonWriter jsonWriter = new JsonTextWriter(sw);
-            JsonSerializer.CreateDefault().Serialize(jsonWriter, new ArraySerializable<HorseBase>(horses));
+            JsonSerializer.CreateDefault().Serialize(jsonWriter, horses);
         }
 
         private void RewriteSaveBonesFile(string path, ICollection<SaveBonesData> saves)
@@ -520,7 +544,7 @@ namespace Ford.SaveSystem.Ver2
 
             using StreamWriter sw = new(path);
             using JsonWriter jsonWriter = new JsonTextWriter(sw);
-            JsonSerializer.CreateDefault().Serialize(jsonWriter, new ArraySerializable<SaveBonesData>(saves));
+            JsonSerializer.CreateDefault().Serialize(jsonWriter, saves);
         }
 
         private void ClearIncrements()

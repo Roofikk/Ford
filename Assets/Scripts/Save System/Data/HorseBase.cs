@@ -1,10 +1,9 @@
 using Ford.SaveSystem.Ver2;
-using Ford.WebApi.Data;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
-namespace Ford.SaveSystem
+namespace Ford.SaveSystem.Data
 {
     public class HorseBase : IStorageData
     {
@@ -20,12 +19,13 @@ namespace Ford.SaveSystem
         public string OwnerName { get; set; }
         public string OwnerPhoneNumber { get; set; }
         public HorseUserDto Self { get; set; }
-        public DateTime CreationDate { get; set; }
-        public DateTime LastUpdate { get; set; }
+        public UserDate CreatedBy { get; set; }
+        public UserDate LastModifiedBy { get; set; }
         public ICollection<HorseUserDto> Users { get; set; }
         public ICollection<SaveInfo> Saves { get; set; }
 
-        public string ActionDescription => $"Кличка: {Name}\nДата:{CreationDate}";
+        [JsonIgnore]
+        public string ActionDescription => $"Кличка: {Name}\nСоздан: {CreatedBy.Date}";
 
         public HorseBase(HorseBase horse)
         {
@@ -39,8 +39,8 @@ namespace Ford.SaveSystem
             Country = horse.Country;
             OwnerName = horse.OwnerName;
             OwnerPhoneNumber = horse.OwnerPhoneNumber;
-            CreationDate = horse.CreationDate;
-            LastUpdate = horse.LastUpdate;
+            CreatedBy = horse.CreatedBy;
+            LastModifiedBy = horse.LastModifiedBy;
             Self = horse.Self;
             Users = horse.Users;
             Saves = horse.Saves;
