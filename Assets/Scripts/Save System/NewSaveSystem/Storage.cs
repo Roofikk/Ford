@@ -21,6 +21,8 @@ namespace Ford.SaveSystem.Ver2
         private readonly string _horsesFileName = "horses.json";
         private readonly string _storageSettingsFileName = "storageSettings.json";
 
+        public string StoragePath => _storagePath;
+
         public StorageHistory History { get; private set; }
 
         public Storage()

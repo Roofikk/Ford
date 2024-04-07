@@ -3,9 +3,7 @@ using UnityEngine;
 
 [CreateAssetMenu(fileName = "Settings", menuName = "Settings/Create")]
 public class Settings : ScriptableObject
-{
-    [SerializeField] private string _pathSave;
-    
+{    
     [SerializeField] private bool _inverseMovementPlayer;
     [SerializeField] private bool _inverseRotationCamera;
 
@@ -34,7 +32,6 @@ public class Settings : ScriptableObject
     private readonly string SENSETIVITY_ROTATION = "SENSETIVITY_ROTATION";
     private readonly string SENSETIVITY_SCROLL = "SENSETIVITY_SCROLL";
 
-    public string PathSave { get { return _pathSave; } set { _pathSave = value; } }
     public bool InverseMovementPlayer { get { return _inverseMovementPlayer; } 
         set
         {
@@ -97,7 +94,6 @@ public class Settings : ScriptableObject
 
     internal void Initiate()
     {
-        PathSave = PlayerPrefs.GetString(PATH_SAVE, Application.persistentDataPath + "/Saves/");
         InverseMovementPlayer = Convert.ToBoolean(PlayerPrefs.GetString(INVERSE_MOVEMENT, InverseMovementPlayer.ToString()));
         InverseRotationCamera = Convert.ToBoolean(PlayerPrefs.GetString(INVERSE_ROTATION, InverseRotationCamera.ToString()));
         SensetivityMovementPlayer = PlayerPrefs.GetFloat(SENSETIVITY_MOVEMENT, SensetivityMovementPlayer);
@@ -107,7 +103,6 @@ public class Settings : ScriptableObject
 
     internal void Save()
     {
-        PlayerPrefs.SetString(PATH_SAVE, PathSave);
         PlayerPrefs.SetString(INVERSE_MOVEMENT, InverseMovementPlayer.ToString());
         PlayerPrefs.SetString(INVERSE_ROTATION, InverseRotationCamera.ToString());
         PlayerPrefs.SetFloat(SENSETIVITY_MOVEMENT, SensetivityMovementPlayer);

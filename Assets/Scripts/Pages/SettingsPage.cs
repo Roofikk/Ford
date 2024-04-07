@@ -1,17 +1,12 @@
-using AnotherFileBrowser.Windows;
-using System.Collections;
+using Ford.SaveSystem.Ver2;
 using System.IO;
 using TMPro;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class SettingsPage : Page
 {
     [SerializeField] private Settings _settings;
-    [SerializeField] private WarningPage _warningPage;
-    [SerializeField] private ToastMessage _toastPrefab;
 
     [Space(10)]
     [SerializeField] private TMP_InputField _pathSaveText;
@@ -41,7 +36,8 @@ public class SettingsPage : Page
 
         //Initialize value
         //Path save
-        _pathSaveText.text = _settings.PathSave;
+        var storage = new Storage();
+        _pathSaveText.text = Path.GetFullPath(storage.StoragePath);
 
         //Inverse
         _inverseMovementPlayerToggle.isOn = _settings.InverseMovementPlayer;
@@ -144,153 +140,154 @@ public class SettingsPage : Page
 
     public void ShowSavePathFolder()
     {
-        string replaceSlash = _settings.PathSave.Replace('/', '\\');
-        Application.OpenURL(@"file://" + replaceSlash);
+        var storage = new Storage();
+        string path = Path.GetFullPath(storage.StoragePath);
+        Application.OpenURL(@"file://" + path);
     }
 
-    private void OpenSelectFolderWithExplorer()
-    {
-#if PLATFORM_STANDALONE_WIN
-        BrowserProperties bp = new BrowserProperties("Выберете папку");
-        bp.filter = "txt files (*.txt)|*.txt|All Files (*.*)|*.*";
-        bp.filterIndex = 0;
+//    private void OpenSelectFolderWithExplorer()
+//    {
+//#if PLATFORM_STANDALONE_WIN
+//        BrowserProperties bp = new BrowserProperties("Выберете папку");
+//        bp.filter = "txt files (*.txt)|*.txt|All Files (*.*)|*.*";
+//        bp.filterIndex = 0;
 
-        FileBrowser fileBrowser = new FileBrowser();
-        fileBrowser.OpenFolderBrowser(bp, path =>
-        {
-            if (path is not null)
-            {
-                PageManager.Instance.OpenPage(_warningPage, new WarningData(
-                    "Внимание",
-                    "Перенести сохранения с предыдущей папки?\r\nЕсли отмените, то сохранения с предыдущей папки удалятся",
-                    () => { TransferSaves(_settings.PathSave, path); },
-                    () => { CancelTransferSave(_settings.PathSave, path); },
-                    CancelChangePathSave), 1);
-            }
-            else
-            {
-                Debug.Log("Path has not choosen");
-            }
-        });
-#endif
-    }
+//        FileBrowser fileBrowser = new FileBrowser();
+//        fileBrowser.OpenFolderBrowser(bp, path =>
+//        {
+//            if (path is not null)
+//            {
+//                PageManager.Instance.OpenPage(_warningPage, new WarningData(
+//                    "Внимание",
+//                    "Перенести сохранения с предыдущей папки?\r\nЕсли отмените, то сохранения с предыдущей папки удалятся",
+//                    () => { TransferSaves(_settings.PathSave, path); },
+//                    () => { CancelTransferSave(_settings.PathSave, path); },
+//                    CancelChangePathSave), 1);
+//            }
+//            else
+//            {
+//                Debug.Log("Path has not choosen");
+//            }
+//        });
+//#endif
+//    }
 
-    private void TransferSaves(string pathFrom, string pathTarget)
-    {
-        if (CheckRequiredSpace(pathFrom, pathTarget))
-        {
-            if (CheckEmptyFolder(pathTarget))
-            {
-                DirectoryInfo sourceDir = new(pathFrom);
-                DirectoryInfo targetDir = new(pathTarget);
+    //private void TransferSaves(string pathFrom, string pathTarget)
+    //{
+    //    if (CheckRequiredSpace(pathFrom, pathTarget))
+    //    {
+    //        if (CheckEmptyFolder(pathTarget))
+    //        {
+    //            DirectoryInfo sourceDir = new(pathFrom);
+    //            DirectoryInfo targetDir = new(pathTarget);
 
-                CopyFilesRecursively(sourceDir, targetDir);
-                DeleteSaves(sourceDir);
-                SetSavePath(pathTarget);
-            }
-            else
-            {
-                // delete
-            }
-        }
-        else
-        {
-            // delete
-        }
-    }
+    //            CopyFilesRecursively(sourceDir, targetDir);
+    //            DeleteSaves(sourceDir);
+    //            SetSavePath(pathTarget);
+    //        }
+    //        else
+    //        {
+    //            // delete
+    //        }
+    //    }
+    //    else
+    //    {
+    //        // delete
+    //    }
+    //}
 
-    private void CancelTransferSave(string sourcePath, string targetPath)
-    {
-        DirectoryInfo directoryInfo = new DirectoryInfo(sourcePath);
-        DeleteSaves(directoryInfo);
-        SetSavePath(targetPath);
-    }
+    //private void CancelTransferSave(string sourcePath, string targetPath)
+    //{
+    //    DirectoryInfo directoryInfo = new DirectoryInfo(sourcePath);
+    //    DeleteSaves(directoryInfo);
+    //    SetSavePath(targetPath);
+    //}
 
-    private void DeleteSaves(DirectoryInfo sourceDir)
-    {
-        StartCoroutine(DeleteSavesCoroutine(sourceDir));
-    }
+    //private void DeleteSaves(DirectoryInfo sourceDir)
+    //{
+    //    StartCoroutine(DeleteSavesCoroutine(sourceDir));
+    //}
 
-    private IEnumerator DeleteSavesCoroutine(DirectoryInfo sourceDir)
-    {
-        yield return new WaitForSecondsRealtime(2f);
-        sourceDir.Delete(true);
-    }
+    //private IEnumerator DeleteSavesCoroutine(DirectoryInfo sourceDir)
+    //{
+    //    yield return new WaitForSecondsRealtime(2f);
+    //    sourceDir.Delete(true);
+    //}
 
-    private static void CopyFilesRecursively(DirectoryInfo source, DirectoryInfo target)
-    {
-        foreach (DirectoryInfo dir in source.GetDirectories())
-            CopyFilesRecursively(dir, target.CreateSubdirectory(dir.Name));
+    //private static void CopyFilesRecursively(DirectoryInfo source, DirectoryInfo target)
+    //{
+    //    foreach (DirectoryInfo dir in source.GetDirectories())
+    //        CopyFilesRecursively(dir, target.CreateSubdirectory(dir.Name));
 
-        foreach (System.IO.FileInfo file in source.GetFiles())
-            file.CopyTo(Path.Combine(target.FullName, file.Name));
-    }
+    //    foreach (System.IO.FileInfo file in source.GetFiles())
+    //        file.CopyTo(Path.Combine(target.FullName, file.Name));
+    //}
 
-    private static bool CheckRequiredSpace(string pathFrom, string pathTarget)
-    {
-        DirectoryInfo dirOld = new DirectoryInfo(pathFrom);
-        long sizeOldFolder = DirSize(dirOld);
-        long sizeNewDisk = -1;
+    //private static bool CheckRequiredSpace(string pathFrom, string pathTarget)
+    //{
+    //    DirectoryInfo dirOld = new DirectoryInfo(pathFrom);
+    //    long sizeOldFolder = DirSize(dirOld);
+    //    long sizeNewDisk = -1;
 
-        string pathDisk = pathTarget.Split('/')[0];
+    //    string pathDisk = pathTarget.Split('/')[0];
 
-        foreach (DriveInfo drive in DriveInfo.GetDrives())
-        {
-            if (drive.IsReady && drive.Name == pathDisk + "\\")
-            {
-                sizeNewDisk = drive.AvailableFreeSpace;
-                break;
-            }
-        }
+    //    foreach (DriveInfo drive in DriveInfo.GetDrives())
+    //    {
+    //        if (drive.IsReady && drive.Name == pathDisk + "\\")
+    //        {
+    //            sizeNewDisk = drive.AvailableFreeSpace;
+    //            break;
+    //        }
+    //    }
 
-        if (sizeNewDisk < 0)
-        {
-            Debug.LogError("Диск не был найден");
-            return false;
-        }
+    //    if (sizeNewDisk < 0)
+    //    {
+    //        Debug.LogError("Диск не был найден");
+    //        return false;
+    //    }
 
-        return sizeNewDisk > sizeOldFolder;
-    }
+    //    return sizeNewDisk > sizeOldFolder;
+    //}
 
-    private static long DirSize(DirectoryInfo d)
-    {
-        long size = 0;
+    //private static long DirSize(DirectoryInfo d)
+    //{
+    //    long size = 0;
 
-        // Add file sizes.
-        FileInfo[] fis = d.GetFiles();
+    //    // Add file sizes.
+    //    FileInfo[] fis = d.GetFiles();
 
-        foreach (FileInfo fi in fis)
-        {
-            size += fi.Length;
-        }
+    //    foreach (FileInfo fi in fis)
+    //    {
+    //        size += fi.Length;
+    //    }
 
-        // Add subdirectory sizes.
-        DirectoryInfo[] dis = d.GetDirectories();
+    //    // Add subdirectory sizes.
+    //    DirectoryInfo[] dis = d.GetDirectories();
 
-        foreach (DirectoryInfo di in dis)
-        {
-            size += DirSize(di);
-        }
+    //    foreach (DirectoryInfo di in dis)
+    //    {
+    //        size += DirSize(di);
+    //    }
 
-        return size;
-    }
+    //    return size;
+    //}
 
-    private bool CheckEmptyFolder(string path)
-    {
-        DirectoryInfo dir = new DirectoryInfo(path);
-        return dir.GetFileSystemInfos().Length == 0 && dir.GetDirectories().Length == 0;
-    }
+    //private bool CheckEmptyFolder(string path)
+    //{
+    //    DirectoryInfo dir = new DirectoryInfo(path);
+    //    return dir.GetFileSystemInfos().Length == 0 && dir.GetDirectories().Length == 0;
+    //}
 
-    private void CancelChangePathSave()
-    {
-        ToastMessage.Show("Путь сохранения не изменен");
-    }
+    //private void CancelChangePathSave()
+    //{
+    //    ToastMessage.Show("Путь сохранения не изменен");
+    //}
 
-    private void SetSavePath(string path)
-    {
-        _settings.PathSave = path;
-        _pathSaveText.text = _settings.PathSave;
+    //private void SetSavePath(string path)
+    //{
+    //    _settings.PathSave = path;
+    //    _pathSaveText.text = _settings.PathSave;
 
-        ToastMessage.Show("Путь сохранения изменен");
-    }
+    //    ToastMessage.Show("Путь сохранения изменен");
+    //}
 }

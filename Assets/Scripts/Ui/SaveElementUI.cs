@@ -4,6 +4,7 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Ford.SaveSystem;
 
 public class SaveElementUI : MonoBehaviour
 {
@@ -77,14 +78,5 @@ public class SaveElementUI : MonoBehaviour
             _image.color = _selectedColor;
         else
             _image.color = _toggle.colors.normalColor;
-    }
-
-    public void RemoveSave()
-    {
-        Storage storage = new(GameManager.Instance.Settings.PathSave);
-        storage.DeleteSave(SaveData.SaveId);
-
-        Destroy(gameObject);
-        PageManager.Instance.CloseWarningPage();
     }
 }
