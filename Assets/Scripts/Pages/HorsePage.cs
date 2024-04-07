@@ -200,7 +200,7 @@ public class HorsePage : Page
             _applyButton.interactable = false;
         }
 
-        _creatingHorseInfoPanel.gameObject.SetActive(false);
+        _creatingHorseInfoPanel.gameObject.SetActive(true);
 
         var accessRole = Enum.Parse<UserAccessRole>(_horseBase.Self.AccessRole);
 
