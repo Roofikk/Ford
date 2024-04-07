@@ -169,8 +169,16 @@ public class HorsePage : Page
 
         _declineButton.GetComponentInChildren<TextMeshProUGUI>().text = "Назад";
         _declineButton.onClick.AddListener(Close);
-        _declineButton.onClick.AddListener(() => { PageManager.Instance.OpenPage(PageManager.Instance.StartPage); });
-        _closeButton.onClick.AddListener(() => { PageManager.Instance.OpenPage(PageManager.Instance.StartPage); });
+        _declineButton.onClick.AddListener(() =>
+        {
+            PageManager.Instance.ClosePage(this);
+            PageManager.Instance.OpenPage(PageManager.Instance.StartPage); 
+        });
+        _closeButton.onClick.AddListener(() =>
+        {
+            PageManager.Instance.ClosePage(this);
+            PageManager.Instance.OpenPage(PageManager.Instance.StartPage);
+        });
     }
 
     private void SetReadMode()

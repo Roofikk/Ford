@@ -14473,7 +14473,7 @@ GameObject:
   - component: {fileID: 565380963}
   - component: {fileID: 565380962}
   m_Layer: 5
-  m_Name: UserInfoPage
+  m_Name: AccountInfoPage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16780,7 +16780,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 217957609}
   m_HandleRect: {fileID: 217957608}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -23439,8 +23439,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 301.5, y: -30}
-  m_SizeDelta: {x: 583, y: 40}
+  m_AnchoredPosition: {x: 101.5, y: -30}
+  m_SizeDelta: {x: 183, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &905349709
 MonoBehaviour:
@@ -30732,7 +30732,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1272284075
 RectTransform:
   m_ObjectHideFlags: 0
@@ -30751,8 +30751,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 10, y: -1.9999924}
-  m_SizeDelta: {x: -20, y: 200}
+  m_AnchoredPosition: {x: -30, y: 0}
+  m_SizeDelta: {x: 60, y: 200}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1272284076
 MonoBehaviour:
