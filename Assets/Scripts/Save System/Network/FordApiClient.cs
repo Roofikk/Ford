@@ -453,7 +453,7 @@ namespace Ford.WebApi
 
                 return ReturnBadResponse<T>(responseText, response.StatusCode);
             }
-            catch (HttpRequestException ex)
+            catch (Exception)
             {
                 return new ResponseResult<T>(null, HttpStatusCode.InternalServerError, new List<ResponseError>()
                 {
@@ -497,7 +497,7 @@ namespace Ford.WebApi
 
                 return ReturnBadResponse(responseText, response.StatusCode);
             }
-            catch (HttpRequestException ex)
+            catch (Exception)
             {
                 return new ResponseResult(HttpStatusCode.InternalServerError, new List<ResponseError>()
                 {
@@ -539,7 +539,7 @@ namespace Ford.WebApi
 
                 return ReturnBadResponse<T>(responseText, response.StatusCode);
             }
-            catch (HttpRequestException ex)
+            catch (Exception)
             {
                 return new ResponseResult<T>(null, HttpStatusCode.InternalServerError, new List<ResponseError>()
                 {
@@ -574,7 +574,7 @@ namespace Ford.WebApi
                 string responseText = await response.Content.ReadAsStringAsync();
                 return ReturnBadResponse(responseText, response.StatusCode);
             }
-            catch (HttpRequestException ex)
+            catch (Exception)
             {
                 return new ResponseResult(HttpStatusCode.InternalServerError, new List<ResponseError>()
                 {
@@ -594,7 +594,7 @@ namespace Ford.WebApi
                 BadResponseDto badResponse = JsonConvert.DeserializeObject<BadResponseDto>(responseText);
                 return new ResponseResult<T>(null, code, badResponse?.Errors);
             }
-            catch (JsonSerializationException ex)
+            catch (JsonSerializationException)
             {
                 return new ResponseResult<T>(null, code, new List<ResponseError>()
                 {
