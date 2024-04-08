@@ -1,12 +1,8 @@
-using Newtonsoft.Json;
+using UnityEngine;
 
-public class Host
+[CreateAssetMenu(fileName = "NewHost", menuName = "Host", order = 1)]
+public class Host : ScriptableObject
 {
-    public string HostConnection { get; private set; }
-
-    [JsonConstructor]
-    public Host(string hostConnection)
-    {
-        HostConnection = hostConnection;
-    }
+    [SerializeField] private string _hostConnection;
+    public string HostConnection => _hostConnection;
 }

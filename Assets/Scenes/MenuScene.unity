@@ -53565,7 +53565,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _loadingPage: {fileID: 778784702}
-  _hostJsonFilePath: D:\Sites\host\host.json
+  _host: {fileID: 11400000, guid: 2c410e04012255048a51bc8de5e2a2a2, type: 2}
 --- !u!1 &2131042444
 GameObject:
   m_ObjectHideFlags: 0

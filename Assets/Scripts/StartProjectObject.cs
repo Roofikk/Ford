@@ -8,7 +8,7 @@ using UnityEngine;
 public class StartProjectObject : MonoBehaviour
 {
     [SerializeField] private Page _loadingPage;
-    [SerializeField] private string _hostJsonFilePath;
+    [SerializeField] private Host _host;
 
     public static event Action OnProjectStarted;
     public static bool ProjectStarted { get; private set; } = false;
@@ -21,11 +21,7 @@ public class StartProjectObject : MonoBehaviour
         {
             _loadingPage.Open(5);
 
-            StreamReader sr = new StreamReader(_hostJsonFilePath);
-            string json = sr.ReadToEnd();
-            var host = JsonConvert.DeserializeObject<Host>(json);
-
-            FordApiClient.SetHost(host.HostConnection);
+            FordApiClient.SetHost(_host.HostConnection);
             StorageSystem.Initiate(StorageSystemStateEnum.Offline);
 
             Player.Authorize(onAuthorizeFinished: () =>
