@@ -93,7 +93,7 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult<AccountDto>> SignUpAsync(RegisterUserDto registerUser)
         {
-            Uri uri = new Uri(_hostDomain, SignUpPath);
+            Uri uri = new(_hostDomain, SignUpPath);
             var result = await PostRequest<AccountDto>(uri, registerUser);
             return result;
         }
@@ -106,7 +106,7 @@ namespace Ford.WebApi
         /// <returns></returns>
         public async Task<ResponseResult<TokenDto>> SignInAsync(LoginRequestDto loginRequestData)
         {
-            Uri uri = new Uri(_hostDomain, SignInPath);
+            Uri uri = new(_hostDomain, SignInPath);
             var result = await PostRequest<TokenDto>(uri, loginRequestData);
             return result;
         }
