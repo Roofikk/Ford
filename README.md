@@ -6,7 +6,7 @@
 
 I created this application at the request of a friend. 
 
-The main idea was to present the anatomy of the horse's bones and preserve the condition of the bones.
+The main idea was to present anatomy of the horse skeleton and preserve the condition of the bones.
 
 ### Requirements
 
@@ -19,7 +19,7 @@ For the application to work properly, you need to start a server with a database
 
 Я создал это приложение по просьбе знакомого мне человека. 
 
-Что же представляет из себя это приложение? Основная идея была представление анатомии костей лошади и сохранение состояния костей для определенной лошади в определенный момент.
+Что же представляет из себя это приложение? Основная идея была представление анатомии скелета лошади и сохранение состояния костей для определенной лошади в определенный момент.
 
 ### Требования к приложению
 
